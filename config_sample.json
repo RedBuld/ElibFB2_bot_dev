@@ -1,0 +1,31 @@
+{
+	"bot_id": 1,
+	"token": "TOKEN",
+	"server": "LOCAL_API_SERVER",
+	"domain": "https://DOMAIN",
+	"sites": {
+		"DOMAIN": ["paging","images","auth"],
+	},
+	"proxied": {
+		"DOMAIN": "PROXY_IP:PROXY_PORT",
+	},
+	"db": {
+		"host": "127.0.0.1:3306",
+		"user": "db_user",
+		"password": "db_password",
+		"db": "db_db",
+		"socket": "/var/run/mysqld/mysqld.sock"
+	},
+	"redis": "redis://127.0.0.1:6379/2",
+	"formats": {
+		"fb2": "Fb2 - для книг",
+		"epub": "Epub - для книг",
+		"cbz": "CBZ - для манги"
+	},
+	"demo": {
+		"DOMAIN": {
+			"login":"LOGIN",
+			"password":"PASSWORD"
+		}
+	}
+}
