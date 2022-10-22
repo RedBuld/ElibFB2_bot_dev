@@ -70,7 +70,7 @@ class DownloadsQueue():
 		return
 
 	async def can_add(self) -> bool:
-		return (self.__queue_ids__) < self.bot.config.DOWNLOADS_Q_LIMIT
+		return len(self.__queue_ids__) < self.bot.config.DOWNLOADS_Q_LIMIT
 
 	async def add(self, params: dict) -> Optional[int]:
 

@@ -118,7 +118,8 @@ async def prepare_download(message: types.Message, state: FSMContext) -> None:
 		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text="Отмените или завершите предыдущее скачивание" )
 		return
 
-	if not await self.downloads_queue.can_add():
+	can_add = await bot.downloads_queue.can_add()
+	if not can_add:
 		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text="Очередь заполнена. Пжалста пдждте" )
 		return
 
