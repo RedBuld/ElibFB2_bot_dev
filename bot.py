@@ -23,7 +23,7 @@ from aiogram.webhook.aiohttp_server import (
 )
 
 logging.basicConfig(
-	filename='err.log',
+	# filename='err.log',
 	format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
 	level=logging.INFO
 )
@@ -248,10 +248,18 @@ async def web_app_callback_data(message: types.Message, state: FSMContext) -> No
 
 
 async def enqueue_download(message: types.Message, params: dict) -> None:
+	print('params')
+	print(params)
 	if 'start' in params:
-		params['start'] = int(params['start'])
+		if params['start']:
+			params['start'] = int(params['start'])
+		else:
+			del params['start']
 	if 'end' in params:
-		params['end'] = int(params['end'])
+		if params['end']:
+			params['end'] = int(params['end'])
+		else:
+			del params['end']
 	if 'images' in params:
 		params['images'] = int(params['images'])
 	if 'cover' in params:
@@ -303,7 +311,6 @@ async def cancel_handler(message: types.Message, state: FSMContext) -> None:
 
 
 async def on_startup(dispatcher: Dispatcher, bot: Bot) -> None:
-	# await bot.db.create_db()
 	await bot.db.init()
 	await bot.messages_queue.start()
 	await bot.downloads_queue.start()
@@ -328,6 +335,8 @@ def start_bot_sync() -> None:
 		web.run_app(app, host="0.0.0.0")
 	except (KeyboardInterrupt, SystemExit):
 		pass
+	except Exception as e:
+		raise e
 
 if __name__ == '__main__':
 	if len(sys.argv) > 1 and sys.argv[1] == 'create_db':

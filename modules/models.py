@@ -52,8 +52,8 @@ class Download(Base):
 	#
 	site = sa.Column('site', sa.String(240), nullable=False, index=True)
 	url = sa.Column('url', sa.Text, nullable=False)
-	start = sa.Column('start', sa.Integer, default=None)
-	end = sa.Column('end', sa.Integer, default=None)
+	start = sa.Column('start', sa.Integer, nullable=True, default=None)
+	end = sa.Column('end', sa.Integer, nullable=True, default=None)
 	format = sa.Column('format', sa.Text)
 	auth = sa.Column('auth', sa.Text, default='none')
 	images = sa.Column('images', sa.Integer, default=0)
