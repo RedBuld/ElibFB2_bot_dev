@@ -15,7 +15,6 @@ class DB(object):
 	def __init__(self, bot:Bot) -> None:
 		self.bot = bot
 		self.bot.db = self
-		self.init()
 
 	async def init(self) -> None:
 		host = self.bot.config.DB_HOST
@@ -40,7 +39,7 @@ class DB(object):
 
 	async def reinit(self) -> None:
 		await self.stop()
-		self.init()
+		await self.init()
 
 	async def create_db(self) -> None:
 		await self.bot.db.init()
