@@ -64,6 +64,15 @@ class AuthForm(StatesGroup):
 class DownloadConfig(StatesGroup):
 	state = State()
 
+@router.message(Command(commands='start'))
+async def start_cmd_handler(message: types.Message) -> None:
+	return await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text="Привет, это тестовый бот.\nПока мало что может.\nАвторизации нет.\nДоступна команда /sites")
+
+@router.message(Command(commands='sites'))
+async def sites_cmd_handler(message: types.Message):
+
+    return await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text=f'Список поддерживаемых сайтов:\n'+('\n'.join( [idna.decode(x) for x in bot.config.SITES_LIST] )) )
+
 @router.message(Command(commands='admin'))
 async def admin_cmd_handler(message: types.Message) -> None:
 
