@@ -1,271 +1,184 @@
-import time, asyncio, orjson
-from datetime import datetime
 import sqlalchemy as sa
-from sqlalchemy.ext.declarative import declarative_base
+from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.future import select
 from sqlalchemy import delete
-# from aiomysql.sa import create_engine
-# from aiogram.fsm.state import State, StatesGroup
+from aiogram import Bot
+from modules.models import *
 
-Base = declarative_base()
-
-DOWNLOAD_STATUS_CANCELLED = 99
-DOWNLOAD_STATUS_WAIT = 1
-DOWNLOAD_STATUS_INIT = 2
-DOWNLOAD_STATUS_RUNNING = 3
-DOWNLOAD_STATUS_PROCESSING = 4
-DOWNLOAD_STATUS_DONE = 5
-
-class UserAuth(Base):
-	__tablename__ = 'users_auth'
-	id = sa.Column(sa.BigInteger, primary_key=True)
-	user = sa.Column(sa.BigInteger, nullable=False, index=True)
-	site = sa.Column(sa.String(240), nullable=False, index=True)
-	login = sa.Column(sa.Text, nullable=True)
-	password = sa.Column(sa.Text, nullable=True)
-	created_on = sa.Column(sa.DateTime(), default=datetime.now)
-	updated_on = sa.Column(sa.DateTime(), default=datetime.now, onupdate=datetime.now)
-
-class MessagesQuery(Base):
-	__tablename__ = 'messages_query'
-	id = sa.Column('id', sa.BigInteger, primary_key=True)
-	bot_id = sa.Column('bot', sa.Integer, index=True)
-	#
-	callee = sa.Column('callee', sa.Text, default=None)
-	args = sa.Column('args', sa.JSON, default=None)
-	kwargs = sa.Column('kwargs', sa.JSON, default=None)
-
-	def __repr__(self):
-		return str({
-			'id': self.id,
-			'bot_id': self.bot_id,
-			'callee': self.callee,
-			'args': self.args,
-			'kwargs': self.kwargs,
-		})
-
-class DownloadsQuery(Base):
-	__tablename__ = 'downloads_query'
-	id = sa.Column('id', sa.BigInteger, primary_key=True)
-	#
-	bot_id = sa.Column('bot', sa.Integer, index=True)
-	user_id = sa.Column('user', sa.BigInteger, index=True)
-	chat_id = sa.Column('chat', sa.Text, default=None)
-	message_id = sa.Column('message', sa.Text, default=None)
-	#
-	site = sa.Column('site', sa.String(240), nullable=False, index=True)
-	book_link = sa.Column('book_link', sa.Text, nullable=False)
-	start = sa.Column('start', sa.Integer, default=None)
-	end = sa.Column('end', sa.Integer, default=None)
-	format = sa.Column('format', sa.Text)
-	auth = sa.Column('auth', sa.Text, default='none')
-	images = sa.Column('images', sa.Integer, default=0)
-	cover = sa.Column('cover', sa.Integer, default=0)
-	status = sa.Column('status', sa.Integer, default=DOWNLOAD_STATUS_WAIT)
-	result = sa.Column('result', sa.JSON, default=None)
-	#
-	pid = sa.Column('pid', sa.Text, default=None)
-	last_message = sa.Column('last_message', sa.Text)
-
-
-	def __repr__(self):
-		return str({
-			'id': self.id,
-			'bot_id': self.bot_id,
-			'chat_id': self.chat_id,
-			'message_id': self.message_id,
-			'user_id': self.user_id,
-			'site': self.site,
-			'book_link': self.book_link,
-			'start': self.start,
-			'end': self.end,
-			'format': self.format,
-			'auth': self.auth,
-			'images': self.images,
-			'cover': self.cover,
-			'status': self.status,
-			'pid': self.pid,
-			'last_message': self.last_message,
-			'result': self.result,
-		})
-
-class SiteStat(Base):
-	__tablename__ = 'sites_stats'
-	id = sa.Column(sa.BigInteger, primary_key=True)
-	site = sa.Column(sa.String(100), nullable=False)
-	day = sa.Column(sa.Date(), default=datetime.now)
-	count = sa.Column(sa.Integer)
-
-class SQLAlchemy(object):
+class DB(object):
 	bot = None
 	engine = None
 	session = None
 
-	def __init__(self, bot):
+	def __init__(self, bot:Bot) -> None:
 		self.bot = bot
 		self.bot.db = self
 		self.init()
 
-	def init(self):
+	async def init(self) -> None:
 		host = self.bot.config.DB_HOST
 		user = self.bot.config.DB_USER
 		password = self.bot.config.DB_PASSWORD
 		database = self.bot.config.DB_DATABASE
 		socket = self.bot.config.DB_SOCKET
-		mysql_url = f"mysql+aiomysql://{user}:{password}@{host}/{database}"
+		db_url = f"postgresql+asyncpg://{user}:{password}@{host}/{database}"
 		if socket:
-			mysql_url = f"{mysql_url}?unix_socket={socket}"
+			db_url = f"{db_url}?unix_socket={socket}"
 		try:
-			self.engine = create_async_engine(mysql_url)
+			self.engine = create_async_engine(db_url, pool_size=50, max_overflow=10)
 			self.session = AsyncSession(self.engine, expire_on_commit=False)
 		except (KeyboardInterrupt, SystemExit):
 			pass
 
-	async def stop(self):
+	async def stop(self) -> None:
 		if self.session:
 			await self.session.close()
 		if self.engine:
 			await self.engine.dispose()
 
-	async def reinit(self):
+	async def reinit(self) -> None:
 		await self.stop()
 		self.init()
 
-	async def create_db(self):
+	async def create_db(self) -> None:
+		await self.bot.db.init()
 		async with self.engine.begin() as conn:
 			await conn.run_sync(Base.metadata.drop_all)
 			await conn.run_sync(Base.metadata.create_all)
 
-	async def get_user_auth(self, uid, site):
-		res = None
-		async with self.session as session:
-			res = await session.execute(
-				select(UserAuth)\
-					.filter(UserAuth.site==site,UserAuth.user==uid)\
-					.order_by(UserAuth.id).limit(1)
-			)
-			res = res.scalars().first()
-			if res:
-				res = res[0]
-		await self.engine.dispose()
+	async def get_user_auth(self, uid:int, site:str) -> Optional[UserAuth]:
+		res = await self.session.execute(
+			select(UserAuth)\
+				.filter(UserAuth.site==site,UserAuth.user==uid)\
+				.order_by(UserAuth.id).limit(1)
+		)
+		res = res.scalars().first()
+		if res:
+			res = res[0]
+
+		# await self.engine.dispose()
 		return res
 
 	# MESSAGES
 
-	async def get_messages_tasks(self):
-		res = None
-		async with self.session as session:
-			res = await session.execute(
-				select(MessagesQuery.id)\
-					.filter(MessagesQuery.bot_id==self.bot.config.BOT_ID)\
-					.order_by(sa.asc(MessagesQuery.id))
-			)
-			res = res.scalars().all()
-		await self.engine.dispose()
-		return res
+	async def get_all_messages(self) -> Optional[list]:
+		L = None
+		L = await self.session.execute(
+			select(Message.id)\
+				.filter(Message.bot_id==self.bot.config.BOT_ID)\
+				.order_by(sa.asc(Message.id))
+		)
+		L = L.scalars().all()
 
-	async def get_messages_task(self,id):
-		res = None
-		async with self.session as session:
-			res = await session.execute(
-				select(MessagesQuery)\
-					.filter(MessagesQuery.id==id)
-			)
-			res = res.scalars().first()
-		await self.engine.dispose()
-		return res
+		# await self.engine.dispose()
+		return L
 
-	async def add_messages_task(self,callee=None,args=None,kwargs=None):
+	async def get_message(self, message_id: int) -> Optional[Message]:
+		M = await self.session.execute(
+			select(Message)\
+				.filter(Message.id==message_id)
+		)
+		M = M.scalars().first()
 
-		mq = MessagesQuery()
-		mq.bot_id = self.bot.config.BOT_ID
-		mq.callee = callee
-		mq.args = args
-		mq.kwargs = kwargs
+		# await self.engine.dispose()
+		return M
 
-		self.session.add(mq)
+	async def add_message(self, params: dict) -> Optional[int]:
+		M = Message()
+		M.bot_id = self.bot.config.BOT_ID
+		for arg in params:
+			setattr(M, arg, params.get(arg,None))
+
+		self.session.add(M)
 
 		await self.session.commit()
-		await self.engine.dispose()
-		return mq.id
+		# await self.engine.dispose()
+		return M.id
 
-	async def remove_messages_task(self,id):
-
-		mq = await self.get_messages_task(id)
-		if mq:
-			await self.session.delete(mq)
+	async def update_message(self, message_id: int, params: dict) -> Optional[Download]:
+		M = await self.get_message(message_id)
+		if M:
+			for arg in params:
+				setattr(M, arg, params.get(arg,None))
+			self.session.add(M)
+		else:
+			return await self.add_message(params)
 
 		await self.session.commit()
-		await self.engine.dispose()
-		return mq
+		# await self.engine.dispose()
+		return M
+
+	async def remove_message(self, message_id: int) -> Optional[Message]:
+		M = await self.get_message(message_id)
+		if M:
+			await self.session.delete(M)
+
+		await self.session.commit()
+		# await self.engine.dispose()
+		return M
 
 	# TASKS
 
-	async def get_download_tasks(self):
-		res = None
-		async with self.session as session:
-			res = await session.execute(
-				select(DownloadsQuery)\
-					.filter(DownloadsQuery.bot_id==self.bot.config.BOT_ID)\
-					.order_by(sa.desc(DownloadsQuery.status),sa.asc(DownloadsQuery.id))
-			)
-			res = res.scalars().all()
-		await self.engine.dispose()
-		return res
+	async def get_all_downloads(self) -> Optional[list]:
+		L = await self.session.execute(
+			select(Download)\
+				.filter(Download.bot_id==self.bot.config.BOT_ID)\
+				.order_by(sa.desc(Download.status),sa.asc(Download.id))
+		)
+		L = L.scalars().all()
+		# await self.engine.dispose()
+		return L
 
-	async def get_download_task(self,id):
-		res = None
-		async with self.session as session:
-			res = await session.execute(
-				select(DownloadsQuery)\
-					.filter(DownloadsQuery.id==id)
-			)
-			res = res.scalars().first()
-		await self.engine.dispose()
-		return res
+	async def get_download(self, download_id: int) -> Optional[Download]:
+		D = await self.session.execute(
+			select(Download)\
+				.filter(Download.id==download_id)
+		)
+		D = D.scalars().first()
 
-	async def add_download_task(self,params):
+		# await self.engine.dispose()
+		return D
 
-		dq = DownloadsQuery()
-		dq.bot_id = self.bot.config.BOT_ID
-		dq.status = DOWNLOAD_STATUS_WAIT
+	async def add_download(self, params: dict) -> Optional[int]:
+		D = Download()
+		D.bot_id = self.bot.config.BOT_ID
 		for arg in params:
-			setattr(dq, arg, params.get(arg,None))
+			setattr(D, arg, params.get(arg,None))
 
-		self.session.add(dq)
+		self.session.add(D)
 
 		await self.session.commit()
-		await self.engine.dispose()
-		return dq.id
+		# await self.engine.dispose()
+		return D.id
 
-	async def update_download_task(self,download_id,params):
-		dq = await self.get_download_task(download_id)
-		if dq:
+	async def update_download(self, download_id: int, params: dict) -> Optional[Download]:
+		D = await self.get_download(download_id)
+		if D:
 			for arg in params:
-				setattr(dq, arg, params.get(arg,None))
-
-			await self.session.commit()
-			await self.engine.dispose()
-		return dq
-
-	async def remove_download_task(self,id):
-
-		dq = await self.get_download_task(id)
-		if dq:
-			await self.session.delete(dq)
+				setattr(D, arg, params.get(arg,None))
+			self.session.add(D)
 
 		await self.session.commit()
-		await self.engine.dispose()
-		return dq
+		# await self.engine.dispose()
+		return D
 
-	# async def set_download_task_message(self,download_id,message_id):
-	# 	dq = await self.get_download_task(download_id)
-	# 	if dq:
-	# 		dq.message_id = message_id
-	# 		self.session.add(dq)
+	async def remove_download(self, download_id: int) -> Optional[Download]:
+		D = await self.get_download(download_id)
+		if D:
+			await self.session.delete(D)
+
+		await self.session.commit()
+		# await self.engine.dispose()
+		return D
+
+	# async def set_downloads_task_message(self,download_id,message_id):
+	# 	D = await self.get_download(download_id)
+	# 	if D:
+	# 		D.message_id = message_id
+	# 		self.session.add(D)
 
 	# 	await self.session.commit()
-	# 	await self.engine.dispose()
-	# 	return dq
+	# 	# await self.engine.dispose()
+	# 	return D

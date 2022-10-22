@@ -1,4 +1,6 @@
 import os, re, orjson
+from pathlib import Path
+from typing import Optional, Union
 
 class Config(object):
 	ACCEPT_NEW                 = True
@@ -15,9 +17,10 @@ class Config(object):
 	DB_SOCKET                  = None
 	REDIS_CONFIG               = None
 	MESSAGES_SEND_INTERVAL     = 2
-	DOWNLOADS_SIMULTANEOUSLY   = 1
+	DOWNLOADS_Q_LIMIT          = 20
+	DOWNLOADS_SIMULTANEOUSLY   = 5
 	DOWNLOADS_CHECK_INTERVAL   = 5
-	DOWNLOADS_NOTICES_INTERVAL = 5
+	DOWNLOADS_NOTICES_INTERVAL = 10
 	DOWNLOADS_SPLIT_LIMIT      = 40*1024*1024
 	SITES_LIST                 = []
 	SITES_DATA                 = []
@@ -57,10 +60,10 @@ class Config(object):
 			'WEBHOOK': self.WEBHOOK,
 		}
 
-	def __repr__(self):
+	def __repr__(self) -> str :
 		return str(self.__json__())
 
-	def __init__(self):
+	def __init__(self) -> None :
 		config_file = os.path.join(os.path.dirname('..'), "config.json")
 		if not os.path.exists(config_file):
 			raise Exception('No config.json found')
@@ -69,7 +72,7 @@ class Config(object):
 			self.__load__(config_file)
 
 
-	def __load__(self, config_file=None):
+	def __load__(self, config_file: Optional[Union[str, Path]]=None) -> None :
 		if not config_file:
 			config_file = os.path.join(os.path.dirname('..'), "config.json")
 			if not os.path.exists(config_file):

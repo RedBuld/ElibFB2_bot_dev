@@ -1,54 +1,65 @@
 import asyncio, logging, copy
+from typing import Optional
 from aiogram.types import FSInputFile
 from aiogram.types.input_media_document import InputMediaDocument
 from aiogram.types.input_media_photo import InputMediaPhoto
 from aiogram.exceptions import TelegramRetryAfter, TelegramMigrateToChat, TelegramBadRequest, TelegramNotFound, TelegramConflictError, TelegramUnauthorizedError, TelegramForbiddenError, TelegramServerError, RestartingTelegram, TelegramAPIError, TelegramEntityTooLarge, ClientDecodeError
+from aiogram import Bot
+from modules.db import Message
 
 logger = logging.getLogger(__name__)
 
-class MessageQueue():
+class MessagesQueue():
 	bot = None
+	_thread = None
+	_running_lock = None
+	_max_try = 3
+
 	_queue = {}
+	_cancelled = []
 
-	def __init__(self, bot):
+	def __init__(self, bot: Bot) -> None:
 
-		super(MessageQueue, self).__init__()
+		super(MessagesQueue, self).__init__()
 
 		self.bot = bot
-		self.bot.message_queue = self
+		self.bot.messages_queue = self
 
 		self._queue = {}
+		self._cancelled = []
 		self._running_lock = asyncio.Lock()
 
-	async def start_queue(self):
+	@property
+	def __queue_ids__(self) -> list:
+		l = list(self._queue.keys())
+		l.sort()
+		return l
+
+	@property
+	def __cancelled_ids__(self) -> list:
+		return list(self._cancelled)
+
+	# PUBLIC
+
+	async def start(self) -> None:
 		self._queue = {}
+		self._cancelled = []
 
-		await self.restore_tasks()
+		logger.info('Starting mq:MessagesQueue')
 
-		logger.info('Starting mq:MessageQueue')
+		await self.__queue_restore()
 
-		asyncio.create_task( self.start_check_queue() )
+		self._thread = asyncio.create_task( self.__queue_run() )
 
-	async def restore_tasks(self):
-		db_tasks = await self.bot.db.get_messages_tasks()
-		if db_tasks:
-			for task in db_tasks:
-				self._queue[task] = 0
+	async def stop(self) -> None:
 
-	async def start_check_queue(self):
-		async with self._running_lock:
-			logger.info('Starting mq message queue')
-			while True:
-				await self.check_queue()
+		logger.info('Stopping mq:MessagesQueue')
 
-	async def check_queue(self):
-		messages_ids = list(self._queue.keys()).sort()
-		if len(messages_ids) > 0:
-			message_id = messages_ids[0]:
-			await self._safe_send_message(message_id)
-		await asyncio.sleep(self.bot.config.MESSAGES_SEND_INTERVAL)
+		if self._thread:
+			self._thread.cancel()
+		return
 
-	async def enqueue(self, callee, *args, **kwargs):
+	async def add(self, callee: str, *args, **kwargs) -> Optional[int]:
 		_args = []
 		_kwargs = {}
 
@@ -65,26 +76,121 @@ class MessageQueue():
 			except Exception as e:
 				_kwargs[key] = kwargs[key]
 
-		index = await self.bot.db.add_messages_task(callee=callee, args=_args, kwargs=_kwargs)
+		params = {
+			'callee':callee,
+			'args':_args,
+			'kwargs':_kwargs
+		}
+
+		index = await self.bot.db.add_message(params)
 		if index:
 			self._queue[index] = 0
 			return index
 
 		return None
 
-	async def _safe_send_message(self, message_id):
+	async def update_or_add(self, callee: str, mq_id: Optional[int]=None, *args, **kwargs) -> Optional[int]:
+		update = False
 
-		task = await self.bot.db.get_messages_task(message_id)
+		if mq_id and mq_id in self._queue:
+			update = True
+			del self._queue[mq_id]
+
+		_args = []
+		_kwargs = {}
+
+		for arg in args:
+			try:
+				_arg = arg.dict()
+				_args.append(_arg)
+			except Exception as e:
+				_args.append(arg)
+
+		for key in kwargs:
+			try:
+				_kwargs[key] = kwargs[key].dict()
+			except Exception as e:
+				_kwargs[key] = kwargs[key]
+
+		params = {
+			'callee':callee,
+			'args':_args,
+			'kwargs':_kwargs
+		}
+
+		index = None
+
+		if update:
+			message = await self.bot.db.update_message(mq_id, params)
+			if message:
+				index = message.id
+		else:
+			index = await self.bot.db.add_message(params)
+
+		if index:
+			self._queue[index] = 0
+			return index
+
+		return None
+
+	async def cancel(self, message_id: int) -> None:
+		if message_id not in self._cancelled:
+			self._cancelled.append( message_id )
+			await self.bot.db.remove_message( message_id )
+
+	# PRIVATE
+
+	async def __queue_restore(self) -> None:
+		db_tasks = await self.bot.db.get_all_messages()
+		if db_tasks:
+			for task in db_tasks:
+				self._queue[task] = 0
+
+	async def __queue_run(self) -> None:
+		try:
+			async with self._running_lock:
+				logger.info('Messages queue running')
+				while True:
+					await self.__queue_step()
+		except asyncio.CancelledError:
+			pass
+		except Exception as e:
+			logger.error('Messages queue error: '+repr(e))
+
+	async def __queue_step(self) -> None:
+
+		_cancelled_ids = self.__cancelled_ids__
+		for message_id in _cancelled_ids:
+			del self._cancelled[message_id]
+
+			if message_id in self._queue:
+				del self._queue[message_id]
+				await self.bot.db.remove_message(message_id)
+
+		if len(self.__queue_ids__) > 0:
+			message_id = self.__queue_ids__[0]
+			try:
+				await self.__process_message(message_id)
+			except Exception as e:
+				logger.error('mq:__process_message error'+repr(e))
+
+
+		await asyncio.sleep(self.bot.config.MESSAGES_SEND_INTERVAL)
+
+	async def __process_message(self, message_id: int) -> None:
+
+		task = await self.bot.db.get_message(message_id)
 
 		if not task:
 			del self._queue[message_id]
 			return
 
+		_try = True
 		_sended = False
+
 		callback = None
 		callback_kwargs = {}
 		delete_files = []
-		_try = True
 
 		args = task.args
 		kwargs = task.kwargs
@@ -103,7 +209,6 @@ class MessageQueue():
 			callee = 'send_message'
 
 		try:
-
 			if callee == 'send_media_group':
 				_m = []
 				for m in kwargs['media']:
@@ -122,6 +227,7 @@ class MessageQueue():
 				kwargs['photo'] = FSInputFile(kwargs['photo'])
 
 			_sended = await getattr(self.bot, callee)(*args, **kwargs)
+
 		# Handling errors
 		except TelegramRetryAfter as e:
 			logger.error(f"---------\n[TelegramRetryAfter]:\n{repr(e)}\n---------")
@@ -154,12 +260,16 @@ class MessageQueue():
 			logger.error(f"---------\n[TelegramAPIError]:\n{repr(e)}\n{repr(args)}\n{repr(kwargs)}\n---------")
 			pass
 		except TelegramEntityTooLarge:
+			_try = False
+			self._queue[message_id] = self._max_try
 			logger.error(f"---------\n[TelegramEntityTooLarge]:\n{repr(e)}\n---------")
 			pass
 		except ClientDecodeError as e:
 			logger.error(f"---------\n[ClientDecodeError]:\n{repr(e)}\n---------")
 			pass
 		except FileNotFoundError:
+			_try = False
+			self._queue[message_id] = self._max_try
 			logger.error(f"File not found")
 			pass
 		except Exception as e:
@@ -168,31 +278,37 @@ class MessageQueue():
 			if not _sended:
 				if _try:
 					self._queue[message_id] += 1
-					# _task['try'] += 1
-					if self._queue[message_id] > 3:
-						self._queue[message_id] = {
-							'callee':'send_message_once',
-							'args':{},
-							'kwargs':{
-								'chat_id':kwargs['chat_id'],
-								'text':'Произошла ошибка'
-							}
+				
+				if self._queue[message_id] >= self._max_try:
+
+					params = {
+						'callee':'send_message_once',
+						'args':[],
+						'kwargs':{
+							'chat_id': kwargs['chat_id'],
+							'text':'Произошла ошибка'
 						}
-						for delete_file in delete_files:
-							proc = await asyncio.create_subprocess_shell(f'rm -rf "{delete_file}"')
-							await proc.wait()
+					}
+
+					await self.bot.db.update_message(message_id,params)
+					
+					for delete_file in delete_files:
+						proc = await asyncio.create_subprocess_shell(f'rm -rf "{delete_file}"')
+						await proc.wait()
 			else:
 				del self._queue[message_id]
+				await self.bot.db.remove_message(message_id)
 
 				for delete_file in delete_files:
 					proc = await asyncio.create_subprocess_shell(f'rm -rf "{delete_file}"')
 					await proc.wait()
 
-				await self.bot.db.remove_messages_task(message_id)
 				if callback:
-					# try:
-					await getattr(self.bot, callback)(_sended, **callback_kwargs)
-					# await callback(_sended,**callback_kwargs)
-					# except Exception as e:
-					# 	pass
-		# await asyncio.sleep(self.bot.config.MESSAGES_SEND_INTERVAL)
+					try:
+						await getattr(self.bot, callback)(_sended, **callback_kwargs)
+					except Exception as e:
+						logger.info('--')
+						logger.info(callback)
+						logger.error(e)
+						logger.info('--')
+						pass

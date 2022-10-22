@@ -1,10 +1,10 @@
-import asyncio, sys, uuid, os, glob, re, uuid, logging, aiofiles, idna, base64, orjson, urllib.parse, pprint
+import asyncio, sys, uuid, os, glob, re, uuid, logging, aiofiles, idna, base64, orjson, urllib.parse
 from typing import Optional
 
 from modules.config import Config
-from modules.db import *
-from modules.message_queue import MessageQueue
-from modules.download_queue import DownloaderQueue
+from modules.db import DB
+from modules.messages_queue import MessagesQueue
+from modules.downloads_queue import DownloadsQueue
 
 from aiohttp import web
 from aiogram import Bot, Dispatcher, Router, F, types
@@ -23,7 +23,7 @@ from aiogram.webhook.aiohttp_server import (
 )
 
 logging.basicConfig(
-	# filename='err.log',
+	filename='err.log',
 	format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
 	level=logging.INFO
 )
@@ -45,29 +45,15 @@ if not storage:
 	storage = MemoryStorage()
 
 # storage = MemoryStorage()
-# pprint.pprint(config.__json__(),indent=4)
 
 bot.config = config
 router = Router()
 dispatcher = Dispatcher(storage=storage)
 dispatcher.include_router(router)
 
-db = SQLAlchemy(bot)
-message_queue = MessageQueue(bot)
-download_queue = DownloaderQueue(bot)
-
-# async def test_db():
-# 	# await db.create_db()
-
-# 	ua = UserAuth()
-# 	ua.user = 470328529
-# 	ua.site = "author.today"
-# 	ua.login = "sibiryakov.ya@gmail.com"
-# 	ua.password = "1409199696Rus"
-
-# 	db.session.add(ua)
-# 	await db.session.commit()
-# 	user_auth = await db.session.get(UserAuth,1)
+db = DB(bot)
+messages_queue = MessagesQueue(bot)
+downloads_queue = DownloadsQueue(bot)
 
 
 class AuthForm(StatesGroup):
@@ -76,14 +62,10 @@ class AuthForm(StatesGroup):
 	password = State()
 
 class DownloadConfig(StatesGroup):
-	download_config = State()
-	# start = State(0)
-	# end = State(0)
-	# format = State()
-	# images = State(False)
+	state = State()
 
 @router.message(Command(commands='admin'))
-async def admin_cmd_handler(message: types.Message):
+async def admin_cmd_handler(message: types.Message) -> None:
 
 	if message.from_user.id != 470328529:
 		return
@@ -92,13 +74,13 @@ async def admin_cmd_handler(message: types.Message):
 	command = command.strip()
 
 	if not command:
-		download_id = await bot.download_queue.enqueue( {'start': '', 'end': '10', 'format': 'fb2', 'auth': 'anon', 'book_link': 'https://ranobelib.me/reverend-insanity?bid=8792&section=chapters&ui=2201240', 'site': 'ranobelib.me', 'user_id': 470328529} )
-		await bot.download_queue.set_message(download_id, chat_id=470328529, message_id=1871)
+		download_id = await bot.downloads_queue.enqueue( {'start': '', 'end': '10', 'format': 'fb2', 'auth': 'anon', 'url': 'https://ranobelib.me/reverend-insanity?bid=8792&section=chapters&ui=2201240', 'site': 'ranobelib.me', 'user_id': 470328529} )
+		await bot.downloads_queue.set_message(download_id, chat_id=470328529, message_id=1871)
 
 	if command == 'reload_config':
 		bot.config.__load__()
 		await bot.db.reinit()
-		return await bot.message_queue.enqueue( 'send_message', chat_id=message.chat.id, text="Конфиг загружен")
+		return await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text="Конфиг загружен")
 
 	if command.startswith('ban'):
 		cmd = command.split()
@@ -111,33 +93,37 @@ async def admin_cmd_handler(message: types.Message):
 
 	if command == 'stop_accept':
 		config.ACCEPT_NEW = False
-		await bot.message_queue.enqueue( 'send_message', chat_id=message.chat.id, text="Бот не принимает новые закачки" )
+		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text="Бот не принимает новые закачки" )
 
 	if command == 'start_accept':
 		config.ACCEPT_NEW = True
-		await bot.message_queue.enqueue( 'send_message', chat_id=message.chat.id, text="Бот принимает новые закачки" )
+		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text="Бот принимает новые закачки" )
 
 	if command == '50m_test':
-		return await bot.message_queue.enqueue( 'send_document', chat_id=message.chat.id, document=os.path.join(DOWNLOADER_PATH, 'untitled.zip') )
+		return await bot.messages_queue.add( callee='send_document', chat_id=message.chat.id, document=os.path.join(DOWNLOADER_PATH, 'untitled.zip') )
 
 # @router.message(F.content_type.in_({'text'}), ~F.text.startswith('http'))
-# async def not_hadleable(message: types.Message, state: FSMContext):
-# 	await bot.message_queue.enqueue( 'send_message', chat_id=message.chat.id, text="Неа. ТОЛЬКО ССЫЛКИ" )
+# async def not_hadleable(message: types.Message, state: FSMContext) -> None:
+# 	await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text="Неа. ТОЛЬКО ССЫЛКИ" )
 
 @router.message(F.content_type.in_({'text'}), F.text.startswith('http'))
-async def prepare_download(message: types.Message, state: FSMContext):
+async def prepare_download(message: types.Message, state: FSMContext) -> None:
 
-	if message.from_user.id != 470328529:
-		await bot.message_queue.enqueue( 'send_message', chat_id=message.chat.id, text="Неа. Это ТЕСТОВЫЙ бот" )
-		return
+	# if message.from_user.id != 470328529:
+	# 	await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text="Неа. Это ТЕСТОВЫЙ бот" )
+	# 	return
 
 	current_state = await state.get_state()
 	if current_state is not None:
-		await bot.message_queue.enqueue( 'send_message', chat_id=message.chat.id, text="Отмените или завершите предыдущее скачивание" )
+		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text="Отмените или завершите предыдущее скачивание" )
+		return
+
+	if not await self.downloads_queue.can_add():
+		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text="Очередь заполнена. Пжалста пдждте" )
 		return
 
 	if not config.ACCEPT_NEW:
-		await bot.message_queue.enqueue( 'send_message', chat_id=message.chat.id, text="Бот временно не принимает новые закачки" )
+		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text="Бот временно не принимает новые закачки" )
 		return
 
 	query = message.text.strip()
@@ -161,8 +147,10 @@ async def prepare_download(message: types.Message, state: FSMContext):
 
 	if url:
 
-		start_end = False
+		use_start_end = False
 		use_auth = {}
+		use_images = False
+		force_images = False
 
 		if "auth" in bot.config.SITES_DATA[site]:
 			ua = await bot.db.get_user_auth(message.from_user.id,site)
@@ -175,12 +163,21 @@ async def prepare_download(message: types.Message, state: FSMContext):
 			use_auth['none'] = 'Без авторизации'
 
 		if "paging" in bot.config.SITES_DATA[site]:
-			start_end = True
+			use_start_end = True
+
+		if "images" in bot.config.SITES_DATA[site]:
+			images = True
+
+		if "force_images" in bot.config.SITES_DATA[site]:
+			force_images = True
+			use_images = False
 
 		payload = {
 			'use_auth': use_auth,
-			'use_start': start_end,
-			'use_end': start_end,
+			'use_start': use_start_end,
+			'use_end': use_start_end,
+			'use_images': use_images,
+			'use_cover': True,
 			'formats': config.FORMATS,
 			'images': True,
 			'cover': False,
@@ -198,33 +195,33 @@ async def prepare_download(message: types.Message, state: FSMContext):
 			]
 		)
 
-		await state.set_state(DownloadConfig.download_config)
-		await state.update_data(download_inited=False)
-		await state.update_data(book_link=url)
+		await state.set_state(DownloadConfig.state)
+		await state.update_data(inited=False)
+		await state.update_data(url=url)
 		await state.update_data(site=site)
 		await state.update_data(user_id=message.from_user.id)
 		await state.update_data(chat_id=message.chat.id)
+		if force_images:
+			await state.update_data(images=True)
 
-		await bot.message_queue.enqueue( 'send_message', chat_id=message.chat.id, text=f"Подготовка к скачиванию {url}", reply_markup=reply_markup )
+		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text=f"Подготовка к скачиванию {url}", reply_markup=reply_markup )
 
 @router.message(F.content_type.in_({'web_app_data'}))
-async def web_app_callback_data(message: types.Message, state: FSMContext):
+async def web_app_callback_data(message: types.Message, state: FSMContext) -> None:
 	current_state = await state.get_state()
 	params = orjson.loads(message.web_app_data.data)
 	data = None
 	if current_state is not None:
 		data = await state.get_data()
-		await state.update_data(download_inited=True)
+		await state.update_data(inited=True)
 		# await state.clear()
-	if data and data['download_inited']:
+	if data and data['inited']:
 		return
 	if params:
 		if data:
 			for k in data:
 				params[k] = data[k]
-		print('params')
-		print(params)
-		url = params['book_link']
+		url = params['url']
 		msg = f"Добавляю в очередь {url}"
 		if 'auth' in params:
 			if params['auth'] == 'self':
@@ -243,14 +240,23 @@ async def web_app_callback_data(message: types.Message, state: FSMContext):
 			msg += "\nСкачиваю обложку"
 		else:
 			msg += "\nНе скачиваю обложку"
-		await bot.message_queue.enqueue( 'send_message', chat_id=message.chat.id, reply_to_message_id=message.message_id, text=msg, reply_markup=ReplyKeyboardRemove(), callback='initialize_download', callback_kwargs={'params':params} )
+		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, reply_to_message_id=message.message_id, text=msg, reply_markup=ReplyKeyboardRemove(), callback='enqueue_download', callback_kwargs={'params':params} )
 		await state.clear()
 	else:
-		await bot.message_queue.enqueue( 'send_message', chat_id=message.chat.id, reply_to_message_id=message.message_id, text='Отправьте ссылку еще раз', reply_markup=ReplyKeyboardRemove())
+		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, reply_to_message_id=message.message_id, text='Отправьте ссылку еще раз', reply_markup=ReplyKeyboardRemove())
 
 
-async def initialize_download(message: types.Message, params: dict):
-	download_id = await bot.download_queue.enqueue( params=params )
+async def enqueue_download(message: types.Message, params: dict) -> None:
+	if 'start' in params:
+		params['start'] = int(params['start'])
+	if 'end' in params:
+		params['end'] = int(params['end'])
+	if 'images' in params:
+		params['images'] = int(params['images'])
+	if 'cover' in params:
+		params['cover'] = int(params['cover'])
+
+	download_id = await bot.downloads_queue.add( params=params )
 	if download_id:
 		reply_markup = InlineKeyboardMarkup(
 			inline_keyboard=[
@@ -260,124 +266,78 @@ async def initialize_download(message: types.Message, params: dict):
 			]
 		)
 		msg = "Добавлено в очередь"
-		await bot.message_queue.enqueue( 'send_message', chat_id=message.chat.id, text=msg, reply_markup=reply_markup, callback='set_download_message', callback_kwargs={'download_id':download_id,'last_message':msg} )
+		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text=msg, reply_markup=reply_markup, callback='initiate_download', callback_kwargs={'download_id':download_id,'last_message':msg} )
 	else:
-		await bot.message_queue.enqueue( 'send_message', chat_id=message.chat.id, text="Произошла ошибка" )
-bot.initialize_download = initialize_download
+		msg = "Произошла ошибка"
+		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text=msg )
+bot.enqueue_download = enqueue_download
 
 
-async def set_download_message(message: types.Message, download_id: int, last_message: str):
-	await bot.download_queue.set_message_id(download_id=download_id, message_id=message.message_id, last_message=last_message)
-bot.set_download_message = set_download_message
+async def initiate_download(message: types.Message, download_id: int, last_message: str) -> None:
+	await bot.downloads_queue.initiate(download_id=download_id, message_id=message.message_id, last_message=last_message)
+bot.initiate_download = initiate_download
 
 @router.callback_query()
-async def callback_query_handler(callback_query: types.CallbackQuery):
-	# print()
-	# print()
-	# print(callback_query.data)
-	# print()
-	# print()
+async def callback_query_handler(callback_query: types.CallbackQuery) -> None:
+	# logger.info()
+	# logger.info()
+	# logger.info(callback_query.data)
+	# logger.info()
+	# logger.info()
 	download_id = int(callback_query.data.split(':')[1])
-	await bot.download_queue.cancel(download_id)
+	await bot.downloads_queue.cancel(download_id)
 
 
 
 @router.message(Command(commands=["cancel"]))
 @router.message(F.text.casefold() == "cancel")
 @router.message(F.text.casefold() == "отмена")
-async def cancel_handler(message: types.Message, state: FSMContext):
+async def cancel_handler(message: types.Message, state: FSMContext) -> None:
 
 	current_state = await state.get_state()
 	if current_state is not None:
 		await state.clear()
 
-	await bot.message_queue.enqueue( 'send_message', chat_id=message.chat.id, text="Отменено", reply_markup=ReplyKeyboardRemove() )
+	await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text="Отменено", reply_markup=ReplyKeyboardRemove() )
 
 
-async def on_startup(dispatcher: Dispatcher, bot: Bot):
+async def on_startup(dispatcher: Dispatcher, bot: Bot) -> None:
 	# await bot.db.create_db()
+	await bot.db.init()
+	await bot.messages_queue.start()
+	await bot.downloads_queue.start()
 	await bot.set_webhook(f"{config.WEBHOOK}/{config.WEBHOOK_PATH}")
 
-async def on_shutdown(dispatcher: Dispatcher, bot: Bot):
+async def on_shutdown(dispatcher: Dispatcher, bot: Bot) -> None:
+	await bot.messages_queue.stop()
+	await bot.downloads_queue.stop()
 	await bot.delete_webhook()
+	await bot.db.stop()
+	await bot.session.close()
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-async def start_dq():
-	try:
-		await download_queue.start_queue()
-	except (KeyboardInterrupt, SystemExit):  # pragma: no cover
-		# Allow to graceful shutdown
-		pass
-async def start_mq():
-	try:
-		await message_queue.start_queue()
-	except (KeyboardInterrupt, SystemExit):  # pragma: no cover
-		# Allow to graceful shutdown
-		pass
-
-async def start_bot():
-	try:
-		await dispatcher.start_polling(bot, skip_updates=False)
-	except (KeyboardInterrupt, SystemExit):  # pragma: no cover
-		# Allow to graceful shutdown
-		pass
-
-async def _start():
-	try:
-		await asyncio.gather(
-			start_dq(),
-			start_mq(),
-			start_bot()
-		)
-	except (KeyboardInterrupt, SystemExit):  # pragma: no cover
-		# Allow to graceful shutdown
-		pass
-
-def start_bot_sync():
+def start_bot_sync() -> None:
 	try:
 		dispatcher.startup.register(on_startup)
-		dispatcher.startup.register(start_dq)
-		dispatcher.startup.register(start_mq)
 		dispatcher.shutdown.register(on_shutdown)
+
 		app = web.Application()
 		SimpleRequestHandler(dispatcher=dispatcher, bot=bot).register(app, path=config.WEBHOOK_PATH)
 		setup_application(app, dispatcher, bot=bot)
-		# import ssl
-		# ssl_context = ssl.create_default_context()
-		# ssl_context = ssl_context.load_cert_chain('/etc/letsencrypt/live/ranobe1.elib-fb2.tw1.ru/fullchain.pem', '/etc/letsencrypt/live/ranobe1.elib-fb2.tw1.ru/privkey.pem')
-		# web.run_app(app, host="0.0.0.0", ssl_context=ssl_context)
 		web.run_app(app, host="0.0.0.0")
-		# await dispatcher.start_polling(bot, skip_updates=False)
-	except (KeyboardInterrupt, SystemExit):  # pragma: no cover
-		# Allow to graceful shutdown
-		pass
-
-def _start_sync():
-	try:
-		start_bot_sync()
-	except (KeyboardInterrupt, SystemExit):  # pragma: no cover
-		# Allow to graceful shutdown
+	except (KeyboardInterrupt, SystemExit):
 		pass
 
 if __name__ == '__main__':
-	try:
-		# asyncio.run(_start())
-		_start_sync()
-	except (KeyboardInterrupt, SystemExit):  # pragma: no cover
-		# Allow to graceful shutdown
-		pass
-#     # date = asyncio.run(asynchronous())
-#     date = asyncio.run(test_exec())
-#     # print( asyncio.run( get_last_line('/root/2aa8ec4a-a863-40a6-bbca-d76cebbd4630.log') ) )
+	if len(sys.argv) > 1 and sys.argv[1] == 'create_db':
+		logger.info('\n'*5)
+		logger.info('Recreating DB')
+		logger.info('\n'*5)
+		asyncio.run( bot.db.create_db() )
+	else:
+		try:
+			logger.info('\n'*5)
+			start_bot_sync()
+			logger.info('\n'*5)
+		except (KeyboardInterrupt, SystemExit):
+			pass
