@@ -225,9 +225,9 @@ class Downloader(object):
 	async def __start(self) -> None:
 		try:
 			async with self._running_lock:
-				print(f'Started download #{self.task.id}')
+				logger.info(f'Started download #{self.task.id}')
 				await self.__download()
-				print(f'Ended download #{self.task.id}')
+				logger.info(f'Ended download #{self.task.id}')
 		except asyncio.CancelledError:
 			pass
 		except Exception as e:
@@ -272,7 +272,7 @@ class Downloader(object):
 
 	async def __chunked_media_group(self) -> Iterator[Union[str, Path]]:
 		for i in range(0, len(self.result['files']), 10):
-			yield lst[i:i + n]
+			yield self.result['files'][i:i + n]
 
 
 	async def __download(self) -> None:
@@ -327,7 +327,7 @@ class Downloader(object):
 		await self.update_status()
 
 	async def __prepare_command(self) -> str:
-		print('__prepare_command')
+		# logger.info('__prepare_command')
 		command = f'cd {self.bot.config.DOWNLOADER_PATH}; dotnet Elib2Ebook.dll --save "{self._files_dir}"'
 
 		task = self.task
@@ -385,7 +385,7 @@ class Downloader(object):
 		return command
 
 	async def __process_results(self) -> tuple:
-		print('__process_results')
+		# logger.info('__process_results')
 		_json = None
 		cover = None
 		file = None
@@ -407,7 +407,7 @@ class Downloader(object):
 		return _json, file, cover
 
 	async def __process_caption(self, _json_file: Union[str, Path]) -> str:
-		print('__process_caption')
+		# logger.info('__process_caption')
 		book_caption = []
 		_title = ''
 		_author = ''
@@ -483,7 +483,7 @@ class Downloader(object):
 	# SERVICE
 
 	async def __process_split_files(self, file: Union[str, Path]) -> list:
-		print('__process_split_files')
+		# logger.info('__process_split_files')
 
 		fsize = os.path.getsize(file)
 		_return = []

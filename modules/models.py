@@ -25,49 +25,49 @@ class UserAuth(Base):
 
 class Message(Base):
 	__tablename__ = 'messages_query'
-	id = sa.Column('id', sa.BigInteger, primary_key=True)
-	bot_id = sa.Column('bot', sa.String(5), index=True)
+	id = sa.Column(sa.BigInteger, primary_key=True)
+	bot_id = sa.Column(sa.String(5), index=True)
 	#
-	callee = sa.Column('callee', sa.Text, default=None)
-	args = sa.Column('args', sa.JSON, default=None)
-	kwargs = sa.Column('kwargs', sa.JSON, default=None)
+	callee = sa.Column(sa.Text, default=None)
+	args = sa.Column(sa.JSON, default=None)
+	kwargs = sa.Column(sa.JSON, default=None)
 
 	def __repr__(self) -> str:
-		return str({
+		return '<Message '+str({
 			'id': self.id,
 			'bot_id': self.bot_id,
 			'callee': self.callee,
 			'args': self.args,
 			'kwargs': self.kwargs,
-		})
+		})+'>'
 
 class Download(Base):
 	__tablename__ = 'downloads_query'
-	id = sa.Column('id', sa.BigInteger, primary_key=True)
+	id = sa.Column(sa.BigInteger, primary_key=True)
 	#
-	bot_id = sa.Column('bot', sa.String(5), index=True)
-	user_id = sa.Column('user', sa.BigInteger, index=True)
-	chat_id = sa.Column('chat', sa.BigInteger, default=None)
-	message_id = sa.Column('message', sa.BigInteger, default=None)
+	bot_id = sa.Column(sa.String(5), index=True)
+	user_id = sa.Column(sa.BigInteger, index=True)
+	chat_id = sa.Column(sa.BigInteger, default=None)
+	message_id = sa.Column(sa.BigInteger, default=None)
 	#
-	site = sa.Column('site', sa.String(240), nullable=False, index=True)
-	url = sa.Column('url', sa.Text, nullable=False)
-	start = sa.Column('start', sa.Integer, nullable=True, default=None)
-	end = sa.Column('end', sa.Integer, nullable=True, default=None)
-	format = sa.Column('format', sa.Text)
-	auth = sa.Column('auth', sa.Text, default='none')
-	images = sa.Column('images', sa.Integer, default=0)
-	cover = sa.Column('cover', sa.Integer, default=0)
-	status = sa.Column('status', sa.Integer, default=DOWNLOAD_STATUS.WAIT)
-	result = sa.Column('result', sa.JSON, default=None)
+	site = sa.Column(sa.String(240), nullable=False, index=True)
+	url = sa.Column(sa.Text, nullable=False)
+	start = sa.Column(sa.Text, nullable=True, default=None)
+	end = sa.Column(sa.Text, nullable=True, default=None)
+	format = sa.Column(sa.Text)
+	auth = sa.Column(sa.Text, default='none')
+	images = sa.Column(sa.String(1), default=0)
+	cover = sa.Column(sa.String(1), default=0)
+	status = sa.Column(sa.Integer, default=DOWNLOAD_STATUS.WAIT)
+	result = sa.Column(sa.JSON, default=None)
 	#
-	pid = sa.Column('pid', sa.BigInteger, default=None)
-	last_message = sa.Column('last_message', sa.Text)
-	mq_message_id = sa.Column('mq_message_id', sa.BigInteger, nullable=True, default=None)
+	pid = sa.Column(sa.BigInteger, default=None)
+	last_message = sa.Column(sa.Text)
+	mq_message_id = sa.Column(sa.BigInteger, nullable=True, default=None)
 
 
 	def __repr__(self) -> str:
-		return str({
+		return '<Download '+str({
 			'id': self.id,
 			'bot_id': self.bot_id,
 			'chat_id': self.chat_id,
@@ -85,7 +85,7 @@ class Download(Base):
 			'pid': self.pid,
 			'last_message': self.last_message,
 			'result': self.result,
-		})
+		})+'>'
 
 class SiteStat(Base):
 	__tablename__ = 'sites_stats'

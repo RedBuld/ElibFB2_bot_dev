@@ -10,6 +10,7 @@ class Config(object):
 	DOWNLOADER_TEMP_PATH       = None
 	DOWNLOADER_LOG_PATH        = None
 	LOCAL_SERVER               = None
+	DB_TYPE                    = 'mysql'
 	DB_HOST                    = None
 	DB_USER                    = None
 	DB_PASSWORD                = None
@@ -21,7 +22,7 @@ class Config(object):
 	DOWNLOADS_SIMULTANEOUSLY   = 5
 	DOWNLOADS_CHECK_INTERVAL   = 5
 	DOWNLOADS_NOTICES_INTERVAL = 10
-	DOWNLOADS_SPLIT_LIMIT      = 40*1024*1024
+	DOWNLOADS_SPLIT_LIMIT      = 400*1024*1024
 	SITES_LIST                 = []
 	SITES_DATA                 = []
 	REGEX_LIST                 = []
@@ -39,6 +40,7 @@ class Config(object):
 			'DOWNLOADER_TEMP_PATH': self.DOWNLOADER_TEMP_PATH,
 			'DOWNLOADER_LOG_PATH': self.DOWNLOADER_LOG_PATH,
 			'LOCAL_SERVER': self.LOCAL_SERVER,
+			'DB_TYPE': self.DB_TYPE,
 			'DB_HOST': self.DB_HOST,
 			'DB_USER': self.DB_USER,
 			'DB_PASSWORD': self.DB_PASSWORD,
@@ -119,6 +121,8 @@ class Config(object):
 						self.DOWNLOAD_DELAY = _config['download']['delay']
 
 				if 'db' in _config and _config['db']:
+					if 'type' in _config['db']:
+						self.DB_TYPE = _config['db']['type']
 					if 'host' in _config['db']:
 						self.DB_HOST = _config['db']['host']
 					if 'user' in _config['db']:

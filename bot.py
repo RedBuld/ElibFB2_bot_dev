@@ -1,4 +1,4 @@
-import asyncio, sys, uuid, os, glob, re, uuid, logging, aiofiles, idna, base64, orjson, urllib.parse
+import asyncio, sys, uuid, os, glob, re, uuid, logging, aiofiles, idna, base64, orjson, urllib.parse, time
 from typing import Optional
 
 from modules.config import Config
@@ -66,7 +66,7 @@ class DownloadConfig(StatesGroup):
 
 @router.message(Command(commands='start'))
 async def start_cmd_handler(message: types.Message) -> None:
-	return await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text="Привет, это тестовый бот.\nПока мало что может.\nАвторизации нет.\nДоступна команда /sites")
+	return await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text="Привет, это тестовый бот.\nМожет не отвечать ОЧЕНЬ долго.\nПока мало что может.\nАвторизации нет.\nДоступна команда /sites")
 
 @router.message(Command(commands='sites'))
 async def sites_cmd_handler(message: types.Message):
@@ -220,6 +220,7 @@ async def prepare_download(message: types.Message, state: FSMContext) -> None:
 async def web_app_callback_data(message: types.Message, state: FSMContext) -> None:
 	current_state = await state.get_state()
 	params = orjson.loads(message.web_app_data.data)
+	print(params)
 	data = None
 	if current_state is not None:
 		data = await state.get_data()
@@ -231,8 +232,10 @@ async def web_app_callback_data(message: types.Message, state: FSMContext) -> No
 		if data:
 			for k in data:
 				params[k] = data[k]
+		_format = params['format']
 		url = params['url']
 		msg = f"Добавляю в очередь {url}"
+		msg += f"\nФормат {_format}"
 		if 'auth' in params:
 			if params['auth'] == 'self':
 				msg += "\nИспользую личные доступы"
@@ -257,22 +260,25 @@ async def web_app_callback_data(message: types.Message, state: FSMContext) -> No
 
 
 async def enqueue_download(message: types.Message, params: dict) -> None:
-	print('params')
-	print(params)
+	del params['inited']
+
 	if 'start' in params:
 		if params['start']:
-			params['start'] = int(params['start'])
+			params['start'] = str(params['start'])
 		else:
 			del params['start']
 	if 'end' in params:
 		if params['end']:
-			params['end'] = int(params['end'])
+			params['end'] = str(params['end'])
 		else:
 			del params['end']
 	if 'images' in params:
-		params['images'] = int(params['images'])
+		params['images'] = '1' if params['images'] else '0'
 	if 'cover' in params:
-		params['cover'] = int(params['cover'])
+		params['cover'] = '1' if params['cover'] else '0'
+
+	print('params')
+	print(params)
 
 	download_id = await bot.downloads_queue.add( params=params )
 	if download_id:
@@ -347,12 +353,47 @@ def start_bot_sync() -> None:
 	except Exception as e:
 		raise e
 
+async def test() -> None:
+	await bot.db.init()
+	l=50
+	ht = [bot.db.test() for x in range(0,l)]
+	tt = [bot.db.test() for x in range(0,l)]
+	tf = [bot.db.test() for x in range(0,l)]
+
+	s = time.time()
+	await asyncio.gather( *ht )
+	# for x in ht:
+	# 	await x
+	e = time.time()
+	print('heating',e-s,'ms')
+
+	s = time.time()
+	await asyncio.gather( *tt )
+	# for x in tt:
+	# 	await x
+	e = time.time()
+	print('w/o obj conv',e-s,'ms')
+
+	s = time.time()
+	await asyncio.gather( *tf )
+	# for x in tf:
+	# 	await x
+	e = time.time()
+	print('w/ obj conv',e-s,'ms')
+	await bot.db.stop()
+
 if __name__ == '__main__':
-	if len(sys.argv) > 1 and sys.argv[1] == 'create_db':
+	if len(sys.argv) > 1 and sys.argv[1] == 'test':
+
+		asyncio.run( test() )
+
+	elif len(sys.argv) > 1 and sys.argv[1] == 'create_db':
+
 		logger.info('\n'*5)
 		logger.info('Recreating DB')
 		logger.info('\n'*5)
 		asyncio.run( bot.db.create_db() )
+
 	else:
 		try:
 			logger.info('\n'*5)
