@@ -65,7 +65,7 @@ class Downloader(object):
 		}
 		self._running_lock = asyncio.Lock()
 		self.mq_id = self.task.mq_message_id
-		self._path = str(self.task.chat_id)+'-'+str(self.task.id)
+		self._path = str(self.bot.config.BOT_ID)+'-'+str(self.task.chat_id)+'-'+str(self.task.id)
 		self._log_file = os.path.join( self.bot.config.DOWNLOADER_LOG_PATH, self._path+'.log' )
 		self._files_dir = os.path.join( self.bot.config.DOWNLOADER_TEMP_PATH, self._path )
 		self._running_lock = asyncio.Lock()
