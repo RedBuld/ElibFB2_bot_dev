@@ -1,0 +1,420 @@
+
+2022-11-05 00:36:45,010 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:21:36:45 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 00:36:45,030 - aiogram.event - INFO - Update id=62116827 is handled. Duration 19 ms by bot id=5614657757
+2022-11-05 00:36:50,201 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:21:36:50 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 00:36:50,225 - aiogram.event - INFO - Update id=62116828 is handled. Duration 22 ms by bot id=5614657757
+2022-11-05 00:37:15,737 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:21:37:15 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 00:37:15,760 - aiogram.event - INFO - Update id=62116829 is handled. Duration 21 ms by bot id=5614657757
+2022-11-05 00:37:27,541 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:21:37:27 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 00:37:27,545 - aiogram.event - INFO - Update id=62116830 is not handled. Duration 1 ms by bot id=5614657757
+2022-11-05 00:38:51,009 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:21:38:51 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 00:38:51,026 - aiogram.event - INFO - Update id=62116831 is handled. Duration 16 ms by bot id=5614657757
+2022-11-05 00:38:58,049 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:21:38:58 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 00:38:58,070 - aiogram.event - INFO - Update id=62116832 is handled. Duration 19 ms by bot id=5614657757
+2022-11-05 00:39:06,105 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:21:39:06 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 00:39:06,149 - aiogram.event - INFO - Update id=62116833 is handled. Duration 43 ms by bot id=5614657757
+2022-11-05 00:39:20,045 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:21:39:20 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 00:39:20,071 - aiogram.event - INFO - Update id=62116834 is handled. Duration 25 ms by bot id=5614657757
+2022-11-05 00:39:23,468 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:21:39:23 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 00:39:23,489 - aiogram.event - INFO - Update id=62116835 is handled. Duration 20 ms by bot id=5614657757
+2022-11-05 00:40:45,728 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:21:40:45 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 00:40:45,749 - aiogram.event - INFO - Update id=62116836 is handled. Duration 19 ms by bot id=5614657757
+2022-11-05 00:42:44,798 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:21:42:44 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 00:42:44,803 - aiogram.event - INFO - Update id=62116837 is not handled. Duration 2 ms by bot id=5614657757
+2022-11-05 00:42:53,710 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:21:42:53 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 00:42:53,752 - aiogram.event - INFO - Update id=62116838 is handled. Duration 41 ms by bot id=5614657757
+2022-11-05 00:43:05,145 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:21:43:05 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 00:43:05,212 - aiogram.event - INFO - Update id=62116839 is handled. Duration 66 ms by bot id=5614657757
+2022-11-05 00:43:13,936 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:21:43:13 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 00:43:13,957 - aiogram.event - INFO - Update id=62116840 is handled. Duration 19 ms by bot id=5614657757
+2022-11-05 00:43:15,550 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:21:43:15 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 00:43:15,556 - aiogram.event - INFO - Update id=691934589 is not handled. Duration 4 ms by bot id=5614657757
+2022-11-05 00:43:20,678 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:21:43:20 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 00:43:20,704 - aiogram.event - INFO - Update id=62116841 is handled. Duration 24 ms by bot id=5614657757
+2022-11-05 00:44:12,210 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:21:44:12 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 00:44:12,245 - aiogram.event - INFO - Update id=62116842 is handled. Duration 34 ms by bot id=5614657757
+2022-11-05 00:45:14,664 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:21:45:14 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 00:45:14,690 - aiogram.event - INFO - Update id=62116843 is handled. Duration 25 ms by bot id=5614657757
+2022-11-05 00:45:22,490 - modules.downloader - INFO - Started download: <Download {'id': 13, 'bot_id': 'r1', 'chat_id': 1204470794, 'message_id': 240, 'user_id': 1204470794, 'site': 'jaomix.ru', 'url': 'https://jaomix.ru/mirovoj-apokalipsis-onlajn/glava-1234-gory-i-morya/', 'start': '1234', 'end': '1809', 'format': 'epub', 'auth': '1161', 'images': '1', 'cover': '0', 'status': 3, 'pid': None, 'last_message': 'Загрузка начата', 'result': {'cover': None, 'files': [], 'caption': None}}>
+2022-11-05 00:45:45,322 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:21:45:45 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 00:45:45,342 - aiogram.event - INFO - Update id=62116844 is handled. Duration 19 ms by bot id=5614657757
+2022-11-05 00:46:24,775 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:21:46:24 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 00:46:24,779 - aiogram.event - INFO - Update id=62116845 is not handled. Duration 1 ms by bot id=5614657757
+2022-11-05 00:46:24,827 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:21:46:24 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 00:46:24,832 - aiogram.event - INFO - Update id=62116846 is not handled. Duration 4 ms by bot id=5614657757
+2022-11-05 00:46:24,982 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:21:46:24 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 00:46:24,985 - aiogram.event - INFO - Update id=62116847 is not handled. Duration 1 ms by bot id=5614657757
+2022-11-05 00:47:08,006 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:21:47:08 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 00:47:08,011 - aiogram.event - INFO - Update id=62116848 is not handled. Duration 4 ms by bot id=5614657757
+2022-11-05 00:47:57,064 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:21:47:57 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 00:47:57,070 - aiogram.event - INFO - Update id=62116849 is not handled. Duration 4 ms by bot id=5614657757
+2022-11-05 00:48:18,496 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:21:48:18 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 00:48:18,527 - aiogram.event - INFO - Update id=62116850 is handled. Duration 29 ms by bot id=5614657757
+2022-11-05 00:50:55,613 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:21:50:55 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 00:50:55,620 - aiogram.event - INFO - Update id=62116851 is not handled. Duration 5 ms by bot id=5614657757
+2022-11-05 00:51:14,850 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:21:51:14 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 00:51:14,870 - aiogram.event - INFO - Update id=62116852 is handled. Duration 19 ms by bot id=5614657757
+2022-11-05 00:51:59,429 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:21:51:59 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 00:51:59,435 - aiogram.event - INFO - Update id=62116853 is not handled. Duration 5 ms by bot id=5614657757
+2022-11-05 00:53:57,031 - modules.downloader - INFO - Ended download: <Download {'id': 13, 'bot_id': 'r1', 'chat_id': 1204470794, 'message_id': 240, 'user_id': 1204470794, 'site': 'jaomix.ru', 'url': 'https://jaomix.ru/mirovoj-apokalipsis-onlajn/glava-1234-gory-i-morya/', 'start': '1234', 'end': '1809', 'format': 'epub', 'auth': '1161', 'images': '1', 'cover': '0', 'status': 5, 'pid': None, 'last_message': 'Загрузка завершена', 'result': {'cover': None, 'files': ['/usr/share/tg-bot-v2/instance/downloader/temp/1204470794-13/Jaomix - Мировой Апокалипсис Онлайн.epub'], 'caption': '[Мировой Апокалипсис Онлайн](https://jaomix.ru/category/mirovoj-apokalipsis-onlajn/)\nАвтор:  Jaomix\n\nГлав  574 из 574 , с  "Глава 1235 \\- Слушатель Ветра"  по  "Глава 1809\\-решительность мастера секты Бай Хуа"\n\n\n[Спасибо автору качалки](https://boosty.to/elib2ebook)  \\(Boosty\\)'}}>
+2022-11-05 00:57:10,613 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:21:57:10 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 00:57:10,640 - aiogram.event - INFO - Update id=62116854 is handled. Duration 25 ms by bot id=5614657757
+2022-11-05 00:57:18,060 - modules.downloader - INFO - Started download: <Download {'id': 16, 'bot_id': 'r1', 'chat_id': 990714223, 'message_id': 250, 'user_id': 990714223, 'site': 'ranobelib.me', 'url': 'https://ranobelib.me/devils-son-in-law?section=info&ui=806596', 'start': '430', 'end': None, 'format': 'epub', 'auth': 'anon', 'images': '1', 'cover': '1', 'status': 3, 'pid': None, 'last_message': 'Загрузка начата', 'result': {'cover': None, 'files': [], 'caption': None}}>
+2022-11-05 00:57:23,148 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:21:57:23 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 00:57:23,168 - aiogram.event - INFO - Update id=62116855 is handled. Duration 19 ms by bot id=5614657757
+2022-11-05 00:57:59,895 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:21:57:59 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 00:57:59,901 - aiogram.event - INFO - Update id=62116856 is not handled. Duration 5 ms by bot id=5614657757
+2022-11-05 00:58:20,501 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:21:58:20 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 00:58:20,506 - aiogram.event - INFO - Update id=62116857 is not handled. Duration 4 ms by bot id=5614657757
+2022-11-05 01:00:03,763 - modules.downloader - INFO - Ended download: <Download {'id': 16, 'bot_id': 'r1', 'chat_id': 990714223, 'message_id': 250, 'user_id': 990714223, 'site': 'ranobelib.me', 'url': 'https://ranobelib.me/devils-son-in-law?section=info&ui=806596', 'start': '430', 'end': None, 'format': 'epub', 'auth': 'anon', 'images': '1', 'cover': '1', 'status': 5, 'pid': None, 'last_message': 'Загрузка завершена', 'result': {'cover': '/usr/share/tg-bot-v2/instance/downloader/temp/990714223-16/RanobeLib - Зять Дьявола (Новелла)_cover.jpg', 'files': ['/usr/share/tg-bot-v2/instance/downloader/temp/990714223-16/RanobeLib - Зять Дьявола (Новелла).epub'], 'caption': '[Зять Дьявола \\(Новелла\\)](https://ranobelib.me/devils-son-in-law)\nАвтор:  RanobeLib\n\nГлав  528 из 528 , с  "Том 1 Глава 430 Воссоединение «старых друзей» спустя тысячелетия"  по  "Том 1 Глава 957 Непонимание и Заговор"\n\n\n[Спасибо автору качалки](https://boosty.to/elib2ebook)  \\(Boosty\\)'}}>
+2022-11-05 01:00:19,943 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:00:19 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:00:19,948 - aiogram.event - INFO - Update id=62116858 is not handled. Duration 4 ms by bot id=5614657757
+2022-11-05 01:00:40,699 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:00:40 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:00:40,721 - aiogram.event - INFO - Update id=691934590 is handled. Duration 21 ms by bot id=5614657757
+2022-11-05 01:00:41,019 - modules.messages_queue - ERROR - ---------
+[TelegramBadRequest]:
+TelegramBadRequest('Bad Request: chat not found')
+---------
+2022-11-05 01:00:41,020 - asyncio - ERROR - Task exception was never retrieved
+future: <Task finished name='Task-2735' coro=<MessagesQueue.__process_message() done, defined at /usr/share/tg-bot-v2/instance/bot/modules/messages_queue.py:184> exception=KeyError(993)>
+Traceback (most recent call last):
+  File "/usr/share/tg-bot-v2/instance/bot/modules/messages_queue.py", line 298, in __process_message
+    self._queue[message_id] += 1
+KeyError: 993
+2022-11-05 01:00:46,200 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:00:46 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:00:46,222 - aiogram.event - INFO - Update id=691934591 is handled. Duration 21 ms by bot id=5614657757
+2022-11-05 01:00:46,864 - modules.messages_queue - ERROR - ---------
+[TelegramBadRequest]:
+TelegramBadRequest('Bad Request: chat not found')
+---------
+2022-11-05 01:00:46,864 - asyncio - ERROR - Task exception was never retrieved
+future: <Task finished name='Task-2746' coro=<MessagesQueue.__process_message() done, defined at /usr/share/tg-bot-v2/instance/bot/modules/messages_queue.py:184> exception=KeyError(994)>
+Traceback (most recent call last):
+  File "/usr/share/tg-bot-v2/instance/bot/modules/messages_queue.py", line 298, in __process_message
+    self._queue[message_id] += 1
+KeyError: 994
+2022-11-05 01:00:51,814 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:00:51 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:00:51,840 - aiogram.event - INFO - Update id=691934592 is handled. Duration 25 ms by bot id=5614657757
+2022-11-05 01:00:52,875 - modules.messages_queue - ERROR - ---------
+[TelegramBadRequest]:
+TelegramBadRequest('Bad Request: chat not found')
+---------
+2022-11-05 01:00:52,875 - asyncio - ERROR - Task exception was never retrieved
+future: <Task finished name='Task-2757' coro=<MessagesQueue.__process_message() done, defined at /usr/share/tg-bot-v2/instance/bot/modules/messages_queue.py:184> exception=KeyError(995)>
+Traceback (most recent call last):
+  File "/usr/share/tg-bot-v2/instance/bot/modules/messages_queue.py", line 298, in __process_message
+    self._queue[message_id] += 1
+KeyError: 995
+2022-11-05 01:00:56,564 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:00:56 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:00:56,589 - aiogram.event - INFO - Update id=691934593 is handled. Duration 24 ms by bot id=5614657757
+2022-11-05 01:00:56,931 - modules.messages_queue - ERROR - ---------
+[TelegramBadRequest]:
+TelegramBadRequest('Bad Request: chat not found')
+---------
+2022-11-05 01:00:56,932 - asyncio - ERROR - Task exception was never retrieved
+future: <Task finished name='Task-2766' coro=<MessagesQueue.__process_message() done, defined at /usr/share/tg-bot-v2/instance/bot/modules/messages_queue.py:184> exception=KeyError(996)>
+Traceback (most recent call last):
+  File "/usr/share/tg-bot-v2/instance/bot/modules/messages_queue.py", line 298, in __process_message
+    self._queue[message_id] += 1
+KeyError: 996
+2022-11-05 01:00:57,129 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:00:57 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:00:57,133 - aiogram.event - INFO - Update id=62116859 is not handled. Duration 1 ms by bot id=5614657757
+2022-11-05 01:00:57,191 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:00:57 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:00:57,196 - aiogram.event - INFO - Update id=62116860 is not handled. Duration 4 ms by bot id=5614657757
+2022-11-05 01:01:01,893 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:01:01 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:01:01,928 - aiogram.event - INFO - Update id=62116861 is handled. Duration 33 ms by bot id=5614657757
+2022-11-05 01:01:07,170 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:01:07 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:01:07,176 - aiogram.event - INFO - Update id=62116862 is not handled. Duration 4 ms by bot id=5614657757
+2022-11-05 01:01:45,185 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:01:45 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:01:45,210 - aiogram.event - INFO - Update id=62116863 is handled. Duration 23 ms by bot id=5614657757
+2022-11-05 01:01:51,246 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:01:51 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:01:51,269 - aiogram.event - INFO - Update id=62116864 is handled. Duration 21 ms by bot id=5614657757
+2022-11-05 01:01:51,664 - modules.downloader - INFO - Started download: <Download {'id': 17, 'bot_id': 'r1', 'chat_id': 1204470794, 'message_id': 259, 'user_id': 1204470794, 'site': 'jaomix.ru', 'url': 'https://jaomix.ru/category/ubit-geroya/', 'start': '231', 'end': '275', 'format': 'epub', 'auth': '1161', 'images': '1', 'cover': '0', 'status': 3, 'pid': None, 'last_message': 'Загрузка начата', 'result': {'cover': None, 'files': [], 'caption': None}}>
+2022-11-05 01:01:58,739 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:01:58 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:01:58,761 - aiogram.event - INFO - Update id=62116865 is handled. Duration 20 ms by bot id=5614657757
+2022-11-05 01:02:07,776 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:02:07 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:02:07,781 - aiogram.event - INFO - Update id=62116866 is not handled. Duration 4 ms by bot id=5614657757
+2022-11-05 01:02:17,980 - modules.downloader - INFO - Ended download: <Download {'id': 17, 'bot_id': 'r1', 'chat_id': 1204470794, 'message_id': 259, 'user_id': 1204470794, 'site': 'jaomix.ru', 'url': 'https://jaomix.ru/category/ubit-geroya/', 'start': '231', 'end': '275', 'format': 'epub', 'auth': '1161', 'images': '1', 'cover': '0', 'status': 5, 'pid': None, 'last_message': 'Загрузка завершена', 'result': {'cover': None, 'files': ['/usr/share/tg-bot-v2/instance/downloader/temp/1204470794-17/Jaomix - Убить Героя.epub'], 'caption': '[Убить Героя](https://jaomix.ru/category/ubit-geroya/)\nАвтор:  Jaomix\n\nГлав  45 из 45 , с  "Глава 230\\-Катастрофа \\(2\\)"  по  "Глава 274\\-убить героя \\(2\\)"\n\n\n[Спасибо автору качалки](https://boosty.to/elib2ebook)  \\(Boosty\\)'}}>
+2022-11-05 01:03:01,586 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:03:01 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:03:01,589 - aiogram.event - INFO - Update id=62116867 is handled. Duration 2 ms by bot id=5614657757
+2022-11-05 01:04:00,011 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:04:00 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:04:00,017 - aiogram.event - INFO - Update id=62116868 is handled. Duration 5 ms by bot id=5614657757
+2022-11-05 01:04:45,657 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:04:45 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:04:45,663 - aiogram.event - INFO - Update id=62116869 is handled. Duration 4 ms by bot id=5614657757
+2022-11-05 01:05:11,201 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:05:11 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:05:11,239 - aiogram.event - INFO - Update id=62116870 is handled. Duration 36 ms by bot id=5614657757
+2022-11-05 01:05:41,765 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:05:41 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:05:41,795 - aiogram.event - INFO - Update id=62116871 is handled. Duration 28 ms by bot id=5614657757
+2022-11-05 01:05:47,091 - modules.downloader - INFO - Started download: <Download {'id': 18, 'bot_id': 'r1', 'chat_id': 1204470794, 'message_id': 273, 'user_id': 1204470794, 'site': 'jaomix.ru', 'url': 'https://jaomix.ru/category/ubit-geroya/', 'start': None, 'end': None, 'format': 'fb2', 'auth': '1161', 'images': '1', 'cover': '1', 'status': 3, 'pid': None, 'last_message': 'Загрузка начата', 'result': {'cover': None, 'files': [], 'caption': None}}>
+2022-11-05 01:08:10,023 - modules.downloader - INFO - Ended download: <Download {'id': 18, 'bot_id': 'r1', 'chat_id': 1204470794, 'message_id': 273, 'user_id': 1204470794, 'site': 'jaomix.ru', 'url': 'https://jaomix.ru/category/ubit-geroya/', 'start': None, 'end': None, 'format': 'fb2', 'auth': '1161', 'images': '1', 'cover': '1', 'status': 5, 'pid': None, 'last_message': 'Загрузка завершена', 'result': {'cover': '/usr/share/tg-bot-v2/instance/downloader/temp/1204470794-18/Jaomix - Убить Героя_cover.jpg', 'files': ['/usr/share/tg-bot-v2/instance/downloader/temp/1204470794-18/Jaomix - Убить Героя.fb2'], 'caption': '[Убить Героя](https://jaomix.ru/category/ubit-geroya/)\nАвтор:  Jaomix\n\nГлав  276 из 276 , с  "Глава 0\\-Пролог"  по  "Глава 275\\-Эпилог \\(конец\\)"\n\n\n[Спасибо автору качалки](https://boosty.to/elib2ebook)  \\(Boosty\\)'}}>
+2022-11-05 01:09:08,290 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:09:08 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:09:08,325 - aiogram.event - INFO - Update id=62116872 is handled. Duration 34 ms by bot id=5614657757
+2022-11-05 01:09:18,873 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:09:18 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:09:18,900 - aiogram.event - INFO - Update id=62116873 is handled. Duration 25 ms by bot id=5614657757
+2022-11-05 01:09:26,225 - modules.downloader - INFO - Started download: <Download {'id': 19, 'bot_id': 'r1', 'chat_id': 1204470794, 'message_id': 280, 'user_id': 1204470794, 'site': 'jaomix.ru', 'url': 'https://jaomix.ru/category/ya-stal-silnejshim-s-nikudyshnym-navykom-izmenenie-sostoyaniya-sokrushaya-vsyo/', 'start': None, 'end': None, 'format': 'epub', 'auth': '1161', 'images': '1', 'cover': '1', 'status': 3, 'pid': None, 'last_message': 'Загрузка начата', 'result': {'cover': None, 'files': [], 'caption': None}}>
+2022-11-05 01:09:47,713 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:09:47 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:09:47,749 - aiogram.event - INFO - Update id=62116874 is handled. Duration 34 ms by bot id=5614657757
+2022-11-05 01:09:59,049 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:09:59 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:09:59,081 - aiogram.event - INFO - Update id=62116875 is handled. Duration 31 ms by bot id=5614657757
+2022-11-05 01:10:05,979 - modules.downloader - INFO - Started download: <Download {'id': 20, 'bot_id': 'r1', 'chat_id': 1204470794, 'message_id': 285, 'user_id': 1204470794, 'site': 'jaomix.ru', 'url': 'https://jaomix.ru/category/dobrodetel-demona/', 'start': None, 'end': None, 'format': 'epub', 'auth': '1161', 'images': '1', 'cover': '1', 'status': 3, 'pid': None, 'last_message': 'Загрузка начата', 'result': {'cover': None, 'files': [], 'caption': None}}>
+2022-11-05 01:10:46,406 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:10:46 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:10:46,440 - aiogram.event - INFO - Update id=62116876 is handled. Duration 33 ms by bot id=5614657757
+2022-11-05 01:10:58,774 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:10:58 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:10:58,801 - aiogram.event - INFO - Update id=62116877 is handled. Duration 25 ms by bot id=5614657757
+2022-11-05 01:11:07,995 - modules.downloader - INFO - Started download: <Download {'id': 21, 'bot_id': 'r1', 'chat_id': 1204470794, 'message_id': 290, 'user_id': 1204470794, 'site': 'jaomix.ru', 'url': 'https://jaomix.ru/category/re-evoljuciya-onlajn/', 'start': None, 'end': None, 'format': 'epub', 'auth': '1161', 'images': '1', 'cover': '1', 'status': 3, 'pid': None, 'last_message': 'Загрузка начата', 'result': {'cover': None, 'files': [], 'caption': None}}>
+2022-11-05 01:11:47,562 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:11:47 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:11:47,583 - aiogram.event - INFO - Update id=62116878 is handled. Duration 19 ms by bot id=5614657757
+2022-11-05 01:12:19,446 - modules.downloader - INFO - Ended download: <Download {'id': 19, 'bot_id': 'r1', 'chat_id': 1204470794, 'message_id': 280, 'user_id': 1204470794, 'site': 'jaomix.ru', 'url': 'https://jaomix.ru/category/ya-stal-silnejshim-s-nikudyshnym-navykom-izmenenie-sostoyaniya-sokrushaya-vsyo/', 'start': None, 'end': None, 'format': 'epub', 'auth': '1161', 'images': '1', 'cover': '1', 'status': 5, 'pid': None, 'last_message': 'Загрузка завершена', 'result': {'cover': '/usr/share/tg-bot-v2/instance/downloader/temp/1204470794-19/Jaomix - Я стал сильнейшим с никудышным навыком «Изменение состояния», сокрушая всё_cover.jpg', 'files': ['/usr/share/tg-bot-v2/instance/downloader/temp/1204470794-19/Jaomix - Я стал сильнейшим с никудышным навыком «Изменение состояния», сокрушая всё.epub'], 'caption': '[Я стал сильнейшим с никудышным навыком «Изменение состояния», сокрушая всё](https://jaomix.ru/category/ya-stal-silnejshim-s-nikudyshnym-navykom-izmenenie-sostoyaniya-sokrushaya-vsyo/)\nАвтор:  Jaomix\n\nГлав  313 из 313 , с  "Глава 1"  по  "313 \\- позови свое имя"\n\n\n[Спасибо автору качалки](https://boosty.to/elib2ebook)  \\(Boosty\\)'}}>
+2022-11-05 01:13:16,035 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:13:16 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:13:16,056 - aiogram.event - INFO - Update id=62116879 is handled. Duration 19 ms by bot id=5614657757
+2022-11-05 01:13:33,080 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:13:33 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:13:33,120 - aiogram.event - INFO - Update id=62116880 is handled. Duration 38 ms by bot id=5614657757
+2022-11-05 01:13:45,108 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:13:45 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:13:45,135 - aiogram.event - INFO - Update id=62116881 is handled. Duration 26 ms by bot id=5614657757
+2022-11-05 01:13:53,365 - modules.downloader - INFO - Started download: <Download {'id': 22, 'bot_id': 'r1', 'chat_id': 1204470794, 'message_id': 301, 'user_id': 1204470794, 'site': 'jaomix.ru', 'url': 'https://jaomix.ru/category/daj-mne-spokojno-poigrat/', 'start': None, 'end': None, 'format': 'epub', 'auth': '1161', 'images': '1', 'cover': '1', 'status': 3, 'pid': None, 'last_message': 'Загрузка начата', 'result': {'cover': None, 'files': [], 'caption': None}}>
+2022-11-05 01:13:58,753 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:13:58 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:13:58,789 - aiogram.event - INFO - Update id=62116882 is handled. Duration 35 ms by bot id=5614657757
+2022-11-05 01:14:07,231 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:14:07 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:14:07,258 - aiogram.event - INFO - Update id=62116883 is handled. Duration 26 ms by bot id=5614657757
+2022-11-05 01:14:12,200 - modules.downloader - INFO - Started download: <Download {'id': 23, 'bot_id': 'r1', 'chat_id': 1204470794, 'message_id': 306, 'user_id': 1204470794, 'site': 'jaomix.ru', 'url': 'https://jaomix.ru/category/vnuk-svyatogo-imperatora-nekromant/', 'start': None, 'end': None, 'format': 'epub', 'auth': '1161', 'images': '1', 'cover': '1', 'status': 3, 'pid': None, 'last_message': 'Загрузка начата', 'result': {'cover': None, 'files': [], 'caption': None}}>
+2022-11-05 01:14:22,193 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:14:22 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:14:22,228 - aiogram.event - INFO - Update id=62116884 is handled. Duration 33 ms by bot id=5614657757
+2022-11-05 01:14:23,887 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:14:23 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:14:23,894 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:14:23 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:14:23,902 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:14:23 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:14:23,908 - aiogram.event - INFO - Update id=691934594 is not handled. Duration 18 ms by bot id=5614657757
+2022-11-05 01:14:23,910 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:14:23 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:14:23,916 - aiogram.event - INFO - Update id=691934595 is not handled. Duration 19 ms by bot id=5614657757
+2022-11-05 01:14:23,918 - aiogram.event - INFO - Update id=691934596 is not handled. Duration 14 ms by bot id=5614657757
+2022-11-05 01:14:23,920 - aiogram.event - INFO - Update id=691934597 is not handled. Duration 8 ms by bot id=5614657757
+2022-11-05 01:14:28,420 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:14:28 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:14:28,426 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:14:28 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:14:28,434 - aiogram.event - INFO - Update id=691934598 is not handled. Duration 11 ms by bot id=5614657757
+2022-11-05 01:14:28,436 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:14:28 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:14:28,440 - aiogram.event - INFO - Update id=691934599 is not handled. Duration 11 ms by bot id=5614657757
+2022-11-05 01:14:28,443 - aiogram.event - INFO - Update id=691934600 is not handled. Duration 5 ms by bot id=5614657757
+2022-11-05 01:14:32,246 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:14:32 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:14:32,274 - aiogram.event - INFO - Update id=62116885 is handled. Duration 26 ms by bot id=5614657757
+2022-11-05 01:14:44,133 - modules.downloader - INFO - Started download: <Download {'id': 24, 'bot_id': 'r1', 'chat_id': 1204470794, 'message_id': 311, 'user_id': 1204470794, 'site': 'jaomix.ru', 'url': 'https://jaomix.ru/category/smertelnyj-vystrel/', 'start': None, 'end': None, 'format': 'epub', 'auth': '1161', 'images': '1', 'cover': '1', 'status': 3, 'pid': None, 'last_message': 'Загрузка начата', 'result': {'cover': None, 'files': [], 'caption': None}}>
+2022-11-05 01:14:53,090 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:14:53 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:14:53,133 - aiogram.event - INFO - Update id=62116886 is handled. Duration 42 ms by bot id=5614657757
+2022-11-05 01:15:01,915 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:15:01 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:15:01,944 - aiogram.event - INFO - Update id=62116887 is handled. Duration 28 ms by bot id=5614657757
+2022-11-05 01:15:16,510 - modules.downloader - INFO - Started download: <Download {'id': 25, 'bot_id': 'r1', 'chat_id': 1204470794, 'message_id': 316, 'user_id': 1204470794, 'site': 'jaomix.ru', 'url': 'https://jaomix.ru/category/prizyv-svyatogo-mecha/', 'start': None, 'end': None, 'format': 'epub', 'auth': '1161', 'images': '1', 'cover': '1', 'status': 3, 'pid': None, 'last_message': 'Загрузка начата', 'result': {'cover': None, 'files': [], 'caption': None}}>
+2022-11-05 01:15:20,097 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:15:20 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:15:20,131 - aiogram.event - INFO - Update id=62116888 is handled. Duration 33 ms by bot id=5614657757
+2022-11-05 01:15:34,424 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:15:34 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:15:34,456 - aiogram.event - INFO - Update id=62116889 is handled. Duration 31 ms by bot id=5614657757
+2022-11-05 01:15:49,283 - modules.downloader - INFO - Started download: <Download {'id': 26, 'bot_id': 'r1', 'chat_id': 1204470794, 'message_id': 321, 'user_id': 1204470794, 'site': 'jaomix.ru', 'url': 'https://jaomix.ru/category/mmorpg-vozrozhdenie-legendarnogo-hranitelya/', 'start': None, 'end': None, 'format': 'epub', 'auth': '1161', 'images': '1', 'cover': '1', 'status': 3, 'pid': None, 'last_message': 'Загрузка начата', 'result': {'cover': None, 'files': [], 'caption': None}}>
+2022-11-05 01:15:50,843 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:15:50 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:15:50,876 - aiogram.event - INFO - Update id=62116890 is handled. Duration 32 ms by bot id=5614657757
+2022-11-05 01:16:03,987 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:16:03 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:16:04,016 - aiogram.event - INFO - Update id=62116891 is handled. Duration 28 ms by bot id=5614657757
+2022-11-05 01:16:20,073 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:16:20 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:16:20,110 - aiogram.event - INFO - Update id=62116892 is handled. Duration 36 ms by bot id=5614657757
+2022-11-05 01:16:22,519 - modules.downloader - INFO - Started download: <Download {'id': 27, 'bot_id': 'r1', 'chat_id': 1204470794, 'message_id': 326, 'user_id': 1204470794, 'site': 'jaomix.ru', 'url': 'https://jaomix.ru/category/bank-vselennoj/', 'start': None, 'end': None, 'format': 'epub', 'auth': '1161', 'images': '1', 'cover': '1', 'status': 3, 'pid': None, 'last_message': 'Загрузка начата', 'result': {'cover': None, 'files': [], 'caption': None}}>
+2022-11-05 01:16:34,753 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:16:34 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:16:34,780 - aiogram.event - INFO - Update id=62116893 is handled. Duration 26 ms by bot id=5614657757
+2022-11-05 01:16:37,064 - modules.downloader - INFO - Ended download: <Download {'id': 20, 'bot_id': 'r1', 'chat_id': 1204470794, 'message_id': 285, 'user_id': 1204470794, 'site': 'jaomix.ru', 'url': 'https://jaomix.ru/category/dobrodetel-demona/', 'start': None, 'end': None, 'format': 'epub', 'auth': '1161', 'images': '1', 'cover': '1', 'status': 5, 'pid': None, 'last_message': 'Загрузка завершена', 'result': {'cover': '/usr/share/tg-bot-v2/instance/downloader/temp/1204470794-20/Jaomix - Добродетель Демона_cover.jpg', 'files': ['/usr/share/tg-bot-v2/instance/downloader/temp/1204470794-20/Jaomix - Добродетель Демона.epub'], 'caption': '[Добродетель Демона](https://jaomix.ru/category/dobrodetel-demona/)\nАвтор:  Jaomix\n\nГлав  616 из 616 , с  "Глава 1: Пролог"  по  "Глава 618: Ученик"\n\n\n[Спасибо автору качалки](https://boosty.to/elib2ebook)  \\(Boosty\\)'}}>
+2022-11-05 01:16:56,020 - modules.downloader - INFO - Started download: <Download {'id': 28, 'bot_id': 'r1', 'chat_id': 1204470794, 'message_id': 333, 'user_id': 1204470794, 'site': 'jaomix.ru', 'url': 'https://jaomix.ru/category/sistema-tenej/', 'start': None, 'end': None, 'format': 'epub', 'auth': '1161', 'images': '1', 'cover': '1', 'status': 3, 'pid': None, 'last_message': 'Загрузка начата', 'result': {'cover': None, 'files': [], 'caption': None}}>
+2022-11-05 01:16:57,535 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:16:57 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:16:57,572 - aiogram.event - INFO - Update id=62116894 is handled. Duration 36 ms by bot id=5614657757
+2022-11-05 01:17:11,145 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:17:11 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:17:11,173 - aiogram.event - INFO - Update id=62116895 is handled. Duration 26 ms by bot id=5614657757
+2022-11-05 01:17:29,595 - modules.downloader - INFO - Started download: <Download {'id': 29, 'bot_id': 'r1', 'chat_id': 1204470794, 'message_id': 338, 'user_id': 1204470794, 'site': 'jaomix.ru', 'url': 'https://jaomix.ru/category/ya-dejstvitelno-ne-syn-proroka/', 'start': None, 'end': None, 'format': 'epub', 'auth': '1161', 'images': '1', 'cover': '1', 'status': 3, 'pid': None, 'last_message': 'Загрузка начата', 'result': {'cover': None, 'files': [], 'caption': None}}>
+2022-11-05 01:17:30,798 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:17:30 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:17:30,855 - aiogram.event - INFO - Update id=62116896 is handled. Duration 56 ms by bot id=5614657757
+2022-11-05 01:17:32,721 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:17:32 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:17:32,752 - aiogram.event - INFO - Update id=62116897 is handled. Duration 29 ms by bot id=5614657757
+2022-11-05 01:17:45,170 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:17:45 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:17:45,198 - aiogram.event - INFO - Update id=62116898 is handled. Duration 26 ms by bot id=5614657757
+2022-11-05 01:17:57,612 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:17:57 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:17:57,648 - aiogram.event - INFO - Update id=62116899 is handled. Duration 34 ms by bot id=5614657757
+2022-11-05 01:18:07,249 - modules.downloader - INFO - Started download: <Download {'id': 30, 'bot_id': 'r1', 'chat_id': 1204470794, 'message_id': 346, 'user_id': 1204470794, 'site': 'jaomix.ru', 'url': 'https://jaomix.ru/category/arhimag-kotoryj-vernulsya-spustya-4-tysyachi-let/', 'start': None, 'end': None, 'format': 'epub', 'auth': '1161', 'images': '1', 'cover': '1', 'status': 3, 'pid': None, 'last_message': 'Загрузка начата', 'result': {'cover': None, 'files': [], 'caption': None}}>
+2022-11-05 01:18:14,016 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:18:14 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:18:14,057 - aiogram.event - INFO - Update id=62116900 is handled. Duration 40 ms by bot id=5614657757
+2022-11-05 01:18:33,513 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:18:33 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:18:33,552 - aiogram.event - INFO - Update id=62116901 is handled. Duration 38 ms by bot id=5614657757
+2022-11-05 01:18:52,294 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:18:52 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:18:52,321 - aiogram.event - INFO - Update id=62116902 is handled. Duration 26 ms by bot id=5614657757
+2022-11-05 01:19:15,120 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:19:15 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:19:15,156 - aiogram.event - INFO - Update id=62116903 is handled. Duration 34 ms by bot id=5614657757
+2022-11-05 01:19:31,610 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:19:31 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:19:31,658 - aiogram.event - INFO - Update id=62116904 is handled. Duration 46 ms by bot id=5614657757
+2022-11-05 01:19:39,634 - modules.downloader - INFO - Ended download: <Download {'id': 23, 'bot_id': 'r1', 'chat_id': 1204470794, 'message_id': 306, 'user_id': 1204470794, 'site': 'jaomix.ru', 'url': 'https://jaomix.ru/category/vnuk-svyatogo-imperatora-nekromant/', 'start': None, 'end': None, 'format': 'epub', 'auth': '1161', 'images': '1', 'cover': '1', 'status': 5, 'pid': None, 'last_message': 'Загрузка завершена', 'result': {'cover': '/usr/share/tg-bot-v2/instance/downloader/temp/1204470794-23/Jaomix - Внук святого императора - некромант_cover.jpg', 'files': ['/usr/share/tg-bot-v2/instance/downloader/temp/1204470794-23/Jaomix - Внук святого императора - некромант.epub'], 'caption': '[Внук святого императора \\- некромант](https://jaomix.ru/category/vnuk-svyatogo-imperatora-nekromant/)\nАвтор:  Jaomix\n\nГлав  385 из 385 , с  "Глава 1"  по  "Глава 384\\_END"\n\n\n[Спасибо автору качалки](https://boosty.to/elib2ebook)  \\(Boosty\\)'}}>
+2022-11-05 01:19:44,178 - modules.downloader - INFO - Started download: <Download {'id': 31, 'bot_id': 'r1', 'chat_id': 1204470794, 'message_id': 350, 'user_id': 1204470794, 'site': 'jaomix.ru', 'url': 'https://jaomix.ru/category/hrizalida/', 'start': None, 'end': None, 'format': 'epub', 'auth': '1161', 'images': '1', 'cover': '1', 'status': 3, 'pid': None, 'last_message': 'Загрузка начата', 'result': {'cover': None, 'files': [], 'caption': None}}>
+2022-11-05 01:19:44,218 - modules.downloader - INFO - Started download: <Download {'id': 32, 'bot_id': 'r1', 'chat_id': 1204470794, 'message_id': 355, 'user_id': 1204470794, 'site': 'jaomix.ru', 'url': 'https://jaomix.ru/category/vo-vseoruzhii/', 'start': None, 'end': None, 'format': 'epub', 'auth': '1161', 'images': '1', 'cover': '1', 'status': 3, 'pid': None, 'last_message': 'Загрузка начата', 'result': {'cover': None, 'files': [], 'caption': None}}>
+2022-11-05 01:19:50,015 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:19:50 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:19:50,056 - aiogram.event - INFO - Update id=62116905 is handled. Duration 39 ms by bot id=5614657757
+2022-11-05 01:19:52,153 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:19:52 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:19:52,174 - aiogram.event - INFO - Update id=62116906 is handled. Duration 19 ms by bot id=5614657757
+2022-11-05 01:19:56,289 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:19:56 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:19:56,313 - aiogram.event - INFO - Update id=62116907 is handled. Duration 23 ms by bot id=5614657757
+2022-11-05 01:20:01,309 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:20:01 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:20:01,314 - aiogram.event - INFO - Update id=62116908 is not handled. Duration 1 ms by bot id=5614657757
+2022-11-05 01:20:05,440 - modules.messages_queue - ERROR - ---------
+[TelegramForbiddenError]:
+TelegramForbiddenError('Forbidden: bot was blocked by the user')
+---------
+2022-11-05 01:20:06,762 - modules.downloader - INFO - Ended download: <Download {'id': 21, 'bot_id': 'r1', 'chat_id': 1204470794, 'message_id': 290, 'user_id': 1204470794, 'site': 'jaomix.ru', 'url': 'https://jaomix.ru/category/re-evoljuciya-onlajn/', 'start': None, 'end': None, 'format': 'epub', 'auth': '1161', 'images': '1', 'cover': '1', 'status': 5, 'pid': None, 'last_message': 'Загрузка завершена', 'result': {'cover': '/usr/share/tg-bot-v2/instance/downloader/temp/1204470794-21/Jaomix - Re: Эволюция онлайн_cover.jpg', 'files': ['/usr/share/tg-bot-v2/instance/downloader/temp/1204470794-21/Jaomix - Re: Эволюция онлайн.epub'], 'caption': '[Re: Эволюция онлайн](https://jaomix.ru/category/re-evoljuciya-onlajn/)\nАвтор:  Jaomix\n\nГлав  711 из 711 , с  "Глава 1 \\- Второй шанс"  по  "Глава 711 Высокомерие или?"\n\n\n[Спасибо автору качалки](https://boosty.to/elib2ebook)  \\(Boosty\\)'}}>
+2022-11-05 01:20:08,446 - modules.messages_queue - ERROR - ---------
+[TelegramForbiddenError]:
+TelegramForbiddenError('Forbidden: bot was blocked by the user')
+---------
+2022-11-05 01:20:17,654 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:20:17 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:20:17,682 - aiogram.event - INFO - Update id=62116909 is handled. Duration 27 ms by bot id=5614657757
+2022-11-05 01:20:24,991 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:20:24 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:20:25,014 - aiogram.event - INFO - Update id=691934601 is handled. Duration 22 ms by bot id=5614657757
+2022-11-05 01:20:33,485 - modules.messages_queue - ERROR - ---------
+[TelegramBadRequest]:
+TelegramBadRequest('Bad Request: chat not found')
+---------
+2022-11-05 01:20:33,486 - asyncio - ERROR - Task exception was never retrieved
+future: <Task finished name='Task-11115' coro=<MessagesQueue.__process_message() done, defined at /usr/share/tg-bot-v2/instance/bot/modules/messages_queue.py:184> exception=KeyError(1697)>
+Traceback (most recent call last):
+  File "/usr/share/tg-bot-v2/instance/bot/modules/messages_queue.py", line 298, in __process_message
+    self._queue[message_id] += 1
+KeyError: 1697
+2022-11-05 01:20:38,711 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:20:38 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:20:38,717 - aiogram.event - INFO - Update id=691934602 is not handled. Duration 5 ms by bot id=5614657757
+2022-11-05 01:20:43,123 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:20:43 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:20:43,161 - aiogram.event - INFO - Update id=62116910 is handled. Duration 37 ms by bot id=5614657757
+2022-11-05 01:20:46,191 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:20:46 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:20:46,221 - aiogram.event - INFO - Update id=691934603 is handled. Duration 28 ms by bot id=5614657757
+2022-11-05 01:20:55,515 - modules.messages_queue - ERROR - ---------
+[TelegramBadRequest]:
+TelegramBadRequest('Bad Request: chat not found')
+---------
+2022-11-05 01:20:55,515 - asyncio - ERROR - Task exception was never retrieved
+future: <Task finished name='Task-11461' coro=<MessagesQueue.__process_message() done, defined at /usr/share/tg-bot-v2/instance/bot/modules/messages_queue.py:184> exception=KeyError(1719)>
+Traceback (most recent call last):
+  File "/usr/share/tg-bot-v2/instance/bot/modules/messages_queue.py", line 298, in __process_message
+    self._queue[message_id] += 1
+KeyError: 1719
+2022-11-05 01:20:56,768 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:20:56 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:20:56,772 - aiogram.event - INFO - Update id=691934604 is not handled. Duration 1 ms by bot id=5614657757
+2022-11-05 01:21:02,792 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:21:02 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:21:02,819 - aiogram.event - INFO - Update id=62116911 is handled. Duration 26 ms by bot id=5614657757
+2022-11-05 01:21:29,459 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:21:29 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:21:29,495 - aiogram.event - INFO - Update id=62116912 is handled. Duration 35 ms by bot id=5614657757
+2022-11-05 01:21:46,931 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:21:46 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:21:46,968 - aiogram.event - INFO - Update id=62116913 is handled. Duration 35 ms by bot id=5614657757
+2022-11-05 01:22:08,687 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:22:08 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:22:08,722 - aiogram.event - INFO - Update id=62116914 is handled. Duration 34 ms by bot id=5614657757
+2022-11-05 01:22:27,112 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:22:27 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:22:27,226 - aiogram.event - INFO - Update id=62116915 is handled. Duration 112 ms by bot id=5614657757
+2022-11-05 01:22:34,100 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:22:34 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:22:34,128 - aiogram.event - INFO - Update id=62116916 is handled. Duration 26 ms by bot id=5614657757
+2022-11-05 01:22:39,245 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:22:39 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:22:39,270 - aiogram.event - INFO - Update id=62116917 is handled. Duration 24 ms by bot id=5614657757
+2022-11-05 01:22:55,650 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:22:55 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:22:55,696 - aiogram.event - INFO - Update id=62116918 is handled. Duration 45 ms by bot id=5614657757
+2022-11-05 01:23:11,921 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:23:11 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:23:11,952 - aiogram.event - INFO - Update id=62116919 is handled. Duration 30 ms by bot id=5614657757
+2022-11-05 01:23:28,533 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:23:28 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:23:28,579 - aiogram.event - INFO - Update id=62116920 is handled. Duration 45 ms by bot id=5614657757
+2022-11-05 01:23:44,818 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:23:44 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:23:44,843 - aiogram.event - INFO - Update id=62116921 is handled. Duration 24 ms by bot id=5614657757
+2022-11-05 01:27:00,034 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:27:00 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:27:00,059 - aiogram.event - INFO - Update id=62116922 is handled. Duration 23 ms by bot id=5614657757
+2022-11-05 01:28:12,672 - modules.downloader - INFO - Ended download: <Download {'id': 29, 'bot_id': 'r1', 'chat_id': 1204470794, 'message_id': 338, 'user_id': 1204470794, 'site': 'jaomix.ru', 'url': 'https://jaomix.ru/category/ya-dejstvitelno-ne-syn-proroka/', 'start': None, 'end': None, 'format': 'epub', 'auth': '1161', 'images': '1', 'cover': '1', 'status': 5, 'pid': None, 'last_message': 'Загрузка завершена', 'result': {'cover': '/usr/share/tg-bot-v2/instance/downloader/temp/1204470794-29/Jaomix - Я действительно не сын пророка_cover.jpg', 'files': ['/usr/share/tg-bot-v2/instance/downloader/temp/1204470794-29/Jaomix - Я действительно не сын пророка.epub'], 'caption': '[Я действительно не сын пророка](https://jaomix.ru/category/ya-dejstvitelno-ne-syn-proroka/)\nАвтор:  Jaomix\n\nГлав  510 из 510 , с  "Глава 1\\."  по  "Глава 510 \\- Путь К Бессмертию, Шаг В Небесный Мир\\!"\n\n\n[Спасибо автору качалки](https://boosty.to/elib2ebook)  \\(Boosty\\)'}}>
+2022-11-05 01:28:18,731 - modules.downloader - INFO - Started download: <Download {'id': 33, 'bot_id': 'r1', 'chat_id': 1204470794, 'message_id': 363, 'user_id': 1204470794, 'site': 'jaomix.ru', 'url': 'https://jaomix.ru/category/peredovaya-tehnologicheskaya-sistema-uchenogo/', 'start': None, 'end': None, 'format': 'epub', 'auth': '1161', 'images': '1', 'cover': '1', 'status': 3, 'pid': None, 'last_message': 'Загрузка начата', 'result': {'cover': None, 'files': [], 'caption': None}}>
+2022-11-05 01:28:18,767 - modules.downloader - INFO - Started download: <Download {'id': 34, 'bot_id': 'r1', 'chat_id': 1204470794, 'message_id': 371, 'user_id': 1204470794, 'site': 'jaomix.ru', 'url': 'https://jaomix.ru/category/magazin-astralnyh-pitomczev/', 'start': None, 'end': None, 'format': 'epub', 'auth': '1161', 'images': '1', 'cover': '1', 'status': 3, 'pid': None, 'last_message': 'Загрузка начата', 'result': {'cover': None, 'files': [], 'caption': None}}>
+2022-11-05 01:28:38,466 - modules.downloader - INFO - Ended download: <Download {'id': 24, 'bot_id': 'r1', 'chat_id': 1204470794, 'message_id': 311, 'user_id': 1204470794, 'site': 'jaomix.ru', 'url': 'https://jaomix.ru/category/smertelnyj-vystrel/', 'start': None, 'end': None, 'format': 'epub', 'auth': '1161', 'images': '1', 'cover': '1', 'status': 5, 'pid': None, 'last_message': 'Загрузка завершена', 'result': {'cover': '/usr/share/tg-bot-v2/instance/downloader/temp/1204470794-24/Jaomix - Смертельный выстрел_cover.jpg', 'files': ['/usr/share/tg-bot-v2/instance/downloader/temp/1204470794-24/Jaomix - Смертельный выстрел.epub'], 'caption': '[Смертельный выстрел](https://jaomix.ru/category/smertelnyj-vystrel/)\nАвтор:  Jaomix\n\nГлав  720 из 720 , с  "Глава 1\\-Выстрел В Голову С Одного Удара"  по  "Глава 718 \\- Обнаружена Скрытая область"\n\n\n[Спасибо автору качалки](https://boosty.to/elib2ebook)  \\(Boosty\\)'}}>
+2022-11-05 01:28:48,916 - modules.downloader - INFO - Ended download: <Download {'id': 27, 'bot_id': 'r1', 'chat_id': 1204470794, 'message_id': 326, 'user_id': 1204470794, 'site': 'jaomix.ru', 'url': 'https://jaomix.ru/category/bank-vselennoj/', 'start': None, 'end': None, 'format': 'epub', 'auth': '1161', 'images': '1', 'cover': '1', 'status': 5, 'pid': None, 'last_message': 'Загрузка завершена', 'result': {'cover': '/usr/share/tg-bot-v2/instance/downloader/temp/1204470794-27/Jaomix - Банк Вселенной_cover.jpg', 'files': ['/usr/share/tg-bot-v2/instance/downloader/temp/1204470794-27/Jaomix - Банк Вселенной.epub'], 'caption': '[Банк Вселенной](https://jaomix.ru/category/bank-vselennoj/)\nАвтор:  Jaomix\n\nГлав  621 из 621 , с  "Глава 1"  по  "Глава 620 \\- Три Зеленые шляпы"\n\n\n[Спасибо автору качалки](https://boosty.to/elib2ebook)  \\(Boosty\\)'}}>
+2022-11-05 01:28:53,360 - modules.downloader - INFO - Started download: <Download {'id': 35, 'bot_id': 'r1', 'chat_id': 1204470794, 'message_id': 376, 'user_id': 1204470794, 'site': 'jaomix.ru', 'url': 'https://jaomix.ru/category/raj-monstrov/', 'start': None, 'end': None, 'format': 'epub', 'auth': '1161', 'images': '1', 'cover': '1', 'status': 3, 'pid': None, 'last_message': 'Загрузка начата', 'result': {'cover': None, 'files': [], 'caption': None}}>
+2022-11-05 01:28:53,400 - modules.downloader - INFO - Started download: <Download {'id': 36, 'bot_id': 'r1', 'chat_id': 1204470794, 'message_id': 381, 'user_id': 1204470794, 'site': 'jaomix.ru', 'url': 'https://jaomix.ru/category/verhovnyj-mag/', 'start': None, 'end': None, 'format': 'epub', 'auth': '1161', 'images': '1', 'cover': '1', 'status': 3, 'pid': None, 'last_message': 'Загрузка начата', 'result': {'cover': None, 'files': [], 'caption': None}}>
+2022-11-05 01:30:14,018 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:30:14 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:30:14,039 - aiogram.event - INFO - Update id=62116923 is handled. Duration 20 ms by bot id=5614657757
+2022-11-05 01:31:04,466 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:31:04 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:31:04,471 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:31:04 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:31:04,477 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:31:04 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:31:04,482 - aiogram.event - INFO - Update id=691934605 is not handled. Duration 14 ms by bot id=5614657757
+2022-11-05 01:31:04,484 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:31:04 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:31:04,489 - aiogram.event - INFO - Update id=691934606 is not handled. Duration 16 ms by bot id=5614657757
+2022-11-05 01:31:04,490 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:31:04 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:31:04,498 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:31:04 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:31:04,499 - aiogram.event - INFO - Update id=691934607 is not handled. Duration 21 ms by bot id=5614657757
+2022-11-05 01:31:04,503 - aiogram.event - INFO - Update id=691934608 is not handled. Duration 18 ms by bot id=5614657757
+2022-11-05 01:31:04,505 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:31:04 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:31:04,510 - aiogram.event - INFO - Update id=691934609 is not handled. Duration 18 ms by bot id=5614657757
+2022-11-05 01:31:04,512 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:31:04 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:31:04,517 - aiogram.event - INFO - Update id=691934610 is not handled. Duration 17 ms by bot id=5614657757
+2022-11-05 01:31:04,518 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:31:04 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:31:04,521 - aiogram.event - INFO - Update id=691934611 is not handled. Duration 15 ms by bot id=5614657757
+2022-11-05 01:31:04,525 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:31:04 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:31:04,529 - aiogram.event - INFO - Update id=691934612 is not handled. Duration 16 ms by bot id=5614657757
+2022-11-05 01:31:04,531 - aiogram.event - INFO - Update id=691934613 is not handled. Duration 12 ms by bot id=5614657757
+2022-11-05 01:31:04,533 - aiogram.event - INFO - Update id=691934614 is not handled. Duration 7 ms by bot id=5614657757
+2022-11-05 01:31:12,062 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:31:12 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:31:12,067 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:31:12 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:31:12,073 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:31:12 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:31:12,078 - aiogram.event - INFO - Update id=691934615 is not handled. Duration 14 ms by bot id=5614657757
+2022-11-05 01:31:12,079 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:31:12 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:31:12,084 - aiogram.event - INFO - Update id=691934616 is not handled. Duration 16 ms by bot id=5614657757
+2022-11-05 01:31:12,086 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:31:12 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:31:12,091 - aiogram.event - INFO - Update id=691934617 is not handled. Duration 16 ms by bot id=5614657757
+2022-11-05 01:31:12,092 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:31:12 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:31:12,097 - aiogram.event - INFO - Update id=691934618 is not handled. Duration 17 ms by bot id=5614657757
+2022-11-05 01:31:12,099 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:31:12 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:31:12,105 - aiogram.event - INFO - Update id=691934619 is not handled. Duration 18 ms by bot id=5614657757
+2022-11-05 01:31:12,109 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:31:12 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:31:12,117 - aiogram.event - INFO - Update id=691934620 is not handled. Duration 24 ms by bot id=5614657757
+2022-11-05 01:31:12,119 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:31:12 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:31:12,124 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:31:12 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:31:12,126 - aiogram.event - INFO - Update id=691934621 is not handled. Duration 25 ms by bot id=5614657757
+2022-11-05 01:31:12,129 - aiogram.event - INFO - Update id=691934622 is not handled. Duration 18 ms by bot id=5614657757
+2022-11-05 01:31:12,132 - aiogram.event - INFO - Update id=691934623 is not handled. Duration 11 ms by bot id=5614657757
+2022-11-05 01:31:12,134 - aiogram.event - INFO - Update id=691934624 is not handled. Duration 8 ms by bot id=5614657757
+2022-11-05 01:32:04,844 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:32:04 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:32:04,850 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:32:04 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:32:04,857 - aiogram.event - INFO - Update id=691934626 is not handled. Duration 5 ms by bot id=5614657757
+2022-11-05 01:32:04,927 - aiogram.event - INFO - Update id=691934625 is not handled. Duration 81 ms by bot id=5614657757
+2022-11-05 01:32:59,990 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:32:59 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:33:00,017 - aiogram.event - INFO - Update id=62116924 is handled. Duration 25 ms by bot id=5614657757
+2022-11-05 01:33:43,189 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:33:43 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:33:43,255 - aiogram.event - INFO - Update id=62116925 is handled. Duration 65 ms by bot id=5614657757
+2022-11-05 01:33:45,879 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:33:45 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:33:46,002 - aiogram.event - INFO - Update id=62116926 is handled. Duration 121 ms by bot id=5614657757
+2022-11-05 01:33:50,247 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:33:50 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:33:50,253 - aiogram.event - INFO - Update id=62116927 is not handled. Duration 5 ms by bot id=5614657757
+2022-11-05 01:34:06,129 - modules.downloader - INFO - Ended download: <Download {'id': 30, 'bot_id': 'r1', 'chat_id': 1204470794, 'message_id': 346, 'user_id': 1204470794, 'site': 'jaomix.ru', 'url': 'https://jaomix.ru/category/arhimag-kotoryj-vernulsya-spustya-4-tysyachi-let/', 'start': None, 'end': None, 'format': 'epub', 'auth': '1161', 'images': '1', 'cover': '1', 'status': 5, 'pid': None, 'last_message': 'Загрузка завершена', 'result': {'cover': '/usr/share/tg-bot-v2/instance/downloader/temp/1204470794-30/Jaomix - Архимаг, который вернулся спустя 4 тысячи лет_cover.jpg', 'files': ['/usr/share/tg-bot-v2/instance/downloader/temp/1204470794-30/Jaomix - Архимаг, который вернулся спустя 4 тысячи лет.epub'], 'caption': '[Архимаг, который вернулся спустя 4 тысячи лет](https://jaomix.ru/category/arhimag-kotoryj-vernulsya-spustya-4-tysyachi-let/)\nАвтор:  Jaomix\n\nГлав  697 из 697 , с  "Глава 0"  по  "S2Глава 454"\n\n\n[Спасибо автору качалки](https://boosty.to/elib2ebook)  \\(Boosty\\)'}}>
+2022-11-05 01:34:29,013 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:34:29 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:34:29,034 - aiogram.event - INFO - Update id=62116928 is handled. Duration 19 ms by bot id=5614657757
+2022-11-05 01:35:57,582 - modules.downloader - INFO - Ended download: <Download {'id': 26, 'bot_id': 'r1', 'chat_id': 1204470794, 'message_id': 321, 'user_id': 1204470794, 'site': 'jaomix.ru', 'url': 'https://jaomix.ru/category/mmorpg-vozrozhdenie-legendarnogo-hranitelya/', 'start': None, 'end': None, 'format': 'epub', 'auth': '1161', 'images': '1', 'cover': '1', 'status': 5, 'pid': None, 'last_message': 'Загрузка завершена', 'result': {'cover': '/usr/share/tg-bot-v2/instance/downloader/temp/1204470794-26/Jaomix - ММОРПГ Возрождение Легендарного Хранителя_cover.jpg', 'files': ['/usr/share/tg-bot-v2/instance/downloader/temp/1204470794-26/Jaomix - ММОРПГ Возрождение Легендарного Хранителя.epub'], 'caption': '[ММОРПГ Возрождение Легендарного Хранителя](https://jaomix.ru/category/mmorpg-vozrozhdenie-legendarnogo-hranitelya/)\nАвтор:  Jaomix\n\nГлав  856 из 856 , с  "Глава 1: вместе в смерти"  по  "Глава 856: Заключение"\n\n\n[Спасибо автору качалки](https://boosty.to/elib2ebook)  \\(Boosty\\)'}}>
+2022-11-05 01:36:04,074 - modules.downloader - INFO - Started download: <Download {'id': 37, 'bot_id': 'r1', 'chat_id': 1204470794, 'message_id': 389, 'user_id': 1204470794, 'site': 'jaomix.ru', 'url': 'https://jaomix.ru/category/super-gen-boga/', 'start': None, 'end': None, 'format': 'epub', 'auth': '1161', 'images': '1', 'cover': '1', 'status': 3, 'pid': None, 'last_message': 'Загрузка начата', 'result': {'cover': None, 'files': [], 'caption': None}}>
+2022-11-05 01:36:04,116 - modules.downloader - INFO - Started download: <Download {'id': 38, 'bot_id': 'r1', 'chat_id': 1204470794, 'message_id': 396, 'user_id': 1204470794, 'site': 'jaomix.ru', 'url': 'https://jaomix.ru/category/prepodobnyj-gu/', 'start': None, 'end': None, 'format': 'epub', 'auth': '1161', 'images': '1', 'cover': '1', 'status': 3, 'pid': None, 'last_message': 'Загрузка начата', 'result': {'cover': None, 'files': [], 'caption': None}}>
+2022-11-05 01:40:21,167 - modules.downloader - INFO - Ended download: <Download {'id': 28, 'bot_id': 'r1', 'chat_id': 1204470794, 'message_id': 333, 'user_id': 1204470794, 'site': 'jaomix.ru', 'url': 'https://jaomix.ru/category/sistema-tenej/', 'start': None, 'end': None, 'format': 'epub', 'auth': '1161', 'images': '1', 'cover': '1', 'status': 5, 'pid': None, 'last_message': 'Загрузка завершена', 'result': {'cover': '/usr/share/tg-bot-v2/instance/downloader/temp/1204470794-28/Jaomix - Система теней_cover.jpg', 'files': ['/usr/share/tg-bot-v2/instance/downloader/temp/1204470794-28/Jaomix - Система теней.epub'], 'caption': '[Система теней](https://jaomix.ru/category/sistema-tenej/)\nАвтор:  Jaomix\n\nГлав  989 из 989 , с  "Глава 1: Таинственная Тень"  по  "Глава 989\\-989 Инь Император Погибает"\n\n\n[Спасибо автору качалки](https://boosty.to/elib2ebook)  \\(Boosty\\)'}}>
+2022-11-05 01:45:24,142 - modules.downloader - INFO - Ended download: <Download {'id': 31, 'bot_id': 'r1', 'chat_id': 1204470794, 'message_id': 350, 'user_id': 1204470794, 'site': 'jaomix.ru', 'url': 'https://jaomix.ru/category/hrizalida/', 'start': None, 'end': None, 'format': 'epub', 'auth': '1161', 'images': '1', 'cover': '1', 'status': 5, 'pid': None, 'last_message': 'Загрузка завершена', 'result': {'cover': '/usr/share/tg-bot-v2/instance/downloader/temp/1204470794-31/Jaomix - Хризалида_cover.jpg', 'files': ['/usr/share/tg-bot-v2/instance/downloader/temp/1204470794-31/Jaomix - Хризалида.epub'], 'caption': '[Хризалида](https://jaomix.ru/category/hrizalida/)\nАвтор:  Jaomix\n\nГлав  1034 из 1034 , с  "Глава 1"  по  "Глава 1033\\-дальний финал"\n\n\n[Спасибо автору качалки](https://boosty.to/elib2ebook)  \\(Boosty\\)'}}>
+2022-11-05 01:45:30,139 - modules.downloader - INFO - Started download: <Download {'id': 39, 'bot_id': 'r1', 'chat_id': 1204470794, 'message_id': 400, 'user_id': 1204470794, 'site': 'jaomix.ru', 'url': 'https://jaomix.ru/category/reinkarnacziya-silnejshego-boga-mecha/', 'start': None, 'end': None, 'format': 'epub', 'auth': '1161', 'images': '1', 'cover': '1', 'status': 3, 'pid': None, 'last_message': 'Загрузка начата', 'result': {'cover': None, 'files': [], 'caption': None}}>
+2022-11-05 01:47:49,924 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:47:49 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:47:49,955 - aiogram.event - INFO - Update id=62116929 is handled. Duration 29 ms by bot id=5614657757
+2022-11-05 01:49:46,247 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:49:46 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:49:46,274 - aiogram.event - INFO - Update id=62116930 is handled. Duration 26 ms by bot id=5614657757
+2022-11-05 01:50:25,934 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:50:25 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:50:25,958 - aiogram.event - INFO - Update id=62116931 is handled. Duration 23 ms by bot id=5614657757
+2022-11-05 01:50:41,757 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:50:41 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:50:41,778 - aiogram.event - INFO - Update id=62116932 is handled. Duration 20 ms by bot id=5614657757
+2022-11-05 01:50:48,441 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:50:48 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:50:48,468 - aiogram.event - INFO - Update id=62116933 is handled. Duration 26 ms by bot id=5614657757
+2022-11-05 01:51:39,412 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:51:39 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:51:39,446 - aiogram.event - INFO - Update id=62116934 is handled. Duration 33 ms by bot id=5614657757
+2022-11-05 01:52:17,272 - modules.downloader - INFO - Ended download: <Download {'id': 25, 'bot_id': 'r1', 'chat_id': 1204470794, 'message_id': 316, 'user_id': 1204470794, 'site': 'jaomix.ru', 'url': 'https://jaomix.ru/category/prizyv-svyatogo-mecha/', 'start': None, 'end': None, 'format': 'epub', 'auth': '1161', 'images': '1', 'cover': '1', 'status': 5, 'pid': None, 'last_message': 'Загрузка завершена', 'result': {'cover': '/usr/share/tg-bot-v2/instance/downloader/temp/1204470794-25/Jaomix - Призыв Святого Меча_cover.jpg', 'files': ['/usr/share/tg-bot-v2/instance/downloader/temp/1204470794-25/Jaomix - Призыв Святого Меча.epub'], 'caption': '[Призыв Святого Меча](https://jaomix.ru/category/prizyv-svyatogo-mecha/)\nАвтор:  Jaomix\n\nГлав  1381 из 1381 , с  "Глава 1"  по  "Глава 1381\\_END \\- Совершенно Новое Начало"\n\n\n[Спасибо автору качалки](https://boosty.to/elib2ebook)  \\(Boosty\\)'}}>
+2022-11-05 01:55:34,449 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:55:34 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:55:34,452 - aiogram.event - INFO - Update id=62116935 is not handled. Duration 1 ms by bot id=5614657757
+2022-11-05 01:55:34,500 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:55:34 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:55:34,505 - aiogram.event - INFO - Update id=62116936 is not handled. Duration 4 ms by bot id=5614657757
+2022-11-05 01:55:34,607 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:55:34 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:55:34,610 - aiogram.event - INFO - Update id=62116937 is not handled. Duration 1 ms by bot id=5614657757
+2022-11-05 01:56:30,030 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:56:30 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:56:30,036 - aiogram.event - INFO - Update id=62116938 is not handled. Duration 4 ms by bot id=5614657757
+2022-11-05 01:57:45,291 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:57:45 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:57:45,295 - aiogram.event - INFO - Update id=62116939 is not handled. Duration 1 ms by bot id=5614657757
+2022-11-05 01:57:45,354 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:57:45 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:57:45,360 - aiogram.event - INFO - Update id=62116940 is not handled. Duration 4 ms by bot id=5614657757
+2022-11-05 01:57:45,448 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:57:45 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:57:45,451 - aiogram.event - INFO - Update id=62116941 is not handled. Duration 1 ms by bot id=5614657757
+2022-11-05 01:58:08,195 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:58:08 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:58:08,201 - aiogram.event - INFO - Update id=62116942 is not handled. Duration 5 ms by bot id=5614657757
+2022-11-05 01:58:47,587 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:58:47 +0000] "POST /wh_r1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:58:47,608 - aiogram.event - INFO - Update id=62116943 is handled. Duration 19 ms by bot id=5614657757
