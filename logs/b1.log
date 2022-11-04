@@ -521,3 +521,5 @@ KeyError: 1190
 2022-11-05 01:58:08,189 - aiogram.event - INFO - Update id=585777090 is not handled. Duration 4 ms by bot id=5739433482
 2022-11-05 01:58:41,874 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:58:41 +0000] "POST /wh_b1 HTTP/1.0" 200 159 "-" "-"
 2022-11-05 01:58:41,897 - aiogram.event - INFO - Update id=585777091 is handled. Duration 21 ms by bot id=5739433482
+2022-11-05 01:59:50,864 - aiohttp.access - INFO - 127.0.0.1 [04/Nov/2022:22:59:50 +0000] "POST /wh_b1 HTTP/1.0" 200 159 "-" "-"
+2022-11-05 01:59:50,870 - aiogram.event - INFO - Update id=585777092 is not handled. Duration 4 ms by bot id=5739433482
