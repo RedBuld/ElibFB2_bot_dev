@@ -169,19 +169,20 @@ class MessagesQueue():
 
 		if len(self.__queue_ids__) > 0:
 			message_id = self.__queue_ids__.pop(0)
+			try_count = self._queue[message_id]
 			try:
 				del self._queue[message_id]
 			except Exception as e:
 				pass
 			try:
-				asyncio.create_task( self.__process_message(message_id) )
+				asyncio.create_task( self.__process_message(message_id,try_count) )
 			except Exception as e:
 				logger.error('mq:__process_message error'+repr(e))
 
 
 		await asyncio.sleep(self.bot.config.MESSAGES_Q_INTERVAL)
 
-	async def __process_message(self, message_id: int) -> None:
+	async def __process_message(self, message_id: int, try_count: int) -> None:
 
 		task = await self.bot.db.get_message(message_id)
 
@@ -240,7 +241,7 @@ class MessagesQueue():
 		except TelegramRetryAfter as e:
 			logger.error(f"---------\n[TelegramRetryAfter]:\n{repr(e)}\n---------")
 			await asyncio.sleep(e.retry_after)
-			return self.__process_message(message_id)
+			return self.__process_message(message_id,try_count)
 		except TelegramMigrateToChat as e:
 			logger.error(f"---------\n[TelegramMigrateToChat]:\n{repr(e)}\n---------")
 			pass
@@ -295,9 +296,9 @@ class MessagesQueue():
 					await self.bot.db.remove_message(message_id)
 					return
 				if _try:
-					self._queue[message_id] += 1
+					try_count += 1
 				
-				if self._queue[message_id] >= self._max_try:
+				if try_count >= self._max_try:
 
 					params = {
 						'callee':'send_message_once',
@@ -313,6 +314,11 @@ class MessagesQueue():
 					for delete_file in delete_files:
 						proc = await asyncio.create_subprocess_shell(f'rm -rf "{delete_file}"')
 						await proc.wait()
+				else:
+					try:
+						self._queue[message_id] = try_count
+					except Exception as e:
+						raise e
 			else:
 				try:
 					del self._queue[message_id]
