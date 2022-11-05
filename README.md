@@ -67,3 +67,12 @@ server {
 	}
 }
 ```
+
+
+## Support
+
+Поддержка https://t.me/elib_fb2_bot_support
+
+Сказать спасибо https://boosty.to/elib2ebook/about
+
+Сказать спасибо https://boosty.to/redbuld/about
