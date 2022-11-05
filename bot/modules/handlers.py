@@ -228,6 +228,10 @@ async def stats_command(message: types.Message, state: FSMContext) -> None:
 @router.message(F.content_type.in_({'text'}), F.text.startswith('http'))
 async def prepare_download(message: types.Message, state: FSMContext) -> None:
 
+	if message.chat.type == 'channel':
+		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text="Бот не доступен в чатах" )
+		await bot.leave_chat(message.chat.id)
+
 	if bot.config.LOCKED:
 		if message.from_user.id not in bot.config.ADMINS:
 			await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text="Идет разработка" )

@@ -250,6 +250,8 @@ class MessagesQueue():
 				_ignore = True
 			if 'chat not found' in str(e):
 				_ignore = True
+			if 'web App buttons' in str(e):
+				_ignore = True
 			logger.error(f"---------\n[TelegramBadRequest]:\n{repr(e)}\n---------")
 			pass
 		except TelegramNotFound as e:

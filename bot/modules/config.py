@@ -168,8 +168,8 @@ class Config(object):
 					if 'split_limit' in _config['download']:
 						try:
 							self.DOWNLOADS_SPLIT_LIMIT = int(_config['download']['split_limit'])
-							if self.DOWNLOADS_SPLIT_LIMIT > 1800*1024*1024:
-								self.DOWNLOADS_SPLIT_LIMIT = 1000*1024*1024
+							if self.DOWNLOADS_SPLIT_LIMIT > 400*1024*1024:
+								self.DOWNLOADS_SPLIT_LIMIT = 400*1024*1024
 						except Exception as e:
 							self.DOWNLOADS_SPLIT_LIMIT = 400*1024*1024
 

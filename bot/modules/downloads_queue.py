@@ -108,16 +108,16 @@ class DownloadsQueue():
 		if db_tasks:
 			for task in db_tasks:
 				if task.status == DOWNLOAD_STATUS.CANCELLED:
-					logger.info('CANCELLED')
-					logger.info(task)
+					# logger.info('CANCELLED')
+					# logger.info(task)
 					await self.__init_downloader(task.id)
 				if task.status == DOWNLOAD_STATUS.ERROR:
-					logger.info('ERROR')
-					logger.info(task)
+					# logger.info('ERROR')
+					# logger.info(task)
 					await self.__init_downloader(task.id)
 				if task.status == DOWNLOAD_STATUS.DONE:
-					logger.info('DONE')
-					logger.info(task)
+					# logger.info('DONE')
+					# logger.info(task)
 					await self.__init_downloader(task.id)
 				if task.status == DOWNLOAD_STATUS.PROCESSING:
 					# logger.info('PROCESSING')

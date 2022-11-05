@@ -269,7 +269,10 @@ class Downloader(object):
 		with open(self._log_file, 'r') as f:
 			for line in f:
 				pass
-			last_line = line
+			if not line.startswith('Загружена картинка'):
+				last_line = line
+			if 'успешно сохранена' in line:
+				last_line = 'Файл скачан'
 		return last_line
 
 	async def __get_last_line_seek(self) -> str:
@@ -300,7 +303,7 @@ class Downloader(object):
 
 	async def __chunked_media_group(self) -> Iterator[Union[str, Path]]:
 		for i in range(0, len(self.result['files']), 10):
-			yield self.result['files'][i:i + n]
+			yield self.result['files'][i:i + 10]
 
 
 	async def __download(self) -> None:
@@ -566,7 +569,7 @@ class Downloader(object):
 
 	async def __process_error(self, message: str, command: Optional[str]=None, e: Optional[Exception]=None) -> str:
 		if e:
-			message += '\n'+repr(e)
+			message += '\n'+fmt.escape_md(repr(e))
 		if message:
 			logger.error(message)
 		if command:
