@@ -31,6 +31,7 @@ $hs = false;
 		{
 			$sql = str_replace('_DAY_', $mysqli->real_escape_string($payload['sql_daily']), $sql_day);
 			$result = $mysqli->query($sql);
+			$total = 0;
 
 			if( $result->num_rows > 0 )
 			{
@@ -43,12 +44,22 @@ $hs = false;
 				</tr>
 			</thead>
 			<tbody>
-				<?php foreach( $result as $row ) { ?>
+				<?php
+				foreach( $result as $row )
+				{
+				?>
 				<tr>
 					<td><a target="_blank" href="http://<?=$row['site']?>"><?=$row['site']?></a></td>
 					<td><?=plural_form($row['count'],$w)?></td>
 				</tr>
-				<?php } ?>
+				<?php
+				$total+=intval($row['count']);
+				}
+				?>
+				<tr>
+					<td>Всего</td>
+					<td><?=plural_form($total,$w)?></td>
+				</tr>
 			</tbody>
 		</table>
 		<?php
@@ -59,6 +70,7 @@ $hs = false;
 		{
 			$sql = str_replace('_DAY_', $mysqli->real_escape_string($payload['sql_daily_prev']), $sql_day);
 			$result = $mysqli->query($sql);
+			$total = 0;
 
 			if( $result->num_rows > 0 )
 			{
@@ -71,12 +83,22 @@ $hs = false;
 				</tr>
 			</thead>
 			<tbody>
-				<?php foreach( $result as $row ) { ?>
+				<?php
+				foreach( $result as $row )
+				{
+				?>
 				<tr>
 					<td><a target="_blank" href="http://<?=$row['site']?>"><?=$row['site']?></a></td>
 					<td><?=plural_form($row['count'],$w)?></td>
 				</tr>
-				<?php } ?>
+				<?php
+				$total+=intval($row['count']);
+				}
+				?>
+				<tr>
+					<td>Всего</td>
+					<td><?=plural_form($total,$w)?></td>
+				</tr>
 			</tbody>
 		</table>
 		<?php
@@ -88,6 +110,8 @@ $hs = false;
 			$sql = str_replace('_START_', $mysqli->real_escape_string($payload['sql_montly'][0]), $sql_month);
 			$sql = str_replace('_END_', $mysqli->real_escape_string($payload['sql_montly'][1]), $sql);
 			$result = $mysqli->query($sql);
+			$total = 0;
+
 			if( $result->num_rows > 0 )
 			{
 				$hs = true;
@@ -99,12 +123,22 @@ $hs = false;
 				</tr>
 			</thead>
 			<tbody>
-				<?php foreach( $result as $row ) { ?>
+				<?php
+				foreach( $result as $row )
+				{
+				?>
 				<tr>
 					<td><a target="_blank" href="http://<?=$row['site']?>"><?=$row['site']?></a></td>
 					<td><?=plural_form($row['count'],$w)?></td>
 				</tr>
-				<?php } ?>
+				<?php
+				$total+=intval($row['count']);
+				}
+				?>
+				<tr>
+					<td>Всего</td>
+					<td><?=plural_form($total,$w)?></td>
+				</tr>
 			</tbody>
 		</table>
 		<?php
@@ -116,6 +150,8 @@ $hs = false;
 			$sql = str_replace('_START_', $mysqli->real_escape_string($payload['sql_montly_prev'][0]), $sql_month);
 			$sql = str_replace('_END_', $mysqli->real_escape_string($payload['sql_montly_prev'][1]), $sql);
 			$result = $mysqli->query($sql);
+			$total = 0;
+
 			if( $result->num_rows > 0 )
 			{
 				$hs = true;
@@ -127,12 +163,22 @@ $hs = false;
 				</tr>
 			</thead>
 			<tbody>
-				<?php foreach( $result as $row ) { ?>
+				<?php
+				foreach( $result as $row )
+				{
+				?>
 				<tr>
 					<td><a target="_blank" href="http://<?=$row['site']?>"><?=$row['site']?></a></td>
 					<td><?=plural_form($row['count'],$w)?></td>
 				</tr>
-				<?php } ?>
+				<?php
+				$total+=intval($row['count']);
+				}
+				?>
+				<tr>
+					<td>Всего</td>
+					<td><?=plural_form($total,$w)?></td>
+				</tr>
 			</tbody>
 		</table>
 		<?php
