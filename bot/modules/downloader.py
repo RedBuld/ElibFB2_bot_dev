@@ -86,6 +86,12 @@ class Downloader(object):
 
 		if not self._thread:
 
+			proc = await asyncio.create_subprocess_shell(f'rm -rf "{self._log_file}"')
+			await proc.wait()
+
+			proc = await asyncio.create_subprocess_shell(f'rm -rf "{self._files_dir}"')
+			await proc.wait()
+
 			if self.status == DOWNLOAD_STATUS.INIT:
 				self.status = DOWNLOAD_STATUS.RUNNING
 				await self.update_status()
