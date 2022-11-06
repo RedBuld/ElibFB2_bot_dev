@@ -1,4 +1,4 @@
-import asyncio, re, os, logging, glob, orjson
+import asyncio, re, os, logging, glob, orjson, ijson
 import aiogram.utils.markdown as fmt
 from pathlib import Path
 from typing import Optional, Union, Iterator
@@ -106,6 +106,7 @@ class Downloader(object):
 					pass
 
 	async def cancel(self) -> None:
+		await self.bot.db.add_user_stat(self.task.user_id,1)
 		self.status = DOWNLOAD_STATUS.CANCELLED
 
 		if self._process:
@@ -364,6 +365,10 @@ class Downloader(object):
 				except Exception as e:
 					raise e
 
+				size = await self.__process_files_size()
+
+				await self.bot.db.add_site_stat( self.task.site, size )
+
 				self.status = DOWNLOAD_STATUS.DONE
 				await self.update_status()
 
@@ -463,62 +468,96 @@ class Downloader(object):
 		book_caption = []
 		_title = ''
 		_author = ''
-		_chapters = ''
 		_seria = ''
+		_chapters = ''
+
+		_book_title = ''
+		_book_url = ''
+		_author_name = ''
+		_author_url = ''
+		_seria_name = ''
+		_seria_number = ''
+		_seria_url = ''
+		_book_chapters = []
+		_book_chapter = None
 		try:
 			if _json_file is not None:
-				with open(_json_file, 'r') as t:
-					_json_data = t.read()
-					if _json_data:
-						_json = orjson.loads(_json_data)
-						if _json:
-							if 'Title' in _json and _json['Title']:
-								t = TAG_RE.sub('', _json["Title"])
-								if "Url" in _json and _json["Url"]:
-									u = TAG_RE.sub('', _json["Url"])
-									_title = fmt.link( t, u )
-								else:
-									_title = fmt.text( fmt.escape_md(t) )
-							if 'Author' in _json and _json['Author']:
-								if "Name" in _json["Author"] and _json["Author"]["Name"]:
-									t = TAG_RE.sub('', _json["Author"]["Name"])
-									if 'Url' in _json['Author'] and _json['Author']['Url']:
-										u = TAG_RE.sub('', _json["Author"]["Url"])
-										_author = fmt.text( 'Автор: ', fmt.link(t,u) )
-									else:
-										_author = fmt.text( 'Автор: ', fmt.escape_md(t) )
-							if 'Seria' in _json and _json['Seria']:
-								if 'Name' in _json['Seria'] and _json['Seria']['Name']:
-									t = TAG_RE.sub('', _json["Seria"]["Name"])
-									_seria = fmt.text( 'Серия: ', fmt.escape_md(t) )
-								if 'Number' in _json['Seria'] and _json['Seria']['Number']:
-									t = TAG_RE.sub('', _json["Seria"]["Number"])
-									_seria += fmt.text( ', №', fmt.escape_md(t) )
-							if 'Chapters' in _json and _json['Chapters']:
-								_tc = 0
-								_vc = 0
-								_fc = ''
-								_lc = ''
-								if len(_json['Chapters']) > 0:
-									for chapter in _json['Chapters']:
-										if chapter['Title']:
-											_tc += 1
-											if chapter['IsValid']:
-												_vc += 1
-												if not _fc:
-													_fc = chapter['Title']
-												_lc = chapter['Title']
-									if _fc and _lc:
-										_fc = TAG_RE.sub('', _fc)
-										_lc = TAG_RE.sub('', _lc)
-										_chapters = fmt.text( 'Глав ', fmt.escape_md(_vc), 'из', fmt.escape_md(_tc), ', с ', fmt.escape_md(f'"{_fc}"'), ' по ', fmt.escape_md(f'"{_lc}"') )
-									else:
-										_chapters = fmt.text( 'Глав ', fmt.escape_md(_vc), 'из', fmt.escape_md(_tc) )
+				with open(_json_file, "rb") as f:
+					parser = ijson.parse(f)
+					for prefix, event, value in parser:
+						if prefix == 'Title':
+							_book_title = value
+						if prefix == 'Url':
+							_book_url = value
+						if prefix == 'Author.Name':
+							_author_name = value
+						if prefix == 'Author.Url':
+							_author_url = value
+						if prefix == 'Seria.Name':
+							_seria_name = value
+						if prefix == 'Seria.Number':
+							_seria_number = value
+						if prefix == 'Seria.Url':
+							_seria_url = value
+						if prefix == 'Chapters.item' and event == 'start_map':
+							_book_chapter = {}
+						if prefix == 'Chapters.item.Title':
+							_book_chapter['Title'] = value
+						if prefix == 'Chapters.item.IsValid':
+							_book_chapter['IsValid'] = value
+						if prefix == 'Chapters.item' and event == 'end_map':
+							_book_chapters.append(_book_chapter)
+							_book_chapter = None
+
+				if _book_title:
+					t = TAG_RE.sub('', _book_title)
+					if _book_url:
+						u = TAG_RE.sub('', _book_url)
+						_title = fmt.link( t, u )
+					else:
+						_title = fmt.text( fmt.escape_md(t) )
+				if _author_name:
+					t = TAG_RE.sub('', _author_name)
+					if _author_url:
+						u = TAG_RE.sub('', _author_url)
+						_author = fmt.text( 'Автор: ', fmt.link(t,u) )
+					else:
+						_author = fmt.text( 'Автор: ', fmt.escape_md(t) )
+				if _seria_name:
+					t = TAG_RE.sub('', _seria_name)
+					if _seria_url:
+						u = TAG_RE.sub('', _seria_url)
+						_seria = fmt.text( 'Серия: ', fmt.link(t,u) )
+					else:
+						_seria = fmt.text( 'Серия: ', fmt.escape_md(t) )
+					if _seria_number:
+						t = TAG_RE.sub('', _seria_number)
+						_seria += fmt.text( ' №', fmt.escape_md(t) )
+				if _book_chapters:
+					_tc = 0
+					_vc = 0
+					_fc = ''
+					_lc = ''
+					if len(_book_chapters) > 0:
+						for chapter in _book_chapters:
+							if chapter['Title']:
+								_tc += 1
+								if chapter['IsValid']:
+									_vc += 1
+									if not _fc:
+										_fc = chapter['Title']
+									_lc = chapter['Title']
+						if _fc and _lc:
+							_fc = TAG_RE.sub('', _fc)
+							_lc = TAG_RE.sub('', _lc)
+							_chapters = fmt.text( 'Глав ', fmt.escape_md(_vc), 'из', fmt.escape_md(_tc), ', с ', fmt.escape_md(f'"{_fc}"'), ' по ', fmt.escape_md(f'"{_lc}"') )
+						else:
+							_chapters = fmt.text( 'Глав ', fmt.escape_md(_vc), 'из', fmt.escape_md(_tc) )
 		except Exception as e:
 			await self.__process_error('Произошла ошибка чтения json',e=e)
 
-		proc = await asyncio.create_subprocess_shell(f'rm -rf "{_json_file}"')
-		await proc.wait()
+		# proc = await asyncio.create_subprocess_shell(f'rm -rf "{_json_file}"')
+		# await proc.wait()
 
 		if _title:
 			book_caption.append(_title)
@@ -537,6 +576,13 @@ class Downloader(object):
 		return book_caption
 
 	# SERVICE
+
+	async def __process_files_size(self) -> int:
+		size = 0
+		for file in self.result['files']:
+			fsize = os.path.getsize(file)
+			size += fsize
+		return int(size/1024)
 
 	async def __process_split_files(self) -> list:
 

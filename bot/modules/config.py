@@ -10,6 +10,7 @@ class Config(object):
 	LOCKED                     = False
 	ADMINS                     = [470328529]
 	BOT_ID                     = None
+	BOT_MODE                   = 0
 	BOT_PORT                   = None
 	API_TOKEN                  = None
 	DB_URL                     = None
@@ -25,6 +26,7 @@ class Config(object):
 	DOWNLOADS_SIMULTANEOUSLY   = 10
 	DOWNLOADS_NOTICES_INTERVAL = 10
 	DOWNLOADS_SPLIT_LIMIT      = 400*1024*1024
+	DOWNLOADS_FREE_LIMIT       = None
 	START_MESSAGE              = None
 	SITES_LIST                 = []
 	SITES_DATA                 = []
@@ -40,6 +42,7 @@ class Config(object):
 	def __json__(self):
 		return {
 			'BOT_ID': self.BOT_ID,
+			'BOT_MODE': self.BOT_MODE,
 			'API_TOKEN': self.API_TOKEN,
 			'REDIS_URL': self.REDIS_URL,
 			'LOGS_PATH': self.LOGS_PATH,
@@ -56,6 +59,7 @@ class Config(object):
 			'DOWNLOADS_Q_INTERVAL': self.DOWNLOADS_Q_INTERVAL,
 			'DOWNLOADS_SIMULTANEOUSLY': self.DOWNLOADS_SIMULTANEOUSLY,
 			'DOWNLOADS_NOTICES_INTERVAL': self.DOWNLOADS_NOTICES_INTERVAL,
+			'DOWNLOADS_FREE_LIMIT': self.DOWNLOADS_FREE_LIMIT,
 			'START_MESSAGE': self.START_MESSAGE,
 			'SITES_LIST': self.SITES_LIST,
 			'SITES_DATA': self.SITES_DATA,
@@ -136,6 +140,9 @@ class Config(object):
 				if 'accept' in _config:
 					self.ACCEPT_NEW = _config['accept']
 
+				if 'mode' in _config:
+					self.BOT_MODE = _config['mode']
+
 				if 'start_message' in _config:
 					self.START_MESSAGE = _config['start_message']
 
@@ -157,6 +164,8 @@ class Config(object):
 					self.PROXY_LIST = _config['proxied']
 
 				if 'download' in _config and _config['download']:
+					if 'free' in _config['download']:
+						self.DOWNLOADS_FREE_LIMIT = _config['download']['free']
 					if 'limit' in _config['download']:
 						self.DOWNLOADS_Q_LIMIT = _config['download']['limit']
 					if 'check_interval' in _config['download']:

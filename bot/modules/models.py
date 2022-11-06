@@ -23,6 +23,14 @@ class DOWNLOAD_STATUS(object):
 	PROCESSING = 4
 	DONE = 5
 
+class ACL(Base):
+	__tablename__ = 'access_list'
+	id = sa.Column(sa.BigInteger, primary_key=True)
+	user = sa.Column(sa.BigInteger, nullable=False, index=True)
+	mode = sa.Column(sa.Integer) # 0 - payed, 1 - banned
+	reason = sa.Column(sa.Text)
+	until = sa.Column(sa.DateTime(), default=datetime.now())
+
 class UserAuth(Base):
 	__tablename__ = 'users_auth'
 	id = sa.Column(sa.BigInteger, primary_key=True)
@@ -50,6 +58,26 @@ class UserAuth(Base):
 			_r = _r+' [от '+str(self.updated_on.strftime('%d.%m.%Y'))+']'
 		return _r
 
+
+class UserSetting(Base):
+	__tablename__ = 'users_settings'
+	__table_args__ = ( sa.UniqueConstraint("user", "key", name="user_key_index"), )
+	id = sa.Column(sa.BigInteger, primary_key=True)
+	user = sa.Column(sa.BigInteger, nullable=False, index=True)
+	key = sa.Column(sa.String(100))
+	value = sa.Column(sa.Text)
+
+
+class UserStat(Base):
+	__tablename__ = 'users_stats'
+	__table_args__ = ( sa.UniqueConstraint("user", "bot_id", "day", name="user_bot_day_index"), )
+	id = sa.Column(sa.BigInteger, primary_key=True)
+	user = sa.Column(sa.BigInteger, nullable=False, index=True)
+	bot_id = sa.Column(sa.String(5), index=True)
+	day = sa.Column(sa.Date(), default=date.today())
+	count = sa.Column(sa.Integer, default=1)
+
+
 class Message(Base):
 	__tablename__ = 'messages_query'
 	id = sa.Column(sa.BigInteger, primary_key=True)
@@ -71,6 +99,7 @@ class Message(Base):
 class Download(Base):
 	__tablename__ = 'downloads_query'
 	id = sa.Column(sa.BigInteger, primary_key=True)
+	created_on = sa.Column(sa.DateTime(), default=datetime.now())
 	#
 	bot_id = sa.Column(sa.String(5), index=True)
 	user_id = sa.Column(sa.BigInteger, index=True)
@@ -88,7 +117,6 @@ class Download(Base):
 	status = sa.Column(sa.Integer, default=DOWNLOAD_STATUS.WAIT)
 	result = sa.Column(sa.JSON, default=None)
 	#
-	pid = sa.Column(sa.BigInteger, default=None)
 	last_message = sa.Column(sa.Text)
 	mq_message_id = sa.Column(sa.BigInteger, nullable=True, default=None)
 
@@ -109,7 +137,6 @@ class Download(Base):
 			'images': self.images,
 			'cover': self.cover,
 			'status': self.status,
-			'pid': self.pid,
 			'last_message': self.last_message,
 			'result': self.result,
 		})+'>'
@@ -122,6 +149,7 @@ class SiteStat(Base):
 	site = sa.Column(sa.String(100), nullable=False)
 	day = sa.Column(sa.Date(), default=date.today())
 	count = sa.Column(sa.Integer, default=1)
+	fsize = sa.Column(sa.BigInteger, default=0)
 
 
 class BotStat(Base):

@@ -1,6 +1,6 @@
 import asyncio, idna, orjson, urllib.parse
 from datetime import datetime
-from typing import Any
+from typing import Any, Optional
 from aiogram import Bot, Router, F, types
 from aiogram.fsm.context import FSMContext
 from aiogram.filters import Command, Text
@@ -54,11 +54,38 @@ async def start_command(message: types.Message, state: FSMContext) -> None:
 	if bot.config.START_MESSAGE:
 		return await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text=bot.config.START_MESSAGE, reply_markup=ReplyKeyboardRemove())
 
+@router.message(Command(commands='format'))
+async def format_command(message: types.Message, state: FSMContext) -> None:
+
+	if bot.config.BOT_MODE != 1:
+		return
+
+	user_id = message.from_user.id
+
+	row_btns = []
+	for fmt in bot.config.FORMATS:
+		row_btns.append([InlineKeyboardButton(text=bot.config.FORMATS[fmt], callback_data=f'format:{fmt}')])
+	reply_markup = InlineKeyboardMarkup(row_width=1,inline_keyboard=row_btns)
+
+	await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text='Выберите формат', reply_markup=reply_markup)
+
+@router.callback_query(F.data.startswith('format:'))
+async def format_command_format(callback_query: types.CallbackQuery, state: FSMContext) -> None:
+
+	await callback_query.answer()
+
+	data = callback_query.data.split(':')
+	_format = str(data[1])
+	user_id = callback_query.from_user.id
+	_format_name = bot.config.FORMATS[_format]
+
+	await bot.db.add_user_setting(user_id, 'format', _format)
+	await bot.messages_queue.add( callee='edit_message_text', chat_id=callback_query.message.chat.id, message_id=callback_query.message.message_id, text=f'Установлен формат: {_format_name}', reply_markup=None)
 
 @router.message(Command(commands='sites'))
 async def sites_command(message: types.Message, state: FSMContext) -> None:
 
-	return await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text=f'Список поддерживаемых сайтов:\n'+('\n'.join( [idna.decode(x) for x in bot.config.SITES_LIST] )) )
+	await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text=f'Список поддерживаемых сайтов:\n'+('\n'.join( [idna.decode(x) for x in bot.config.SITES_LIST] )) )
 
 
 @router.message(Command(commands='login'))
@@ -75,13 +102,11 @@ async def login_command(message: types.Message, state: FSMContext) -> None:
 			used_for_auth.append(site)
 
 	if len(used_for_auth) > 0:
-		keyboard = []
+		row_btns = []
 		for site in used_for_auth:
-			keyboard.append( [types.InlineKeyboardButton(text=idna.decode(site), callback_data=f'site:{site}')] )
+			row_btns.append( [InlineKeyboardButton(text=idna.decode(site), callback_data=f'site:{site}')] )
 
-		reply_markup = InlineKeyboardMarkup(
-			inline_keyboard=keyboard
-		)
+		reply_markup = InlineKeyboardMarkup(row_width=1, inline_keyboard=row_btns)
 
 		await state.set_state(AuthForm.site)
 
@@ -92,6 +117,8 @@ async def login_command(message: types.Message, state: FSMContext) -> None:
 
 @router.callback_query(AuthForm.site, F.data.startswith('site:'))
 async def login_command_site(callback_query: types.CallbackQuery, state: FSMContext) -> None:
+
+	await callback_query.answer()
 
 	site = callback_query.data.split(':')[1]
 
@@ -166,9 +193,9 @@ async def logins_command(message: types.Message, state: FSMContext) -> None:
 		row_btns = []
 
 		for site in sites:
-			row_btns.append([types.InlineKeyboardButton(text=idna.decode(site), callback_data=f'logins:{site}')])
+			row_btns.append([InlineKeyboardButton(text=idna.decode(site), callback_data=f'logins:{site}')])
 
-		reply_markup = types.InlineKeyboardMarkup(row_width=1,inline_keyboard=row_btns)
+		reply_markup = InlineKeyboardMarkup(row_width=1,inline_keyboard=row_btns)
 
 		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text='Выберите сайт', reply_markup=reply_markup)
 
@@ -177,7 +204,9 @@ async def logins_command(message: types.Message, state: FSMContext) -> None:
 
 
 @router.callback_query(F.data.startswith('logins:'))
-async def login_command_site(callback_query: types.CallbackQuery, state: FSMContext) -> None:
+async def logins_command_site(callback_query: types.CallbackQuery, state: FSMContext) -> None:
+	await callback_query.answer()
+
 	user_id = callback_query.from_user.id
 	chat_id = callback_query.message.chat.id
 	message_id = callback_query.message.message_id
@@ -219,28 +248,19 @@ async def stats_command(message: types.Message, state: FSMContext) -> None:
 	payload = orjson.dumps(payload).decode('utf8')
 	payload = urllib.parse.quote_plus( payload )
 	row_btns = [
-		[types.InlineKeyboardButton(text='Статистика', web_app=types.WebAppInfo(url=f'{bot.config.STATS_URL}?payload={payload}'))]
+		[InlineKeyboardButton(text='Статистика', web_app=types.WebAppInfo(url=f'{bot.config.STATS_URL}?payload={payload}'))]
 	]
-	reply_markup = types.InlineKeyboardMarkup(row_width=1,inline_keyboard=row_btns)
+	reply_markup = InlineKeyboardMarkup(row_width=1,inline_keyboard=row_btns)
 	await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text='Статистика доступна тут', reply_markup=reply_markup)
 
 
 @router.message(F.content_type.in_({'text'}), F.text.startswith('http'))
 async def prepare_download(message: types.Message, state: FSMContext) -> None:
 
-	if message.chat.type == 'channel':
-		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text="Бот не доступен в чатах" )
-		await bot.leave_chat(message.chat.id)
-
 	if bot.config.LOCKED:
 		if message.from_user.id not in bot.config.ADMINS:
 			await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text="Идет разработка" )
 			return
-
-	current_state = await state.get_state()
-	if current_state is not None:
-		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text="Отмените или завершите предыдущее скачивание/авторизацию" )
-		return
 
 	can_add = await bot.downloads_queue.can_add()
 	if not can_add:
@@ -251,85 +271,18 @@ async def prepare_download(message: types.Message, state: FSMContext) -> None:
 		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text="Бот временно не принимает новые закачки" )
 		return
 
-	query = message.text.strip()
-	query = query.split()
+	print('DOWNLOADS_FREE_LIMIT')
+	print(bot.config.DOWNLOADS_FREE_LIMIT)
 
-	url = ''
-	site = ''
+	can_download = await bot.db.can_download(message.from_user.id)
+	if not can_download:
+		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text='Достигнуто максимальное количество бесплатных скачиваний в день' )
+		return
 
-	for q in query:
-		for r in bot.config.REGEX_LIST:
-			m = r.match(q)
-			if m:
-				site = m.group('site')
-				if site not in bot.config.SITES_LIST:
-					site = None
-				else:
-					url = q
-				break
-		if url:
-			break
-
-	if url:
-
-		use_start_end = False
-		use_auth = {}
-		use_images = False
-		force_images = False
-
-		if "auth" in bot.config.SITES_DATA[site]:
-			uas = await bot.db.get_all_site_auths(message.from_user.id,site)
-			demo_login = True if site in bot.config.DEMO_USER else False
-			if uas:
-				for ua in uas:
-					use_auth[str(ua.id)] = ua.get_name()
-			if demo_login:
-				use_auth['anon'] = 'Анонимные доступы'
-			use_auth['none'] = 'Без авторизации'
-
-		if "paging" in bot.config.SITES_DATA[site]:
-			use_start_end = True
-
-		if "images" in bot.config.SITES_DATA[site]:
-			use_images = True
-
-		if "force_images" in bot.config.SITES_DATA[site]:
-			force_images = True
-			use_images = False
-
-		payload = {
-			'use_auth': use_auth,
-			'use_start': use_start_end,
-			'use_end': use_start_end,
-			'use_images': use_images,
-			'use_cover': True,
-			'formats': bot.config.FORMATS,
-			'images': True,
-			'cover': False,
-		}
-		payload = orjson.dumps(payload).decode('utf8')
-		payload = urllib.parse.quote_plus( payload )
-		web_app = types.WebAppInfo(url=f"{bot.config.DOWNLOAD_URL}?payload={payload}")
-		
-		reply_markup = ReplyKeyboardMarkup(
-			keyboard=[
-				[
-					KeyboardButton( text='Скачать', web_app=web_app ),
-					KeyboardButton( text='Отмена' )
-				]
-			]
-		)
-
-		await state.set_state(DownloadConfig.state)
-		await state.update_data(inited=False)
-		await state.update_data(url=url)
-		await state.update_data(site=site)
-		await state.update_data(user_id=message.from_user.id)
-		await state.update_data(chat_id=message.chat.id)
-		if force_images:
-			await state.update_data(images=True)
-
-		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text=f"Подготовка к скачиванию {url}", reply_markup=reply_markup )
+	if bot.config.BOT_MODE == 0:
+		return await __mode_0_download(message, state)
+	if bot.config.BOT_MODE == 1:
+		return await __mode_1_download(message, state)
 
 
 @router.message(F.content_type.in_({'web_app_data'}))
@@ -348,9 +301,10 @@ async def web_app_callback_data(message: types.Message, state: FSMContext) -> No
 			for k in data:
 				params[k] = data[k]
 		_format = params['format']
+		_format_name = bot.config.FORMATS[_format]
 		url = params['url']
 		msg = f"Добавляю в очередь {url}"
-		msg += f"\nФормат {_format}"
+		msg += f"\nФормат: {_format_name}"
 		if 'auth' in params:
 			if params['auth'] == 'self':
 				msg += "\nИспользую личные доступы"
@@ -374,9 +328,33 @@ async def web_app_callback_data(message: types.Message, state: FSMContext) -> No
 		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, reply_to_message_id=message.message_id, text='Отправьте ссылку еще раз', reply_markup=ReplyKeyboardRemove())
 
 
+@router.callback_query(F.data.startswith('download:'))
+async def start_preinitiated_download(callback_query: types.CallbackQuery) -> None:
+	await callback_query.answer()
+	data = callback_query.data.split(':')
+	download_id = int(data[1])
+	auth = str(data[2])
+
+	print('start_preinitiated_download')
+	print(download_id)
+	print(auth)
+
+	reply_markup = InlineKeyboardMarkup(
+		inline_keyboard=[
+			[
+				InlineKeyboardButton( text='Отмена', callback_data=f'cancel:{download_id}' )
+			]
+		]
+	)
+	msg = "Добавлено в очередь"
+	await bot.messages_queue.add( callee='edit_message_text', chat_id=callback_query.message.chat.id, message_id=callback_query.message.message_id, text=msg, reply_markup=reply_markup, callback='initiate_download', callback_kwargs={'download_id':download_id,'last_message':msg,'auth':auth,'user_id':callback_query.from_user.id} )
+
 @router.callback_query(F.data.startswith('cancel:'))
 async def cancel_download(callback_query: types.CallbackQuery) -> None:
+	await callback_query.answer()
+	print('cancel_download')
 	download_id = int(callback_query.data.split(':')[1])
+	print('download_id')
 	await bot.downloads_queue.cancel(download_id)
 
 
@@ -456,12 +434,13 @@ async def _message_handler(message: types.Message) -> Any:
 # 	print(poll_answer)
 # 	print()
 
-@router.errors()
-async def _error_handler(exception: types.error_event.ErrorEvent) -> Any:
-	print()
-	print('exception')
-	print(exception)
-	print()
+# @router.errors()
+# async def _error_handler(exception: types.error_event.ErrorEvent) -> Any:
+# 	print()
+# 	print('exception')
+# 	print(exception)
+# 	print()
+
 
 
 
@@ -470,8 +449,8 @@ async def __get_authed_sites(user_id: int, chat_id: int, message_id: int, data: 
 	if len(sites) > 0:
 		row_btns = []
 		for site in sites:
-			row_btns.append([types.InlineKeyboardButton(text=idna.decode(site), callback_data=f'logins:{site}')])
-		reply_markup = types.InlineKeyboardMarkup(row_width=1,inline_keyboard=row_btns)
+			row_btns.append([InlineKeyboardButton(text=idna.decode(site), callback_data=f'logins:{site}')])
+		reply_markup = InlineKeyboardMarkup(row_width=1,inline_keyboard=row_btns)
 		await bot.messages_queue.add( callee='edit_message_text', chat_id=chat_id, message_id=message_id, text='Выберите сайт', reply_markup=reply_markup)
 	else:
 		await bot.messages_queue.add( callee='edit_message_text', chat_id=chat_id, message_id=message_id, text='Нет сохраненных доступов', reply_markup=None)
@@ -483,13 +462,13 @@ async def __get_authed_site_logins(user_id: int, chat_id: int, message_id: int, 
 	msg = ''
 	if uas:
 		for ua in uas:
-			row_btns.append([types.InlineKeyboardButton(text=ua.get_name(), callback_data=f'logins:{site}:{ua.id}')])
-		row_btns.append([types.InlineKeyboardButton(text='Назад', callback_data=f'logins:all')])
+			row_btns.append([InlineKeyboardButton(text=ua.get_name(), callback_data=f'logins:{site}:{ua.id}')])
+		row_btns.append([InlineKeyboardButton(text='Назад', callback_data=f'logins:all')])
 		msg = f'Список доступов для сайта {site}'
 	else:
-		row_btns.append([types.InlineKeyboardButton(text='Назад', callback_data=f'logins:all')])
+		row_btns.append([InlineKeyboardButton(text='Назад', callback_data=f'logins:all')])
 		msg = f'Нет сохраненных доступов для сайта {site}'
-	reply_markup = types.InlineKeyboardMarkup(row_width=1,inline_keyboard=row_btns)
+	reply_markup = InlineKeyboardMarkup(row_width=1,inline_keyboard=row_btns)
 	await bot.messages_queue.add( callee='edit_message_text', chat_id=chat_id, message_id=message_id, text=msg, reply_markup=reply_markup)
 
 async def __get_authed_site_login_data(user_id: int, chat_id: int, message_id: int, data: dict) -> None:
@@ -498,11 +477,167 @@ async def __get_authed_site_login_data(user_id: int, chat_id: int, message_id: i
 	ua = await bot.db.get_site_auth(ua_id)
 	if ua:
 		row_btns = []
-		row_btns.append([types.InlineKeyboardButton(text='Удалить', callback_data=f'logins:{site}:{ua.id}:delete')])
-		row_btns.append([types.InlineKeyboardButton(text='Назад', callback_data=f'logins:{site}')])
-		reply_markup = types.InlineKeyboardMarkup(row_width=1,inline_keyboard=row_btns)
+		row_btns.append([InlineKeyboardButton(text='Удалить', callback_data=f'logins:{site}:{ua.id}:delete')])
+		row_btns.append([InlineKeyboardButton(text='Назад', callback_data=f'logins:{site}')])
+		reply_markup = InlineKeyboardMarkup(row_width=1,inline_keyboard=row_btns)
 		await bot.messages_queue.add( callee='edit_message_text', chat_id=chat_id, message_id=message_id, text=f'Авторизация:\n\nЛогин: "{ua.login}"\nПароль: "{ua.password}"', reply_markup=reply_markup)
 
+
+async def __mode_0_download(message: types.Message, state: FSMContext) -> None:
+
+	if message.chat.type != 'private':
+		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text="Данный бот не доступен в чатах" )
+		await bot.leave_chat(message.chat.id)
+
+	current_state = await state.get_state()
+	if current_state is not None:
+		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text="Отмените или завершите предыдущее скачивание/авторизацию" )
+		return
+
+	query = message.text.strip()
+	query = query.split()
+
+	url = ''
+	site = ''
+
+	for q in query:
+		for r in bot.config.REGEX_LIST:
+			m = r.match(q)
+			if m:
+				site = m.group('site')
+				if site not in bot.config.SITES_LIST:
+					site = None
+				else:
+					url = q
+				break
+		if url:
+			break
+
+	if url:
+
+		use_start_end = False
+		use_auth = {}
+		use_images = False
+		force_images = False
+
+		if "auth" in bot.config.SITES_DATA[site]:
+			uas = await bot.db.get_all_site_auths(message.from_user.id,site)
+			demo_login = True if site in bot.config.DEMO_USER else False
+			if uas:
+				for ua in uas:
+					use_auth[str(ua.id)] = ua.get_name()
+			if demo_login:
+				use_auth['anon'] = 'Анонимные доступы'
+			use_auth['none'] = 'Без авторизации'
+
+		if "paging" in bot.config.SITES_DATA[site]:
+			use_start_end = True
+
+		if "images" in bot.config.SITES_DATA[site]:
+			use_images = True
+
+		if "force_images" in bot.config.SITES_DATA[site]:
+			force_images = True
+			use_images = False
+
+		payload = {
+			'use_auth': use_auth,
+			'use_start': use_start_end,
+			'use_end': use_start_end,
+			'use_images': use_images,
+			'use_cover': True,
+			'formats': bot.config.FORMATS,
+			'images': True,
+			'cover': False,
+		}
+		payload = orjson.dumps(payload).decode('utf8')
+		payload = urllib.parse.quote_plus( payload )
+		web_app = types.WebAppInfo(url=f"{bot.config.DOWNLOAD_URL}?payload={payload}")
+		
+		reply_markup = ReplyKeyboardMarkup(
+			row_width=1,
+			keyboard=[
+				[KeyboardButton( text='Скачать', web_app=web_app )],
+				[KeyboardButton( text='Отмена' )]
+			]
+		)
+
+		await state.set_state(DownloadConfig.state)
+		await state.update_data(inited=False)
+		await state.update_data(url=url)
+		await state.update_data(site=site)
+		await state.update_data(user_id=message.from_user.id)
+		await state.update_data(chat_id=message.chat.id)
+		if force_images:
+			await state.update_data(images=True)
+
+		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text=f"Подготовка к скачиванию {url}", reply_markup=reply_markup )
+
+async def __mode_1_download(message: types.Message, state: FSMContext) -> None:
+
+	# if message.chat.type == 'channel':
+	# 	await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text="Бот не доступен в чатах" )
+	# 	await bot.leave_chat(message.chat.id)
+
+	query = message.text.strip()
+	query = query.split()
+
+	url = ''
+	site = ''
+
+	for q in query:
+		for r in bot.config.REGEX_LIST:
+			m = r.match(q)
+			if m:
+				site = m.group('site')
+				if site not in bot.config.SITES_LIST:
+					site = None
+				else:
+					url = q
+				break
+		if url:
+			break
+
+	if url:
+
+		_format = await bot.db.get_user_setting(message.from_user.id,'format')
+		if not _format:
+			_format = 'fb2'
+		else:
+			_format = _format.value
+
+		use_auth = {}
+		params = {
+			'url': url,
+			'site': site,
+			'user_id': message.from_user.id,
+			'chat_id': message.chat.id,
+			'images': '1',
+			'cover': '1',
+			'auth': 'none',
+			'format': _format
+		}
+
+		download_id = await bot.downloads_queue.add( params=params )
+
+		if "auth" in bot.config.SITES_DATA[site]:
+			uas = await bot.db.get_all_site_auths(message.from_user.id,site)
+			demo_login = True if site in bot.config.DEMO_USER else False
+			if uas:
+				for ua in uas:
+					use_auth[str(ua.id)] = ua.get_name()
+			if demo_login:
+				use_auth['anon'] = 'Анонимные доступы'
+			use_auth['none'] = 'Без авторизации'
+
+		row_btns = []
+		for key, name in use_auth.items():
+			row_btns.append([InlineKeyboardButton(text=name, callback_data=f'download:{download_id}:{key}')])
+		row_btns.append([InlineKeyboardButton(text='Отмена', callback_data=f'cancel:{download_id}')])
+
+		reply_markup = InlineKeyboardMarkup(row_width=1,inline_keyboard=row_btns)
+
+		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text=f"Подготовка к скачиванию {url}\n\nВыберите доступы", reply_markup=reply_markup, callback='preinitiate_download', callback_kwargs={'download_id':download_id} )
 
 async def __enqueue_download(message: types.Message, params: dict) -> None:
 	del params['inited']
@@ -532,14 +667,24 @@ async def __enqueue_download(message: types.Message, params: dict) -> None:
 			]
 		)
 		msg = "Добавлено в очередь"
-		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text=msg, reply_markup=reply_markup, callback='initiate_download', callback_kwargs={'download_id':download_id,'last_message':msg} )
+		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text=msg, reply_markup=reply_markup, callback='initiate_download', callback_kwargs={'download_id':download_id,'last_message':msg,'user_id':message.from_user.id} )
 	else:
 		msg = "Произошла ошибка"
 		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text=msg )
 
+async def __preinitiate_download(message: types.Message, download_id: int) -> None:
+	await bot.downloads_queue.preinitiate(download_id=download_id, message_id=message.message_id)
 
-async def __initiate_download(message: types.Message, download_id: int, last_message: str) -> None:
-	await bot.downloads_queue.initiate(download_id=download_id, message_id=message.message_id, last_message=last_message)
+async def __initiate_download(message: types.Message, download_id: int, last_message: str, user_id: int, auth: Optional[str]=None) -> None:
+	can_download = await bot.db.can_download(user_id)
+	if not can_download:
+		await bot.downloads_queue.preinitiate(download_id=download_id, message_id=message.message_id)
+		await bot.downloads_queue.cancel(download_id,False)
+		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text='Достигнуто максимальное количество бесплатных скачиваний в день' )
+		return
+	await bot.db.add_user_stat(user_id)
+	await bot.downloads_queue.initiate(download_id=download_id, message_id=message.message_id, last_message=last_message, auth=auth)
+
 
 
 def get_router(_bot: Bot):
@@ -550,5 +695,6 @@ def get_router(_bot: Bot):
 
 	bot.enqueue_download = __enqueue_download
 	bot.initiate_download = __initiate_download
+	bot.preinitiate_download = __preinitiate_download
 
 	return router

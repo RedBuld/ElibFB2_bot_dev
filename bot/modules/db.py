@@ -81,8 +81,7 @@ class DB(object):
 		try:
 			await self.init()
 			async with self.engine.begin() as conn:
-				await conn.run_sync(Base.metadata.drop_all)
-				await conn.run_sync(Base.metadata.create_all)
+				await conn.run_sync(Base.metadata.create_all,checkfirst=True)
 				await conn.commit()
 			await self.stop()
 		except Exception as e:
@@ -98,31 +97,130 @@ class DB(object):
 		return str(n) + ' ' + words[p]
 
 
-	# BANS
+	# USER SETTINGS
+
+	async def get_user_setting(self, user_id: int, key: str) -> Optional[UserSetting]:
+		res = None
+
+		async with self.engine.begin() as conn:
+			query = await conn.execute(
+				select(UserSetting)\
+					.filter(UserSetting.user==user_id,UserSetting.key==key)
+			)
+			res = query.fetchone()
+			if res:
+				keys = query.keys()
+				res = await self.__map_one__(res,keys,UserSetting)
+		return res
+
+	async def add_user_setting(self, user_id: int, key: str, value: str) -> Optional[int]:
+		res = None
+
+		us = UserSetting()
+		us.user=user_id
+		us.bot_id = self.bot.config.BOT_ID
+		us.key=key
+		params = await self.__to_object__(us)
+
+		async with self.engine.begin() as conn:
+			res = await conn.execute(insert(UserSetting.__table__).values(**params).on_duplicate_key_update(value=value))
+			await conn.commit()
+		return res.lastrowid if res else None
 
 	async def set_user_ban(self, *args, **kwargs) -> None:
 		# PLACEHOLDER
 		return
 
+	async def get_user_ban(self, *args, **kwargs) -> bool:
+		# PLACEHOLDER
+		return False
+
+	async def can_download(self, user_id: int) -> bool:
+		if self.bot.config.DOWNLOADS_FREE_LIMIT:
+			used = await self.get_user_stat(user_id)
+			if used >= self.bot.config.DOWNLOADS_FREE_LIMIT:
+				premium = await self.is_user_premium(user_id)
+				if not premium:
+					return False
+		return True
+
+	async def is_user_premium(self, user_id: int) -> bool:
+		res = False
+
+		day = datetime.now()
+
+		async with self.engine.begin() as conn:
+			query = await conn.execute(
+				select(ACL)\
+					.filter(ACL.user==user_id,ACL.mode==0)
+			)
+			res = query.fetchone()
+			if res:
+				keys = query.keys()
+				res = await self.__map_one__(res,keys,ACL)
+				if res.until < day:
+					await self.delete_user_premium(user_id)
+					res = False
+				else:
+					res = True
+			else:
+				res = False
+		return res
+
+	async def delete_user_premium(self, user_id: int) -> None:
+		async with self.engine.begin() as conn:
+			await conn.execute(ACL.__table__.delete().where(ACL.user==user_id,ACL.mode==0))
+			await conn.commit()
+		return
+
+	async def add_user_stat(self, user_id: int, mode: int=0) -> Optional[int]:
+		res = None
+
+		us = UserStat()
+		us.user=user_id
+		us.bot_id = self.bot.config.BOT_ID
+		params = await self.__to_object__(us)
+
+		cmd = "count+1" if mode==0 else "count-1"
+
+		async with self.engine.begin() as conn:
+			res = await conn.execute(insert(UserStat.__table__).values(**params).on_duplicate_key_update(count=sa.text(cmd)))
+			await conn.commit()
+		return res.lastrowid if res else None
+
+	async def get_user_stat(self, user_id: int) -> Optional[int]:
+		res = None
+
+		day = date.today()
+
+		async with self.engine.begin() as conn:
+			query = await conn.execute(
+				select(UserStat.count)\
+					.filter(UserStat.day==str(day),UserStat.user==user_id,UserStat.bot_id==self.bot.config.BOT_ID)
+			)
+			res = query.scalar()
+		if not res:
+			res = 0
+		return res
 
 	# STATISTICS
 
-	async def add_site_stat(self, site: str) -> Optional[SiteStat]:
+
+	async def add_site_stat(self, site: str, size: int) -> Optional[int]:
 		res = None
 
-		s = SiteStat()
-		s.site=site
-		params = await self.__to_object__(s)
-		params['bot_id'] = self.bot.config.BOT_ID
+		ss = SiteStat()
+		ss.site=site
+		ss.bot_id = self.bot.config.BOT_ID
+		params = await self.__to_object__(ss)
 
 		async with self.engine.begin() as conn:
-			res = await conn.execute(insert(SiteStat.__table__).values(**params).on_duplicate_key_update(count=sa.text("count+1")))
+			res = await conn.execute(insert(SiteStat.__table__).values(**params).on_duplicate_key_update(count=sa.text("count+1"),fsize=sa.text(f"fsize+{size}")))
 			await conn.commit()
 		return res.lastrowid if res else None
 
 	async def get_daily_stats(self, days_step: Optional[int]=0) -> Optional[list]:
 		res = None
-
 
 		dat = self.get_daily_stats_dates(days_step)
 
@@ -177,7 +275,7 @@ class DB(object):
 		# return str( sql.compile(self.engine, compile_kwargs={"literal_binds": True}) )
 	
 
-	async def update_usage_status(self,queue_length: int,total_length: int) -> None:
+	async def update_usage_status(self, queue_length: int,total_length: int) -> Optional[int]:
 		res = None
 
 		s = BotStat()
@@ -190,6 +288,7 @@ class DB(object):
 			res = await conn.execute(insert(BotStat.__table__).values(**params).on_duplicate_key_update(queue_length=queue_length,total_length=total_length))
 			await conn.commit()
 		return res.lastrowid if res else None
+
 
 	# AUTHS
 
@@ -235,7 +334,7 @@ class DB(object):
 				res = await self.__map_one__(res,keys,UserAuth)
 		return res
 
-	async def add_site_auth(self, params: dict) -> Optional[UserAuth]:
+	async def add_site_auth(self, params: dict) -> Optional[int]:
 		res = None
 		params = await self.__map_one__(params.values(),params.keys(),UserAuth)
 		params = await self.__to_object__(params)
