@@ -26,7 +26,7 @@ class Config(object):
 	DOWNLOADS_SIMULTANEOUSLY   = 10
 	DOWNLOADS_NOTICES_INTERVAL = 10
 	DOWNLOADS_SPLIT_LIMIT      = 400*1024*1024
-	DOWNLOADS_FREE_LIMIT       = None
+	DOWNLOADS_FREE_LIMIT       = 100
 	START_MESSAGE              = None
 	SITES_LIST                 = []
 	SITES_DATA                 = []
@@ -109,6 +109,8 @@ class Config(object):
 		if not os.path.exists(self.DOWNLOADER_LOG_PATH):
 			os.makedirs(self.DOWNLOADER_LOG_PATH, 777, exist_ok=True)
 
+		self.DOWNLOADS_FREE_LIMIT = int(os.getenv('FREE_LIMIT',100))
+
 		if os.path.exists(self.__config_file):
 			with open(self.__config_file,'r') as _c:
 				_config = _c.read()
@@ -164,8 +166,6 @@ class Config(object):
 					self.PROXY_LIST = _config['proxied']
 
 				if 'download' in _config and _config['download']:
-					if 'free' in _config['download']:
-						self.DOWNLOADS_FREE_LIMIT = _config['download']['free']
 					if 'limit' in _config['download']:
 						self.DOWNLOADS_Q_LIMIT = _config['download']['limit']
 					if 'check_interval' in _config['download']:

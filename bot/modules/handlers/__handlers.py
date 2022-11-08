@@ -1,4 +1,4 @@
-import asyncio, idna, orjson, urllib.parse
+import asyncio, idna, orjson, urllib.parse, logging
 from datetime import datetime
 from typing import Any, Optional
 from aiogram import Bot, Router, F, types
@@ -13,6 +13,8 @@ bot = None
 router = Router()
 
 direct_functions = {}
+
+logger = logging.getLogger(__name__)
 
 @router.message(Command(commands='admin'))
 async def admin_command(message: types.Message, state: FSMContext) -> None:
@@ -48,11 +50,34 @@ async def admin_command(message: types.Message, state: FSMContext) -> None:
 		bot.config.ACCEPT_NEW = True
 		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text="Бот принимает новые закачки" )
 
+	if command.startswith('cancel_d'):
+		command = command.split()
+		download_id = command[1]
+		logger.info(f'cancel_d -> {download_id}')
+		if '-' in download_id:
+			download_range = download_id.split('-')
+			s = int(download_range[0])
+			e = int(download_range[1])
+			for x in range(s,e):
+				logger.info(f'cancel_d r -> {x}')
+				await bot.downloads_queue.cancel(x)
+		else:
+			download_id = int(download_id)
+			logger.info(f'cancel_d s -> {download_id}')
+			await bot.downloads_queue.cancel(download_id)
+		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text="Отменяю закачки" )
+
 @router.message(Command(commands='start'))
 async def start_command(message: types.Message, state: FSMContext) -> None:
 	await state.clear()
 	if bot.config.START_MESSAGE:
 		return await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text=bot.config.START_MESSAGE, reply_markup=ReplyKeyboardRemove())
+
+
+@router.message(Command(commands='my_id'))
+async def my_id_command(message: types.Message, state: FSMContext) -> None:
+	user_id = message.from_user.id
+	return await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text=f'Ваш id {user_id}')
 
 @router.message(Command(commands='format'))
 async def format_command(message: types.Message, state: FSMContext) -> None:
@@ -232,23 +257,8 @@ async def logins_command_site(callback_query: types.CallbackQuery, state: FSMCon
 @router.message(Command(commands='stats'))
 async def stats_command(message: types.Message, state: FSMContext) -> None:
 
-	sql_daily = await bot.db.get_daily_stats_dates()
-	sql_daily_prev = await bot.db.get_daily_stats_dates(-1)
-	sql_montly = await bot.db.get_monthly_stats_dates()
-	sql_montly_prev = await bot.db.get_monthly_stats_dates(-1)
-
-	payload = {
-		'bot': bot.config.BOT_ID,
-		'sql_daily': sql_daily,
-		'sql_daily_prev': sql_daily_prev,
-		'sql_montly': sql_montly,
-		'sql_montly_prev': sql_montly_prev,
-	}
-
-	payload = orjson.dumps(payload).decode('utf8')
-	payload = urllib.parse.quote_plus( payload )
 	row_btns = [
-		[InlineKeyboardButton(text='Статистика', web_app=types.WebAppInfo(url=f'{bot.config.STATS_URL}?payload={payload}'))]
+		[InlineKeyboardButton(text='Статистика', web_app=types.WebAppInfo(url=f'{bot.config.STATS_URL}?bot_id={bot.config.BOT_ID}'))]
 	]
 	reply_markup = InlineKeyboardMarkup(row_width=1,inline_keyboard=row_btns)
 	await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text='Статистика доступна тут', reply_markup=reply_markup)
@@ -271,12 +281,14 @@ async def prepare_download(message: types.Message, state: FSMContext) -> None:
 		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text="Бот временно не принимает новые закачки" )
 		return
 
-	print('DOWNLOADS_FREE_LIMIT')
-	print(bot.config.DOWNLOADS_FREE_LIMIT)
-
 	can_download = await bot.db.can_download(message.from_user.id)
 	if not can_download:
 		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text='Достигнуто максимальное количество бесплатных скачиваний в день' )
+		return
+
+	is_user_banned = await bot.db.is_user_banned(message.from_user.id)
+	if is_user_banned:
+		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text=f'Вы были заблокированы. Причина: {is_user_banned.reason}. Срок: {is_user_banned.until}' )
 		return
 
 	if bot.config.BOT_MODE == 0:
@@ -303,15 +315,18 @@ async def web_app_callback_data(message: types.Message, state: FSMContext) -> No
 		_format = params['format']
 		_format_name = bot.config.FORMATS[_format]
 		url = params['url']
+
 		msg = f"Добавляю в очередь {url}"
+
 		msg += f"\nФормат: {_format_name}"
+
 		if 'auth' in params:
-			if params['auth'] == 'self':
-				msg += "\nИспользую личные доступы"
 			if params['auth'] == 'anon':
 				msg += "\nИспользую анонимные доступы"
-			if params['auth'] == 'none':
+			elif params['auth'] == 'none':
 				msg += "\nБез авторизации"
+			elif params['auth']:
+				msg += "\nИспользую личные доступы"
 
 		if 'images' in params:
 			msg += "\nСкачиваю картинки"
@@ -335,10 +350,6 @@ async def start_preinitiated_download(callback_query: types.CallbackQuery) -> No
 	download_id = int(data[1])
 	auth = str(data[2])
 
-	print('start_preinitiated_download')
-	print(download_id)
-	print(auth)
-
 	reply_markup = InlineKeyboardMarkup(
 		inline_keyboard=[
 			[
@@ -352,9 +363,7 @@ async def start_preinitiated_download(callback_query: types.CallbackQuery) -> No
 @router.callback_query(F.data.startswith('cancel:'))
 async def cancel_download(callback_query: types.CallbackQuery) -> None:
 	await callback_query.answer()
-	print('cancel_download')
 	download_id = int(callback_query.data.split(':')[1])
-	print('download_id')
 	await bot.downloads_queue.cancel(download_id)
 
 
@@ -381,10 +390,8 @@ async def _message_handler(message: types.Message) -> Any:
 		# await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text="Бот не доступен в чатах. Удачи", reply_markup=ReplyKeyboardRemove() )
 		await bot.leave_chat(message.chat.id)
 
-	print()
-	print('missed message')
-	print(message)
-	print()
+	logger.info('missed message')
+	logger.info(message)
 
 # @router.inline_query()
 # async def _inline_query_handler(inline_query: types.InlineQuery) -> Any:
@@ -640,49 +647,56 @@ async def __mode_1_download(message: types.Message, state: FSMContext) -> None:
 		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text=f"Подготовка к скачиванию {url}\n\nВыберите доступы", reply_markup=reply_markup, callback='preinitiate_download', callback_kwargs={'download_id':download_id} )
 
 async def __enqueue_download(message: types.Message, params: dict) -> None:
-	del params['inited']
+	try:
+		del params['inited']
+	except Exception as e:
+		pass
 
-	if 'start' in params:
-		if params['start']:
-			params['start'] = str(params['start'])
-		else:
-			del params['start']
-	if 'end' in params:
-		if params['end']:
-			params['end'] = str(params['end'])
-		else:
-			del params['end']
-	if 'images' in params:
-		params['images'] = '1' if params['images'] else '0'
-	if 'cover' in params:
-		params['cover'] = '1' if params['cover'] else '0'
+	try:
+		if 'start' in params:
+			if params['start']:
+				params['start'] = str(int(params['start']))
+			else:
+				del params['start']
+		if 'end' in params:
+			if params['end']:
+				params['end'] = str(int(params['end']))
+			else:
+				del params['end']
+		if 'images' in params:
+			params['images'] = '1' if params['images'] else '0'
+		if 'cover' in params:
+			params['cover'] = '1' if params['cover'] else '0'
 
-	download_id = await bot.downloads_queue.add( params=params )
-	if download_id:
-		reply_markup = InlineKeyboardMarkup(
-			inline_keyboard=[
-				[
-					InlineKeyboardButton( text='Отмена', callback_data=f'cancel:{download_id}' )
+		download_id = await bot.downloads_queue.add( params=params )
+		if download_id:
+			reply_markup = InlineKeyboardMarkup(
+				inline_keyboard=[
+					[
+						InlineKeyboardButton( text='Отмена', callback_data=f'cancel:{download_id}' )
+					]
 				]
-			]
-		)
-		msg = "Добавлено в очередь"
-		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text=msg, reply_markup=reply_markup, callback='initiate_download', callback_kwargs={'download_id':download_id,'last_message':msg,'user_id':message.from_user.id} )
-	else:
-		msg = "Произошла ошибка"
+			)
+			msg = "Добавлено в очередь"
+			await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text=msg, reply_markup=reply_markup, callback='initiate_download', callback_kwargs={'download_id':download_id,'last_message':msg,'user_id':message.from_user.id} )
+		else:
+			msg = "Произошла ошибка"
+			await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text=msg )
+	except Exception as e:
+		msg = "Произошла ошибка:\n"+repr(e)
 		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text=msg )
 
 async def __preinitiate_download(message: types.Message, download_id: int) -> None:
 	await bot.downloads_queue.preinitiate(download_id=download_id, message_id=message.message_id)
 
 async def __initiate_download(message: types.Message, download_id: int, last_message: str, user_id: int, auth: Optional[str]=None) -> None:
-	can_download = await bot.db.can_download(user_id)
-	if not can_download:
-		await bot.downloads_queue.preinitiate(download_id=download_id, message_id=message.message_id)
-		await bot.downloads_queue.cancel(download_id,False)
-		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text='Достигнуто максимальное количество бесплатных скачиваний в день' )
-		return
-	await bot.db.add_user_stat(user_id)
+	# can_download = await bot.db.can_download(user_id)
+	# if not can_download:
+	# 	await bot.downloads_queue.preinitiate(download_id=download_id, message_id=message.message_id)
+	# 	await bot.downloads_queue.cancel(download_id,False)
+	# 	await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text='Достигнуто максимальное количество бесплатных скачиваний в день' )
+	# 	return
+	await bot.db.add_user_stat(user_id,0)
 	await bot.downloads_queue.initiate(download_id=download_id, message_id=message.message_id, last_message=last_message, auth=auth)
 
 

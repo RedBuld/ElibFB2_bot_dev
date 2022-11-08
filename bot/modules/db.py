@@ -48,7 +48,11 @@ class DB(object):
 			if not val and column.default is not None:
 				val = column.default.arg
 				if callable(val):
-					value = val(obj)
+					val = val(obj)
+			if column.onupdate is not None:
+				val = column.onupdate.arg
+				if callable(val):
+					val = val(obj)
 			_res[column.name] = val
 		return _res
 
@@ -97,6 +101,45 @@ class DB(object):
 		return str(n) + ' ' + words[p]
 
 
+	# SERVICE
+
+
+	async def maybe_add_link(self, link: str) -> int:
+		res = None
+
+		async with self.engine.begin() as conn:
+			query = await conn.execute(
+				select(Links.id)\
+					.filter(Links.link==link)
+			)
+			res = query.scalar()
+			if not res:
+				l = Links()
+				l.link = link
+				params = await self.__to_object__(l)
+
+				res = await conn.execute(insert(Links.__table__).values(**params))
+				await conn.commit()
+				if res:
+					res = res.lastrowid
+
+		return res
+
+
+	async def get_link(self, link_id: int) -> str:
+		res = None
+
+		async with self.engine.begin() as conn:
+			query = await conn.execute(
+				select(Links.link)\
+					.filter(Links.id==link_id)
+			)
+			res = query.scalar()
+
+		return res
+
+
+
 	# USER SETTINGS
 
 	async def get_user_setting(self, user_id: int, key: str) -> Optional[UserSetting]:
@@ -137,12 +180,33 @@ class DB(object):
 
 	async def can_download(self, user_id: int) -> bool:
 		if self.bot.config.DOWNLOADS_FREE_LIMIT:
-			used = await self.get_user_stat(user_id)
+			used = await self.get_user_usage(user_id)
 			if used >= self.bot.config.DOWNLOADS_FREE_LIMIT:
 				premium = await self.is_user_premium(user_id)
 				if not premium:
 					return False
 		return True
+
+	async def is_user_banned(self, user_id: int) -> Union[bool,ACL]:
+		res = False
+
+		day = datetime.now()
+
+		async with self.engine.begin() as conn:
+			query = await conn.execute(
+				select(ACL)\
+					.filter(ACL.user==user_id,ACL.banned==1)
+			)
+			res = query.fetchone()
+			if res:
+				keys = query.keys()
+				res = await self.__map_one__(res,keys,ACL)
+				if res.until < day:
+					# await self.delete_user_premium(user_id)
+					res = False
+			else:
+				res = False
+		return res
 
 	async def is_user_premium(self, user_id: int) -> bool:
 		res = False
@@ -152,7 +216,7 @@ class DB(object):
 		async with self.engine.begin() as conn:
 			query = await conn.execute(
 				select(ACL)\
-					.filter(ACL.user==user_id,ACL.mode==0)
+					.filter(ACL.user==user_id,ACL.premium==1)
 			)
 			res = query.fetchone()
 			if res:
@@ -169,39 +233,89 @@ class DB(object):
 
 	async def delete_user_premium(self, user_id: int) -> None:
 		async with self.engine.begin() as conn:
-			await conn.execute(ACL.__table__.delete().where(ACL.user==user_id,ACL.mode==0))
+			await conn.execute(ACL.__table__.delete().where(ACL.user==user_id,ACL.premium==1))
 			await conn.commit()
 		return
 
-	async def add_user_stat(self, user_id: int, mode: int=0) -> Optional[int]:
+	async def update_user_usage_extended(self, user_id: int, site: str) -> Optional[int]:
 		res = None
 
-		us = UserStat()
-		us.user=user_id
-		us.bot_id = self.bot.config.BOT_ID
-		params = await self.__to_object__(us)
+		uue = UserUsageExtended()
+		uue.user=user_id
+		uue.site=site
+		params = await self.__to_object__(uue)
+		last_on = params['last_on']
 
-		cmd = "count+1" if mode==0 else "count-1"
+		try:
+			async with self.engine.begin() as conn:
+				res = await conn.execute(insert(UserUsageExtended.__table__).values(**params).on_duplicate_key_update(count=sa.text("count+1"),last_on=sa.text("{last_on}"))
+				await conn.commit()
+		except Exception as e:
+			pass
+
+		await self.update_user_usage(user_id)
+
+		return res.lastrowid if res else None
+
+	# async def reduce_user_usage_extended(self, user_id: int, site: str) -> Optional[int]:
+	# 	res = None
+
+	# 	uue = UserUsage()
+	# 	uue.user=user_id
+	# 	uue.site=site
+	# 	params = await self.__to_object__(uue)
+
+	# 	async with self.engine.begin() as conn:
+	# 		res = await conn.execute(insert(UserUsage.__table__).values(**params).on_duplicate_key_update(count=sa.text("count-1"),last_on=uu.last_on))
+	# 		await conn.commit()
+
+	# 	await self.reduce_user_usage(user_id)
+
+	# 	return res.lastrowid if res else None
+
+	async def update_user_usage(self, user_id: int) -> Optional[int]:
+		res = None
+
+		uu = UserUsage()
+		uu.user=user_id
+		uu.count=1
+		params = await self.__to_object__(uu)
 
 		async with self.engine.begin() as conn:
-			res = await conn.execute(insert(UserStat.__table__).values(**params).on_duplicate_key_update(count=sa.text(cmd)))
+			res = await conn.execute(insert(UserUsage.__table__).values(**params).on_duplicate_key_update(count=sa.text("count+1")))
 			await conn.commit()
 		return res.lastrowid if res else None
 
-	async def get_user_stat(self, user_id: int) -> Optional[int]:
+	# async def reduce_user_usage(self, user_id: int) -> Optional[int]:
+	# 	res = None
+
+	# 	uu = UserUsage()
+	# 	uu.user=user_id
+	# 	uu.count=1
+	# 	params = await self.__to_object__(uu)
+
+	# 	async with self.engine.begin() as conn:
+	# 		res = await conn.execute(insert(UserUsage.__table__).values(**params).on_duplicate_key_update(count=sa.text("count-1")))
+	# 		await conn.commit()
+	# 	return res.lastrowid if res else None
+
+	async def get_user_usage(self, user_id: int) -> Optional[int]:
 		res = None
 
 		day = date.today()
 
 		async with self.engine.begin() as conn:
 			query = await conn.execute(
-				select(UserStat.count)\
-					.filter(UserStat.day==str(day),UserStat.user==user_id,UserStat.bot_id==self.bot.config.BOT_ID)
+				select(UserUsage.count)\
+					.filter(UserUsage.day==str(day),UserUsage.user==user_id)
 			)
 			res = query.scalar()
 		if not res:
 			res = 0
+		else:
+			res = int(res)
 		return res
+
 
 	# STATISTICS
 
@@ -274,21 +388,6 @@ class DB(object):
 		# sql = select(SiteStat.site,func.sum(SiteStat.count).label("count")).filter(SiteStat.day.between(str(start),str(end)),SiteStat.bot_id==self.bot.config.BOT_ID).group_by(SiteStat.site).order_by(sa.asc(SiteStat.site))
 		# return str( sql.compile(self.engine, compile_kwargs={"literal_binds": True}) )
 	
-
-	async def update_usage_status(self, queue_length: int,total_length: int) -> Optional[int]:
-		res = None
-
-		s = BotStat()
-		s.bot_id=self.bot.config.BOT_ID
-		s.queue_length=queue_length
-		s.total_length=total_length
-		params = await self.__to_object__(s)
-
-		async with self.engine.begin() as conn:
-			res = await conn.execute(insert(BotStat.__table__).values(**params).on_duplicate_key_update(queue_length=queue_length,total_length=total_length))
-			await conn.commit()
-		return res.lastrowid if res else None
-
 
 	# AUTHS
 
@@ -466,6 +565,11 @@ class DB(object):
 
 	async def update_download(self, download_id: int, params: dict) -> Optional[Download]:
 		res = None
+		# d = await self.get_download()
+		# d = await self.__to_object__(d)
+		# d = await self.__map_one__(params.values(),params.keys(),Download)
+		params['bot_id'] = self.bot.config.BOT_ID
+		params['updated_on'] = datetime.now()
 		params = await self.__filter__(params, Download)
 
 		async with self.engine.begin() as conn:

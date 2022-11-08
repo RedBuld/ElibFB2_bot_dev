@@ -6,7 +6,7 @@ from pathlib import Path
 from modules.config import Config
 from modules.db import DB
 from modules.messages_queue import MessagesQueue
-from modules.downloads_queue_dev import DownloadsQueue
+from modules.downloads_queue import DownloadsQueue
 from modules.handlers import get_router
 
 from aiohttp import web

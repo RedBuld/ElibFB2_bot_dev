@@ -87,35 +87,31 @@ class DownloadsQueue():
 		return None
 
 	async def cancel(self, download_id: int, drop_usage: bool=True) -> None:
-		print('dq:cancel')
 		if download_id in self._temp:
-			print('dq:cancel temp')
 			await self.__queue_cancel(download_id,drop_usage)
 			return
 		if download_id not in self._cancelled:
-			print('dq:cancel normal')
 			self._cancelled.append( download_id )
 			# await self.bot.db.update_download( download_id, {'status':DOWNLOAD_STATUS.CANCELLED} )
 			# task = await self.bot.db.remove_download(download_id)
 			# if task and task.message_id:
 			# 	await self.bot.messages_queue.add( 'edit_message_text', chat_id=task.chat_id, message_id=task.message_id, text='Загрузка отменена', reply_markup=None )
 
-	async def preinitiate(self, download_id: int, message_id: int) -> None:
-		task = await self.bot.db.update_download( download_id, {'message_id':message_id} )
-
-	async def initiate(self, download_id: int, message_id: int, last_message: str, auth: Optional[str]=None) -> None:
+	async def initiate(self, download_id: int, message_id: int, last_message: str) -> bool:
 		payload = {'last_message':last_message,'message_id':message_id,'status':DOWNLOAD_STATUS.INIT}
-		if auth is not None:
-			payload['auth'] = auth
 		task = await self.bot.db.update_download( download_id, payload )
 		if task:
 			await self.__queue_add(task)
-		try:
-			self._temp.remove(download_id)
-		except Exception as e:
-			pass
+			try:
+				self._temp.remove(download_id)
+			except Exception as e:
+				pass
+			return True
+		return False
+
 
 	# PRIVATE
+
 
 	async def __queue_restore(self) -> None:
 		db_tasks = await self.bot.db.get_all_downloads()
@@ -222,7 +218,6 @@ class DownloadsQueue():
 			for download_id in _waiting_ids:
 				await self.__queue_moved(download_id)
 
-		await self.__update_status()
 		await asyncio.sleep(self.bot.config.DOWNLOADS_Q_INTERVAL)
 	
 	async def __queue_add(self, task: Download, _upd: Optional[bool]=True) -> None:
@@ -260,8 +255,6 @@ class DownloadsQueue():
 				del self._queue[download_id]
 			except Exception as e:
 				pass
-		if drop_usage:
-			await self.bot.db.add_user_stat(task.user_id,1)
 		if task:
 			message = 'Загрузка отменена'
 			reply_markup = None
@@ -273,6 +266,3 @@ class DownloadsQueue():
 		if task:
 			downloader = Downloader(bot=self.bot,task=task)
 			self._active[download_id] = downloader
-	
-	async def __update_status(self):
-		await self.bot.db.update_usage_status(queue_length=len(self.__queue_ids__), total_length=self.bot.config.DOWNLOADS_Q_LIMIT)

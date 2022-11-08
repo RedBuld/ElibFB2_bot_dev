@@ -222,11 +222,20 @@ body {
 	-ms-transform: translateX(1.2rem);
 	transform: translateX(1.2rem);
 }
-#download_config .settings-item-description {
+#download_config .form-row-description {
     font-size: .875rem;
     color: var(--tg-theme-hint-color);
+    margin-top: -1rem;
+    margin-bottom: 1.5rem;
+}
+#download_config .settings-item-description {
+    font-size: .875rem;
+    color: var(--tg-theme-text-color);
     margin-top: -0.5rem;
     margin-bottom: 1.5rem;
+}
+#download_config .settings-item-description small {
+	color: var(--tg-theme-hint-color);
 }
 #download_config .settings-item-description code {
 	color: var(--tg-theme-bg-color);
@@ -234,4 +243,35 @@ body {
 	padding: 0rem 0.3rem;
 	border-radius: 0.15rem;
 	display: inline-block;
+}
+
+#download_config .settings-item-description hr {
+	border: none;
+	border-top: 1px solid var(--tg-theme-hint-color);
+	margin: 0.5rem 0px;
+}
+#download_config .settings-item-description h3 {
+	color: var(--tg-theme-button-color);
+}
+#download_config .settings-item-description summary {
+	color: var(--tg-theme-button-color);
+	cursor: pointer;
+}
+#download_config .settings-item-description table {
+	width: 100%;
+	border: 1px solid var(--tg-theme-hint-color);
+	border-collapse: collapse;
+	margin: 1rem 0px 1rem 0px;
+}
+#download_config .settings-item-description table td,
+#download_config .settings-item-description table th {
+	border: 1px solid var(--tg-theme-hint-color);
+	padding: 0.5rem;
+}
+#download_config .settings-item-description table td {
+	color: var(--tg-theme-text-color);
+}
+#download_config .settings-item-description table th {
+	background-color: var(--tg-theme-hint-color);
+	color: var(--tg-theme-button-text-color);
 }

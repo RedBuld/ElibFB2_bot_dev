@@ -23,11 +23,19 @@ class DOWNLOAD_STATUS(object):
 	PROCESSING = 4
 	DONE = 5
 
+class Links(Base):
+	__tablename__ = 'plain_links'
+	__table_args__  = ( sa.Index('plain_links', 'link', mysql_length=191, unique=True), )
+	id = sa.Column(sa.BigInteger, primary_key=True)
+	link = sa.Column(sa.Text, nullable=False)
+
 class ACL(Base):
 	__tablename__ = 'access_list'
+	__table_args__ = ( sa.UniqueConstraint("user", "premium", name="user_premium_index"), sa.UniqueConstraint("user", "banned", name="user_banned_index") )
 	id = sa.Column(sa.BigInteger, primary_key=True)
 	user = sa.Column(sa.BigInteger, nullable=False, index=True)
-	mode = sa.Column(sa.Integer) # 0 - payed, 1 - banned
+	premium = sa.Column(sa.Boolean)
+	banned = sa.Column(sa.Boolean)
 	reason = sa.Column(sa.Text)
 	until = sa.Column(sa.DateTime(), default=datetime.now())
 
@@ -39,7 +47,6 @@ class UserAuth(Base):
 	login = sa.Column(sa.Text, nullable=True)
 	password = sa.Column(sa.Text, nullable=True)
 	created_on = sa.Column(sa.DateTime(), default=datetime.now())
-	updated_on = sa.Column(sa.DateTime(), default=datetime.now(), onupdate=datetime.now())
 
 	def __repr__(self) -> str:
 		return '<UserAuth '+str({
@@ -48,16 +55,20 @@ class UserAuth(Base):
 			'site': self.site,
 			'login': self.login,
 			'password': self.password,
-			'created_on': self.created_on,
-			'updated_on': self.updated_on,
+			'created_on': self.created_on
 		})+'>'
 
 	def get_name(self):
 		_r = self.login
-		if self.updated_on:
-			_r = _r+' [от '+str(self.updated_on.strftime('%d.%m.%Y'))+']'
+		if self.created_on:
+			_r = _r+' [от '+str(self.created_on.strftime('%d.%m.%Y'))+']'
 		return _r
 
+class User(Base):
+	__tablename__ = 'users'
+	user = sa.Column(sa.BigInteger, primary_key=True)
+	username = sa.Column(sa.Text)
+	fullname = sa.Column(sa.Text)
 
 class UserSetting(Base):
 	__tablename__ = 'users_settings'
@@ -68,14 +79,24 @@ class UserSetting(Base):
 	value = sa.Column(sa.Text)
 
 
-class UserStat(Base):
-	__tablename__ = 'users_stats'
-	__table_args__ = ( sa.UniqueConstraint("user", "bot_id", "day", name="user_bot_day_index"), )
+class UserUsage(Base):
+	__tablename__ = 'users_usage'
+	__table_args__ = ( sa.UniqueConstraint("user", "day", name="user_day_index"), )
 	id = sa.Column(sa.BigInteger, primary_key=True)
 	user = sa.Column(sa.BigInteger, nullable=False, index=True)
-	bot_id = sa.Column(sa.String(5), index=True)
 	day = sa.Column(sa.Date(), default=date.today())
 	count = sa.Column(sa.Integer, default=1)
+
+
+class UserUsageExtended(Base):
+	__tablename__ = 'users_usage_extended'
+	__table_args__ = ( sa.UniqueConstraint("user", "day", "site", name="user_day_site_index"), )
+	id = sa.Column(sa.BigInteger, primary_key=True)
+	user = sa.Column(sa.BigInteger, nullable=False, index=True)
+	day = sa.Column(sa.Date(), default=date.today())
+	site = sa.Column(sa.String(240), nullable=False, index=True)
+	count = sa.Column(sa.Integer, default=1)
+	last_on = sa.Column(sa.DateTime(), default=datetime.now(), onupdate=datetime.now())
 
 
 class Message(Base):
@@ -96,10 +117,12 @@ class Message(Base):
 			'kwargs': self.kwargs,
 		})+'>'
 
+
 class Download(Base):
 	__tablename__ = 'downloads_query'
 	id = sa.Column(sa.BigInteger, primary_key=True)
 	created_on = sa.Column(sa.DateTime(), default=datetime.now())
+	updated_on = sa.Column(sa.DateTime(), default=datetime.now(), onupdate=datetime.now())
 	#
 	bot_id = sa.Column(sa.String(5), index=True)
 	user_id = sa.Column(sa.BigInteger, index=True)
@@ -150,12 +173,3 @@ class SiteStat(Base):
 	day = sa.Column(sa.Date(), default=date.today())
 	count = sa.Column(sa.Integer, default=1)
 	fsize = sa.Column(sa.BigInteger, default=0)
-
-
-class BotStat(Base):
-	__tablename__ = 'bot_stats'
-	__table_args__ = ( sa.UniqueConstraint("bot_id", name="bot_index"), )
-	id = sa.Column(sa.BigInteger, primary_key=True)
-	bot_id = sa.Column(sa.String(5), index=True)
-	queue_length = sa.Column(sa.Text)
-	total_length = sa.Column(sa.Text)
