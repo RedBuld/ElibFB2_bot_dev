@@ -161,8 +161,8 @@ class DB(object):
 
 		us = UserSetting()
 		us.user=user_id
-		us.bot_id = self.bot.config.BOT_ID
 		us.key=key
+		us.value=value
 		params = await self.__to_object__(us)
 
 		async with self.engine.begin() as conn:

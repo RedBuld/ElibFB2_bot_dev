@@ -309,7 +309,7 @@ async def __mode_1_download(message: types.Message, state: FSMContext) -> None:
 		row_btns = []
 		for key, name in use_auth.items():
 			row_btns.append([InlineKeyboardButton(text=name, callback_data=f'pd:{link}:{key}')])
-		row_btns.append([InlineKeyboardButton(text='Отмена', callback_data=f'plain_download_cancel')])
+		# row_btns.append([InlineKeyboardButton(text='Отмена', callback_data=f'plain_download_cancel')])
 
 		reply_markup = InlineKeyboardMarkup(row_width=1,inline_keyboard=row_btns)
 
