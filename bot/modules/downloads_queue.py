@@ -106,8 +106,7 @@ class DownloadsQueue():
 				self._temp.remove(download_id)
 			except Exception as e:
 				pass
-			return True
-		return False
+			return task
 
 
 	# PRIVATE

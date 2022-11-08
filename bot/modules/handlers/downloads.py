@@ -347,7 +347,7 @@ async def __enqueue_download(message: types.Message, params: dict) -> None:
 				]
 			)
 			msg = "Добавлено в очередь"
-			await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text=msg, reply_markup=reply_markup, callback='initiate_download', callback_kwargs={'download_id':download_id,'last_message':msg,'user_id':message.from_user.id,'site':params['site']} )
+			await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text=msg, reply_markup=reply_markup, callback='initiate_download', callback_kwargs={'download_id':download_id,'last_message':msg} )
 		else:
 			msg = "Произошла ошибка"
 			await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text=msg )
@@ -355,9 +355,8 @@ async def __enqueue_download(message: types.Message, params: dict) -> None:
 		msg = "Произошла ошибка:\n"+repr(e)
 		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text=msg )
 
-async def __initiate_download(message: types.Message, download_id: int, last_message: str, user_id: int, site: str) -> None:
+async def __initiate_download(message: types.Message, download_id: int, last_message: str) -> None:
 	added = await bot.downloads_queue.initiate(download_id=download_id, message_id=message.message_id, last_message=last_message)
-	if added:
-		await bot.db.update_user_usage_extended(user_id,site)
+	await bot.db.update_user_usage_extended(added.user_id,added.site)
 
 

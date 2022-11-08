@@ -1,5 +1,4 @@
-import calendar
-import asyncio, time
+import calendar, asyncio, time, logging
 import sqlalchemy as sa
 from datetime import datetime, date
 from typing import Optional, Union, Any
@@ -11,6 +10,8 @@ from sqlalchemy.engine.result import RMKeyView
 from sqlalchemy.dialects.mysql import insert
 from aiogram import Bot
 from .models import *
+
+logger = logging.getLogger(__name__)
 
 class DB(object):
 	bot = None
@@ -246,12 +247,12 @@ class DB(object):
 		params = await self.__to_object__(uue)
 		last_on = params['last_on']
 
-		try:
-			async with self.engine.begin() as conn:
-				res = await conn.execute(insert(UserUsageExtended.__table__).values(**params).on_duplicate_key_update(count=sa.text("count+1"),last_on=sa.text("{last_on}")))
-				await conn.commit()
-		except Exception as e:
-			pass
+		# try:
+		async with self.engine.begin() as conn:
+			res = await conn.execute(insert(UserUsageExtended.__table__).values(**params).on_duplicate_key_update(count=sa.text("count+1"),last_on=last_on))
+			await conn.commit()
+		# except Exception as e:
+		# 	pass
 
 		await self.update_user_usage(user_id)
 

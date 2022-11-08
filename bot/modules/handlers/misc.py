@@ -42,11 +42,14 @@ async def stats_command(message: types.Message, state: FSMContext) -> None:
 
 @router.message(Command(commands='my_id'))
 async def my_id_command(message: types.Message, state: FSMContext) -> None:
+
 	user_id = message.from_user.id
+
 	return await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text=f'Ваш id {user_id}')
 
 @router.message(Command(commands='free'))
 async def mfree_command(message: types.Message, state: FSMContext) -> None:
+
 	user_id = message.from_user.id
 
 	left = 'Неограничено'
