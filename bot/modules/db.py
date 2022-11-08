@@ -248,7 +248,7 @@ class DB(object):
 
 		try:
 			async with self.engine.begin() as conn:
-				res = await conn.execute(insert(UserUsageExtended.__table__).values(**params).on_duplicate_key_update(count=sa.text("count+1"),last_on=sa.text("{last_on}"))
+				res = await conn.execute(insert(UserUsageExtended.__table__).values(**params).on_duplicate_key_update(count=sa.text("count+1"),last_on=sa.text("{last_on}")))
 				await conn.commit()
 		except Exception as e:
 			pass
