@@ -284,7 +284,7 @@ async def __mode_1_download(message: types.Message, state: FSMContext) -> None:
 	if url:
 
 		_format = await bot.db.get_user_setting(message.from_user.id,'format')
-		if not _format.value:
+		if not _format or not _format.value:
 			await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text=f"Не выбран формат. Нажмите /format" )
 			return
 
