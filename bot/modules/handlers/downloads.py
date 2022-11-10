@@ -38,24 +38,24 @@ async def prepare_download(message: types.Message, state: FSMContext) -> None:
 		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text="Бот временно не принимает новые закачки" )
 		return
 
-	can_download = await bot.db.can_download(message.from_user.id)
+	can_download = await bot.db.check_user_limit(message.from_user.id)
 	if not can_download:
 		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text='Достигнуто максимальное количество бесплатных скачиваний в день' )
 		return
 
-	is_user_banned = await bot.db.is_user_banned(message.from_user.id)
-	if is_user_banned:
-		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text=f'Вы были заблокированы. Причина: {is_user_banned.reason}. Срок: {is_user_banned.until}' )
+	check_user_banned = await bot.db.check_user_banned(message.from_user.id)
+	if check_user_banned:
+		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text=f'Вы были заблокированы. Причина: {check_user_banned.reason}. Срок: {check_user_banned.until}' )
 		return
 
 	if bot.config.BOT_MODE == 0:
-		return await __mode_0_download(message, state)
+		return await __mode_0_download_prepare(message, state)
 	if bot.config.BOT_MODE == 1:
-		return await __mode_1_download(message, state)
+		return await __mode_1_download_prepare(message, state)
 
 
-@router.message(F.content_type.in_({'web_app_data'}))
-async def mode_0_download_start(message: types.Message, state: FSMContext) -> None:
+@router.message(DownloadConfig.state, F.content_type.in_({'web_app_data'}))
+async def mode_0_download_handler(message: types.Message, state: FSMContext) -> None:
 	current_state = await state.get_state()
 	params = orjson.loads(message.web_app_data.data)
 	data = None
@@ -101,7 +101,23 @@ async def mode_0_download_start(message: types.Message, state: FSMContext) -> No
 
 
 @router.callback_query(F.data.startswith('pd:'))
-async def mode_1_download_start(callback_query: types.CallbackQuery) -> None:
+async def mode_1_download_handler(callback_query: types.CallbackQuery, state: FSMContext) -> None:
+
+	can_add = await bot.downloads_queue.can_add()
+	if not can_add:
+		await bot.messages_queue.add( callee='send_message', chat_id=callback_query.message.chat.id, text="Очередь заполнена. Пжалста пдждте" )
+		return
+
+	can_download = await bot.db.check_user_limit(callback_query.from_user.id)
+	if not can_download:
+		await bot.messages_queue.add( callee='send_message', chat_id=callback_query.message.chat.id, text='Достигнуто максимальное количество бесплатных скачиваний в день' )
+		return
+
+	check_user_banned = await bot.db.check_user_banned(callback_query.from_user.id)
+	if check_user_banned:
+		await bot.messages_queue.add( callee='send_message', chat_id=callback_query.message.chat.id, text=f'Вы были заблокированы. Причина: {check_user_banned.reason}. Срок: {check_user_banned.until}' )
+		return
+
 	await callback_query.answer()
 	data = callback_query.data.split(':')
 	link_id = int(data[1])
@@ -159,14 +175,15 @@ async def mode_1_download_start(callback_query: types.CallbackQuery) -> None:
 	else:
 		await bot.messages_queue.add( callee='send_message', chat_id=callback_query.message.chat.id, text='Отправьте ссылку еще раз', reply_markup=ReplyKeyboardRemove())
 
-@router.callback_query(F.data.startswith('cancel:'))
-async def cancel_download(callback_query: types.CallbackQuery) -> None:
+@router.callback_query(F.data.startswith('dqc:'))
+async def cancel_download(callback_query: types.CallbackQuery, state: FSMContext) -> None:
 	await callback_query.answer()
 	download_id = int(callback_query.data.split(':')[1])
-	await bot.downloads_queue.cancel(download_id)
+	if download_id > 0:
+		await bot.downloads_queue.cancel(download_id)
 
 
-async def __mode_0_download(message: types.Message, state: FSMContext) -> None:
+async def __mode_0_download_prepare(message: types.Message, state: FSMContext) -> None:
 
 	if message.chat.type != 'private':
 		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text="Данный бот не доступен в чатах" )
@@ -256,7 +273,7 @@ async def __mode_0_download(message: types.Message, state: FSMContext) -> None:
 
 		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text=f"Подготовка к скачиванию {url}", reply_markup=reply_markup )
 
-async def __mode_1_download(message: types.Message, state: FSMContext) -> None:
+async def __mode_1_download_prepare(message: types.Message, state: FSMContext) -> None:
 
 	# if message.chat.type == 'channel':
 	# 	await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text="Бот не доступен в чатах" )
@@ -342,11 +359,11 @@ async def __enqueue_download(message: types.Message, params: dict) -> None:
 			reply_markup = InlineKeyboardMarkup(
 				inline_keyboard=[
 					[
-						InlineKeyboardButton( text='Отмена', callback_data=f'cancel:{download_id}' )
+						InlineKeyboardButton( text='Нельзя отменить', callback_data=f'dqc:0' )
 					]
 				]
 			)
-			msg = "Добавлено в очередь"
+			msg = "Добавляю в очередь"
 			await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text=msg, reply_markup=reply_markup, callback='initiate_download', callback_kwargs={'download_id':download_id,'last_message':msg} )
 		else:
 			msg = "Произошла ошибка"
@@ -357,6 +374,7 @@ async def __enqueue_download(message: types.Message, params: dict) -> None:
 
 async def __initiate_download(message: types.Message, download_id: int, last_message: str) -> None:
 	added = await bot.downloads_queue.initiate(download_id=download_id, message_id=message.message_id, last_message=last_message)
-	await bot.db.update_user_usage_extended(added.user_id,added.site)
+	if added:
+		await bot.db.update_user_usage_extended(added.user_id,added.site)
 
 

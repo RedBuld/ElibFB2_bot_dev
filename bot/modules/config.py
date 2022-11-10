@@ -23,6 +23,7 @@ class Config(object):
 	MESSAGES_Q_INTERVAL        = 1
 	DOWNLOADS_Q_INTERVAL       = 3
 	DOWNLOADS_Q_LIMIT          = 50
+	DOWNLOADS_Q_RUN            = True
 	DOWNLOADS_SIMULTANEOUSLY   = 10
 	DOWNLOADS_NOTICES_INTERVAL = 10
 	DOWNLOADS_SPLIT_LIMIT      = 400*1024*1024
@@ -36,6 +37,8 @@ class Config(object):
 	DEMO_USER                  = {}
 	DOWNLOAD_URL               = None
 	STATS_URL                  = None
+	USAGE_URL                  = None
+	AUTH_URL                   = None
 	WEBHOOK                    = None
 	WEBHOOK_PATH               = None
 
@@ -52,6 +55,8 @@ class Config(object):
 			'DOWNLOADER_LOG_PATH': self.DOWNLOADER_LOG_PATH,
 			'DOWNLOAD_URL': self.DOWNLOAD_URL,
 			'STATS_URL': self.STATS_URL,
+			'USAGE_URL': self.USAGE_URL,
+			'AUTH_URL': self.AUTH_URL,
 			'ACCEPT_NEW': self.ACCEPT_NEW,
 			'MESSAGES_Q_INTERVAL': self.MESSAGES_Q_INTERVAL,
 			'DB_URL': self.DB_URL,
@@ -101,8 +106,16 @@ class Config(object):
 			raise Exception('env DOWNLOAD_URL not set')
 
 		self.STATS_URL = os.getenv('STATS_URL',None)
-		if not self.DOWNLOAD_URL:
+		if not self.STATS_URL:
 			raise Exception('env STATS_URL not set')
+
+		self.USAGE_URL = os.getenv('USAGE_URL',None)
+		if not self.USAGE_URL:
+			raise Exception('env USAGE_URL not set')
+
+		self.AUTH_URL = os.getenv('AUTH_URL',None)
+		if not self.AUTH_URL:
+			raise Exception('env AUTH_URL not set')
 
 		if not os.path.exists(self.DOWNLOADER_TEMP_PATH):
 			os.makedirs(self.DOWNLOADER_TEMP_PATH, 777, exist_ok=True)
@@ -130,6 +143,9 @@ class Config(object):
 						self.WEBHOOK = _config['domain']
 						self.WEBHOOK_PATH = f'/wh_{self.BOT_ID}'
 
+					if 'mode' in _config:
+						self.BOT_MODE = _config['mode']
+
 				if not self.BOT_ID:
 					raise Exception('`bot_id` not set')
 
@@ -141,9 +157,6 @@ class Config(object):
 
 				if 'accept' in _config:
 					self.ACCEPT_NEW = _config['accept']
-
-				if 'mode' in _config:
-					self.BOT_MODE = _config['mode']
 
 				if 'start_message' in _config:
 					self.START_MESSAGE = _config['start_message']
@@ -167,18 +180,24 @@ class Config(object):
 
 				if 'download' in _config and _config['download']:
 					if 'limit' in _config['download']:
-						self.DOWNLOADS_Q_LIMIT = _config['download']['limit']
+						self.DOWNLOADS_Q_LIMIT = int(_config['download']['limit'])
+					else:
+						self.DOWNLOADS_Q_LIMIT = 50
+					if 'run' in _config['download']:
+						self.DOWNLOADS_Q_RUN = bool(_config['download']['run'])
+					else:
+						self.DOWNLOADS_Q_RUN = True
 					if 'check_interval' in _config['download']:
-						self.DOWNLOADS_Q_INTERVAL = _config['download']['check_interval']
+						self.DOWNLOADS_Q_INTERVAL = int(_config['download']['check_interval'])
 					if 'notices_interval' in _config['download']:
-						self.DOWNLOADS_NOTICES_INTERVAL = _config['download']['notices_interval']
+						self.DOWNLOADS_NOTICES_INTERVAL = int(_config['download']['notices_interval'])
 					if 'simultaneously' in _config['download']:
-						self.DOWNLOADS_SIMULTANEOUSLY = _config['download']['simultaneously']
+						self.DOWNLOADS_SIMULTANEOUSLY = int(_config['download']['simultaneously'])
 					if 'split_limit' in _config['download']:
 						try:
 							self.DOWNLOADS_SPLIT_LIMIT = int(_config['download']['split_limit'])
-							if self.DOWNLOADS_SPLIT_LIMIT > 400*1024*1024:
-								self.DOWNLOADS_SPLIT_LIMIT = 400*1024*1024
+							if self.DOWNLOADS_SPLIT_LIMIT > 1900*1024*1024:
+								self.DOWNLOADS_SPLIT_LIMIT = 1900*1024*1024
 						except Exception as e:
 							self.DOWNLOADS_SPLIT_LIMIT = 400*1024*1024
 

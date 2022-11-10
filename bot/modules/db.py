@@ -143,20 +143,6 @@ class DB(object):
 
 	# USER SETTINGS
 
-	async def get_user_setting(self, user_id: int, key: str) -> Optional[UserSetting]:
-		res = None
-
-		async with self.engine.begin() as conn:
-			query = await conn.execute(
-				select(UserSetting)\
-					.filter(UserSetting.user==user_id,UserSetting.key==key)
-			)
-			res = query.fetchone()
-			if res:
-				keys = query.keys()
-				res = await self.__map_one__(res,keys,UserSetting)
-		return res
-
 	async def add_user_setting(self, user_id: int, key: str, value: str) -> Optional[int]:
 		res = None
 
@@ -171,24 +157,30 @@ class DB(object):
 			await conn.commit()
 		return res.lastrowid if res else None
 
-	async def set_user_ban(self, *args, **kwargs) -> None:
-		# PLACEHOLDER
-		return
+	async def get_user_setting(self, user_id: int, key: str) -> Optional[UserSetting]:
+		res = None
 
-	async def get_user_ban(self, *args, **kwargs) -> bool:
-		# PLACEHOLDER
-		return False
+		async with self.engine.begin() as conn:
+			query = await conn.execute(
+				select(UserSetting)\
+					.filter(UserSetting.user==user_id,UserSetting.key==key)
+			)
+			res = query.fetchone()
+			if res:
+				keys = query.keys()
+				res = await self.__map_one__(res,keys,UserSetting)
+		return res
 
-	async def can_download(self, user_id: int) -> bool:
+	async def check_user_limit(self, user_id: int) -> bool:
 		if self.bot.config.DOWNLOADS_FREE_LIMIT:
 			used = await self.get_user_usage(user_id)
 			if used >= self.bot.config.DOWNLOADS_FREE_LIMIT:
-				premium = await self.is_user_premium(user_id)
+				premium = await self.check_user_premium(user_id)
 				if not premium:
 					return False
 		return True
 
-	async def is_user_banned(self, user_id: int) -> Union[bool,ACL]:
+	async def check_user_banned(self, user_id: int) -> Union[bool,ACL]:
 		res = False
 
 		day = datetime.now()
@@ -209,7 +201,7 @@ class DB(object):
 				res = False
 		return res
 
-	async def is_user_premium(self, user_id: int) -> bool:
+	async def check_user_premium(self, user_id: int) -> bool:
 		res = False
 
 		day = datetime.now()
@@ -245,14 +237,10 @@ class DB(object):
 		uue.user=user_id
 		uue.site=site
 		params = await self.__to_object__(uue)
-		last_on = params['last_on']
 
-		# try:
 		async with self.engine.begin() as conn:
-			res = await conn.execute(insert(UserUsageExtended.__table__).values(**params).on_duplicate_key_update(count=sa.text("count+1"),last_on=last_on))
+			res = await conn.execute(insert(UserUsageExtended.__table__).values(**params).on_duplicate_key_update(count=sa.text("count+1"),last_on=params['last_on']))
 			await conn.commit()
-		# except Exception as e:
-		# 	pass
 
 		await self.update_user_usage(user_id)
 
@@ -321,11 +309,27 @@ class DB(object):
 	# STATISTICS
 
 
+	async def update_bot_stat(self, queue_length: int, queue_act: int, queue_limit: int, queue_sim: int) -> bool:
+		res = None
+
+		bs = BotStat()
+		bs.queue_length = queue_length
+		bs.queue_limit = queue_limit
+		bs.queue_sim = queue_sim
+		bs.queue_act = queue_act
+		bs.bot_id = self.bot.config.BOT_ID
+		params = await self.__to_object__(bs)
+
+		async with self.engine.begin() as conn:
+			res = await conn.execute(insert(BotStat.__table__).values(**params).on_duplicate_key_update(queue_length=params['queue_length'],queue_limit=params['queue_limit'],queue_sim=params['queue_sim'],queue_act=params['queue_act'],last_on=params['last_on']))
+			await conn.commit()
+		return res.lastrowid if res else None
+
 	async def add_site_stat(self, site: str, size: int) -> Optional[int]:
 		res = None
 
 		ss = SiteStat()
-		ss.site=site
+		ss.site = site
 		ss.bot_id = self.bot.config.BOT_ID
 		params = await self.__to_object__(ss)
 
@@ -333,62 +337,6 @@ class DB(object):
 			res = await conn.execute(insert(SiteStat.__table__).values(**params).on_duplicate_key_update(count=sa.text("count+1"),fsize=sa.text(f"fsize+{size}")))
 			await conn.commit()
 		return res.lastrowid if res else None
-
-	async def get_daily_stats(self, days_step: Optional[int]=0) -> Optional[list]:
-		res = None
-
-		dat = self.get_daily_stats_dates(days_step)
-
-		async with self.engine.begin() as conn:
-			query = await conn.execute(
-				select(SiteStat.site,SiteStat.count)\
-					.filter(SiteStat.day==str(dat),SiteStat.bot_id==self.bot.config.BOT_ID)\
-					.order_by(sa.asc(SiteStat.site))
-			)
-			res = query.fetchall()
-		return res
-
-	async def get_daily_stats_dates(self, days_step: Optional[int]=0) -> date:
-		today = date.today()
-
-		y = today.year
-		m = today.month
-		d = today.day + days_step
-
-		dat = date(y, m, d)
-
-		return dat
-		# sql = select(SiteStat.site,SiteStat.count).filter(SiteStat.day==str(dat),SiteStat.bot_id==self.bot.config.BOT_ID).order_by(sa.asc(SiteStat.site))
-		# return str( sql.compile(self.engine, compile_kwargs={"literal_binds": True}) )
-
-	async def get_monthly_stats(self, month_step: Optional[int]=0) -> Optional[list]:
-		res = None
-
-		start, end = self.get_daily_stats_dates(month_step)
-
-		async with self.engine.begin() as conn:
-			query = await conn.execute(
-				select(SiteStat.site,func.sum(SiteStat.count).label("count"))\
-					.filter(SiteStat.day.between(start,end),SiteStat.bot_id==self.bot.config.BOT_ID)\
-					.group_by(SiteStat.site)\
-					.order_by(sa.asc(SiteStat.site))
-			)
-			res = query.fetchall()
-		return res
-
-	async def get_monthly_stats_dates(self, month_step: Optional[int]=0) -> tuple:
-		today = date.today()
-
-		y = today.year
-		m = today.month + month_step
-		s, e = calendar.monthrange(y, m)
-
-		start = date(y, m, 1)
-		end = date(y, m, e)
-		return (start, end)
-		# sql = select(SiteStat.site,func.sum(SiteStat.count).label("count")).filter(SiteStat.day.between(str(start),str(end)),SiteStat.bot_id==self.bot.config.BOT_ID).group_by(SiteStat.site).order_by(sa.asc(SiteStat.site))
-		# return str( sql.compile(self.engine, compile_kwargs={"literal_binds": True}) )
-	
 
 	# AUTHS
 

@@ -1,7 +1,8 @@
-import idna, logging
+import orjson, idna, logging
 from aiogram import Bot, Router, F, types
 from aiogram.fsm.context import FSMContext
 from aiogram.filters import Command
+from aiogram.types import KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from ..models import AuthForm
 
@@ -45,7 +46,7 @@ async def login_command(message: types.Message, state: FSMContext) -> None:
 
 
 @router.callback_query(AuthForm.site, F.data.startswith('site:'))
-async def login_command_site(callback_query: types.CallbackQuery, state: FSMContext) -> None:
+async def login_command_site_handler(callback_query: types.CallbackQuery, state: FSMContext) -> None:
 
 	await callback_query.answer()
 
@@ -60,15 +61,46 @@ async def login_command_site(callback_query: types.CallbackQuery, state: FSMCont
 
 		await state.update_data(site=site)
 
-		await state.set_state(AuthForm.login)
+		if bot.config.BOT_MODE == 0:
+			await state.set_state(AuthForm.web)
+			web_app = types.WebAppInfo(url=f"{bot.config.AUTH_URL}")
+			reply_markup = ReplyKeyboardMarkup(
+				row_width=1,
+				keyboard=[
+					[KeyboardButton( text='Войти', web_app=web_app )],
+					[KeyboardButton( text='Отмена' )]
+				]
+			)
+			await bot.messages_queue.add( callee='edit_message_text', chat_id=callback_query.message.chat.id, message_id=callback_query.message.message_id, text=f'Выбран сайт {site}', reply_markup=None)
+			await bot.messages_queue.add( callee='send_message', chat_id=callback_query.message.chat.id, text=f'Используйте окно авторизации', reply_markup=reply_markup)
 
-		await bot.messages_queue.add( callee='edit_message_text', chat_id=callback_query.message.chat.id, message_id=callback_query.message.message_id, text=f'Выбран сайт {site}\nНажмите /cancel для отмены', reply_markup=None)
+		if bot.config.BOT_MODE == 1:
+			await state.set_state(AuthForm.login)
+			await bot.messages_queue.add( callee='edit_message_text', chat_id=callback_query.message.chat.id, message_id=callback_query.message.message_id, text=f'Выбран сайт {site}\n\n!!!ВХОД ЧЕРЕЗ СОЦ. СЕТИ НЕВОЗМОЖЕН!!!\n\nНажмите /cancel для отмены', reply_markup=None)
+			await bot.messages_queue.add( callee='send_message', chat_id=callback_query.message.chat.id, text=f'Отправьте сообщением логин')
 
-		await bot.messages_queue.add( callee='send_message', chat_id=callback_query.message.chat.id, text=f'Введите логин\n!!!ВХОД ЧЕРЕЗ СОЦ. СЕТИ НЕВОЗМОЖЕН!!!\nНажмите /cancel для отмены')
 
+@router.message(AuthForm.web, F.content_type.in_({'web_app_data'}))
+async def login_command_web_handler(message: types.Message, state: FSMContext) -> None:
+	current_state = await state.get_state()
+	params = orjson.loads(message.web_app_data.data)
+	data = None
+
+	if current_state is not None:
+		data = await state.get_data()
+
+	if params:
+		if data:
+			for k in data:
+				params[k] = data[k]
+		params['user'] = message.from_user.id
+
+		await state.clear()
+
+		await __save_auth(message,state,params)
 
 @router.message(AuthForm.login, ~F.text.startswith('/'))
-async def login_command_login(message: types.Message, state: FSMContext) -> None:
+async def login_command_login_handler(message: types.Message, state: FSMContext) -> None:
 
 	login = message.text.strip()
 
@@ -80,11 +112,11 @@ async def login_command_login(message: types.Message, state: FSMContext) -> None
 
 		await state.set_state(AuthForm.password)
 
-		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text=f'Введите пароль\nНажмите /cancel для отмены')
+		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text=f'Отправьте сообщением пароль')
 
 
 @router.message(AuthForm.password, ~F.text.startswith('/'))
-async def login_command_password(message: types.Message, state: FSMContext) -> None:
+async def login_command_password_handler(message: types.Message, state: FSMContext) -> None:
 
 	password = message.text.strip()
 
@@ -99,16 +131,7 @@ async def login_command_password(message: types.Message, state: FSMContext) -> N
 
 		await state.clear()
 
-		ua_id = await bot.db.add_site_auth(data)
-
-		if ua_id:
-			ua = await bot.db.get_site_auth(ua_id)
-			auth = ua.get_name()
-			await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text=f'Авторизация завершена\n\n{auth}')
-		else:
-			_login = data["login"]
-			_password = data["password"]
-			await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text=f'Неверные логин или пароль\n\nЛогин: "{_login}"\nПароль: "{_password}')
+		await __save_auth(message,state,data)
 
 
 @router.message(Command(commands='logins'))
@@ -133,7 +156,7 @@ async def logins_command(message: types.Message, state: FSMContext) -> None:
 
 
 @router.callback_query(F.data.startswith('logins:'))
-async def logins_command_site(callback_query: types.CallbackQuery, state: FSMContext) -> None:
+async def logins_command_site_handler(callback_query: types.CallbackQuery, state: FSMContext) -> None:
 	await callback_query.answer()
 
 	user_id = callback_query.from_user.id
@@ -195,3 +218,14 @@ async def __get_authed_site_login_data(user_id: int, chat_id: int, message_id: i
 		row_btns.append([InlineKeyboardButton(text='Назад', callback_data=f'logins:{site}')])
 		reply_markup = InlineKeyboardMarkup(row_width=1,inline_keyboard=row_btns)
 		await bot.messages_queue.add( callee='edit_message_text', chat_id=chat_id, message_id=message_id, text=f'Авторизация:\n\nЛогин: "{ua.login}"\nПароль: "{ua.password}"', reply_markup=reply_markup)
+
+async def __save_auth(message: types.Message, state: FSMContext, data: dict) -> None:
+	ua_id = await bot.db.add_site_auth(data)
+	if ua_id:
+		ua = await bot.db.get_site_auth(ua_id)
+		auth = ua.get_name()
+		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text=f'Авторизация завершена\n\n{auth}', reply_markup=ReplyKeyboardRemove())
+	else:
+		_login = data["login"]
+		_password = data["password"]
+		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text=f'Неверные логин или пароль\n\nЛогин: "{_login}"\nПароль: "{_password}', reply_markup=ReplyKeyboardRemove())

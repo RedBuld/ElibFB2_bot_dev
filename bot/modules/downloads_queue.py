@@ -10,6 +10,7 @@ class DownloadsQueue():
 	bot = None
 	_thread = None
 	_running_lock = None
+	_delayed_restart = False
 
 	_temp = []
 	_queue = {}
@@ -28,6 +29,7 @@ class DownloadsQueue():
 		self._queue = {}
 		self._active = {}
 		self._cancelled = []
+		self._delayed_restart = False
 
 	@property
 	def __queue_ids__(self) -> list:
@@ -54,6 +56,7 @@ class DownloadsQueue():
 		self._queue = {}
 		self._active = {}
 		self._cancelled = []
+		self._delayed_restart = False
 
 		logger.info('Starting dq:DownloadsQueue')
 
@@ -86,16 +89,9 @@ class DownloadsQueue():
 				return index
 		return None
 
-	async def cancel(self, download_id: int, drop_usage: bool=True) -> None:
-		if download_id in self._temp:
-			await self.__queue_cancel(download_id,drop_usage)
-			return
+	async def cancel(self, download_id: int) -> None:
 		if download_id not in self._cancelled:
 			self._cancelled.append( download_id )
-			# await self.bot.db.update_download( download_id, {'status':DOWNLOAD_STATUS.CANCELLED} )
-			# task = await self.bot.db.remove_download(download_id)
-			# if task and task.message_id:
-			# 	await self.bot.messages_queue.add( 'edit_message_text', chat_id=task.chat_id, message_id=task.message_id, text='Загрузка отменена', reply_markup=None )
 
 	async def initiate(self, download_id: int, message_id: int, last_message: str) -> bool:
 		payload = {'last_message':last_message,'message_id':message_id,'status':DOWNLOAD_STATUS.INIT}
@@ -107,6 +103,12 @@ class DownloadsQueue():
 			except Exception as e:
 				pass
 			return task
+
+	async def set_delayed_restart(self) -> bool:
+		self._delayed_restart = True
+
+	async def set_delayed_restart(self) -> bool:
+		self._delayed_restart = True
 
 
 	# PRIVATE
@@ -131,9 +133,10 @@ class DownloadsQueue():
 				if task.status == DOWNLOAD_STATUS.PROCESSING:
 					# logger.info('PROCESSING')
 					# logger.info(task)
-					task.status = DOWNLOAD_STATUS.INIT
-					await self.bot.db.update_download( task.id, {'status':task.status} )
-					await self.__queue_add(task,_upd=False)
+					# task.status = DOWNLOAD_STATUS.INIT
+					# await self.bot.db.update_download( task.id, {'status':task.status} )
+					# await self.__queue_add(task,_upd=False)
+					await self.__init_downloader(task.id)
 				if task.status == DOWNLOAD_STATUS.RUNNING:
 					# logger.info('RUNNING')
 					# logger.info(task)
@@ -163,17 +166,13 @@ class DownloadsQueue():
 
 	async def __queue_step(self) -> None:
 
+		len_before = len(self.__queue_ids__)
 		_cancelled_ids = self.__cancelled_ids__
 		for download_id in _cancelled_ids:
 			self._cancelled.remove(download_id)
-
-			if download_id in self._active:
-				await self._active[download_id].cancel()
-				# del self._active[download_id]
-
-			if download_id in self._queue:
-				await self.__queue_cancel(download_id)
-				# del self._queue[download_id]
+			
+			await self.__queue_remove(download_id)
+		len_after = len(self.__queue_ids__)
 
 		_active_ids = self.__active_ids__
 		for download_id in _active_ids:
@@ -203,15 +202,19 @@ class DownloadsQueue():
 				elif task.status == DOWNLOAD_STATUS.INIT:
 					await task.start()
 
-		queue_moved = False
-		free_slots = self.bot.config.DOWNLOADS_SIMULTANEOUSLY - len(self.__active_ids__)
-		if free_slots > 0:
-			_queue_ids = self.__queue_ids__[0:free_slots+1]
-			for download_id in _queue_ids:
-				await self.__init_downloader(download_id)
-				del self._queue[download_id]
-			queue_moved = True
+		queue_moved = len_before != len_after
 
+		if self.bot.config.DOWNLOADS_Q_RUN:
+			free_slots = self.bot.config.DOWNLOADS_SIMULTANEOUSLY - len(self.__active_ids__)
+			if free_slots > 0:
+				_queue_ids = self.__queue_ids__[0:free_slots]
+				for download_id in _queue_ids:
+					await self.__init_downloader(download_id)
+					del self._queue[download_id]
+				queue_moved = True
+
+		await self.bot.db.update_bot_stat( len(self.__queue_ids__), len(self.__active_ids__), self.bot.config.DOWNLOADS_Q_LIMIT, self.bot.config.DOWNLOADS_SIMULTANEOUSLY )
+		
 		if queue_moved:
 			_waiting_ids = self.__queue_ids__
 			for download_id in _waiting_ids:
@@ -224,6 +227,37 @@ class DownloadsQueue():
 		self._queue[task.id]['position'] = self.__queue_ids__.index(task.id)
 		if _upd:
 			await self.__queue_moved(task.id)
+
+	async def __queue_remove(self, download_id: int, drop_usage: bool=True):
+		task = None
+		cancelled = False
+		if download_id in self._temp:
+			try:
+				self._temp.remove(download_id)
+				task = await self.bot.db.remove_download(download_id)
+				cancelled = True
+			except Exception as e:
+				pass
+		if download_id in self._queue:
+			try:
+				del self._queue[download_id]
+				task = await self.bot.db.remove_download(download_id)
+				cancelled = True
+			except Exception as e:
+				pass
+		if download_id in self._active:
+			try:
+				_res = await self._active[download_id].cancel()
+				if _res:
+					task = await self.bot.db.remove_download(download_id)
+					cancelled = True
+			except Exception as e:
+				pass
+
+		if task and cancelled:
+			message = 'Загрузка отменена'
+			reply_markup = None
+			await self.bot.messages_queue.update_or_add( callee='edit_message_text', mq_id=task.mq_message_id, chat_id=task.chat_id, message_id=task.message_id, text=message, reply_markup=reply_markup)
 	
 	async def __queue_moved(self, download_id: int) -> None:
 		position = self.__queue_ids__.index(download_id)+1
@@ -235,29 +269,12 @@ class DownloadsQueue():
 				reply_markup = InlineKeyboardMarkup(
 					inline_keyboard=[
 						[
-							InlineKeyboardButton( text='Отмена', callback_data=f'cancel:{download_id}' )
+							InlineKeyboardButton( text='Отмена', callback_data=f'dqc:{download_id}' )
 						]
 					]
 				)
 				mq_id = await self.bot.messages_queue.update_or_add( callee='edit_message_text', mq_id=self._queue[download_id]['mq_id'], chat_id=self._queue[download_id]['chat_id'], message_id=self._queue[download_id]['message_id'], text=message, reply_markup=reply_markup)
 				await self.bot.db.update_download( download_id, {'last_message':message,'mq_message_id':mq_id} )
-
-	async def __queue_cancel(self, download_id: int, drop_usage: bool=True):
-		task = await self.bot.db.remove_download(download_id)
-		if download_id in self._temp:
-			try:
-				self._temp.remove(download_id)
-			except Exception as e:
-				pass
-		if download_id in self._queue:
-			try:
-				del self._queue[download_id]
-			except Exception as e:
-				pass
-		if task:
-			message = 'Загрузка отменена'
-			reply_markup = None
-			await self.bot.messages_queue.update_or_add( callee='edit_message_text', mq_id=task.mq_message_id, chat_id=task.chat_id, message_id=task.message_id, text=message, reply_markup=reply_markup)
 
 	async def __init_downloader(self, download_id: int) -> None:
 		from modules.downloader import Downloader

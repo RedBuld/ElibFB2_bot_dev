@@ -7,6 +7,7 @@ Base = declarative_base()
 
 class AuthForm(StatesGroup):
 	site = State()
+	web = State()
 	login = State()
 	password = State()
 
@@ -37,7 +38,7 @@ class ACL(Base):
 	premium = sa.Column(sa.Boolean)
 	banned = sa.Column(sa.Boolean)
 	reason = sa.Column(sa.Text)
-	until = sa.Column(sa.DateTime(), default=datetime.now())
+	until = sa.Column(sa.DateTime(), default=datetime.now)
 
 class UserAuth(Base):
 	__tablename__ = 'users_auth'
@@ -46,7 +47,7 @@ class UserAuth(Base):
 	site = sa.Column(sa.String(240), nullable=False, index=True)
 	login = sa.Column(sa.Text, nullable=True)
 	password = sa.Column(sa.Text, nullable=True)
-	created_on = sa.Column(sa.DateTime(), default=datetime.now())
+	created_on = sa.Column(sa.DateTime(), default=datetime.now)
 
 	def __repr__(self) -> str:
 		return '<UserAuth '+str({
@@ -84,7 +85,7 @@ class UserUsage(Base):
 	__table_args__ = ( sa.UniqueConstraint("user", "day", name="user_day_index"), )
 	id = sa.Column(sa.BigInteger, primary_key=True)
 	user = sa.Column(sa.BigInteger, nullable=False, index=True)
-	day = sa.Column(sa.Date(), default=date.today())
+	day = sa.Column(sa.Date(), default=date.today)
 	count = sa.Column(sa.Integer, default=1)
 
 
@@ -93,10 +94,10 @@ class UserUsageExtended(Base):
 	__table_args__ = ( sa.UniqueConstraint("user", "day", "site", name="user_day_site_index"), )
 	id = sa.Column(sa.BigInteger, primary_key=True)
 	user = sa.Column(sa.BigInteger, nullable=False, index=True)
-	day = sa.Column(sa.Date(), default=date.today())
+	day = sa.Column(sa.Date(), default=date.today)
 	site = sa.Column(sa.String(240), nullable=False, index=True)
 	count = sa.Column(sa.Integer, default=1)
-	last_on = sa.Column(sa.DateTime(), default=datetime.now(), onupdate=datetime.now())
+	last_on = sa.Column(sa.DateTime(), default=datetime.now, onupdate=datetime.now)
 
 
 class Message(Base):
@@ -121,8 +122,8 @@ class Message(Base):
 class Download(Base):
 	__tablename__ = 'downloads_query'
 	id = sa.Column(sa.BigInteger, primary_key=True)
-	created_on = sa.Column(sa.DateTime(), default=datetime.now())
-	updated_on = sa.Column(sa.DateTime(), default=datetime.now(), onupdate=datetime.now())
+	created_on = sa.Column(sa.DateTime(), default=datetime.now)
+	updated_on = sa.Column(sa.DateTime(), default=datetime.now, onupdate=datetime.now)
 	#
 	bot_id = sa.Column(sa.String(5), index=True)
 	user_id = sa.Column(sa.BigInteger, index=True)
@@ -139,6 +140,7 @@ class Download(Base):
 	cover = sa.Column(sa.String(1), default=0)
 	status = sa.Column(sa.Integer, default=DOWNLOAD_STATUS.WAIT)
 	result = sa.Column(sa.JSON, default=None)
+	proxy = sa.Column(sa.Text, nullable=True)
 	#
 	last_message = sa.Column(sa.Text)
 	mq_message_id = sa.Column(sa.BigInteger, nullable=True, default=None)
@@ -170,6 +172,16 @@ class SiteStat(Base):
 	id = sa.Column(sa.BigInteger, primary_key=True)
 	bot_id = sa.Column(sa.String(5), index=True)
 	site = sa.Column(sa.String(100), nullable=False)
-	day = sa.Column(sa.Date(), default=date.today())
+	day = sa.Column(sa.Date(), default=date.today)
 	count = sa.Column(sa.Integer, default=1)
 	fsize = sa.Column(sa.BigInteger, default=0)
+
+class BotStat(Base):
+	__tablename__ = 'bots_stats'
+	id = sa.Column(sa.BigInteger, primary_key=True)
+	bot_id = sa.Column(sa.String(5), index=True, unique=True)
+	queue_length = sa.Column(sa.Text, nullable=True)
+	queue_limit = sa.Column(sa.Text, nullable=True)
+	queue_act = sa.Column(sa.Text, nullable=True)
+	queue_sim = sa.Column(sa.Text, nullable=True)
+	last_on = sa.Column(sa.DateTime(), default=datetime.now, onupdate=datetime.now)

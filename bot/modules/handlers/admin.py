@@ -29,6 +29,14 @@ async def admin_command(message: types.Message, state: FSMContext) -> None:
 		download_id = await bot.downloads_queue.enqueue( {'start': '', 'end': '10', 'format': 'fb2', 'auth': 'anon', 'url': 'https://ranobelib.me/reverend-insanity?bid=8792&section=chapters&ui=2201240', 'site': 'ranobelib.me', 'user_id': 470328529} )
 		await bot.downloads_queue.set_message(download_id, chat_id=470328529, message_id=1871)
 
+	if command == 'delayed_restart':
+		bot.config.DOWNLOADS_Q_RUN = False
+		return await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text="Инициирована отложенная перезагрузка")
+
+	if command == 'delayed_restart_cancel':
+		bot.config.DOWNLOADS_Q_RUN = True
+		return await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text="Отменена отложенная перезагрузка")
+
 	if command == 'reload_config':
 		bot.config.__load__()
 		await bot.db.reinit()
@@ -41,6 +49,14 @@ async def admin_command(message: types.Message, state: FSMContext) -> None:
 	if command == 'start_accept':
 		bot.config.ACCEPT_NEW = True
 		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text="Бот принимает новые закачки" )
+
+	if command == 'stop_queue':
+		bot.config.DOWNLOADS_Q_RUN = False
+		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text="Очередь закачкек остановлена" )
+
+	if command == 'start_queue':
+		bot.config.DOWNLOADS_Q_RUN = True
+		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text="Очередь закачкек запущена" )
 
 	if command.startswith('ban'):
 		cmd = command.split()
@@ -68,20 +84,47 @@ async def admin_command(message: types.Message, state: FSMContext) -> None:
 		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text="Отменяю закачки" )
 
 	if command == 'supertest':
-		reply_markup = InlineKeyboardMarkup(
-			inline_keyboard=[
-				[
-					InlineKeyboardButton( text='Тест 1', callback_data=f'supertest:asdasdasdasdasasasdasdasdasdasdasdasdasdasdasasd' )
-				]
-				# [
-				# 	InlineKeyboardButton( text='Тест 2', callback_data=f'supertest:asdasdasdasdasasdasdasdasdasdasdadsasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasasdasdasdasdasdasdadsasdasdasdasdasdasdasdasdasdasdasdasdasdasdasd' )
-				# ],
-				# [
-				# 	InlineKeyboardButton( text='Тест 3', callback_data=f'supertest:asdasdasdasdasasdasdasdasdasdasdadsasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasasdasdasdasdasdasdadsasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasdasasdasdasdasdasdasdadsasdasdasdasdasdasdasdasdasdasdasdasdasdasdasd' )
-				# ]
-			]
-		)
-		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text='Супертест', reply_markup=reply_markup)
+		url = 'https://author.today/work/195501'
+		site = 'author.today'
+		_format = 'fb2'
+
+		params = {
+			'url': url,
+			'site': site,
+			'user_id': message.from_user.id,
+			'chat_id': message.chat.id,
+			'images': '1',
+			'cover': '1',
+			'auth': 'none',
+			'format': _format
+		}
+
+		msg = f"Добавляю в очередь {url}"
+
+		_format_name = bot.config.FORMATS[_format]
+
+		msg += f"\nФормат: {_format_name}"
+
+		if 'auth' in params:
+			if params['auth'] == 'anon':
+				msg += "\nИспользую анонимные доступы"
+			elif params['auth'] == 'none':
+				msg += "\nБез авторизации"
+			elif params['auth']:
+				msg += "\nИспользую личные доступы"
+
+		if 'images' in params:
+			msg += "\nСкачиваю картинки"
+		else:
+			msg += "\nНе скачиваю картинки"
+
+		if 'cover' in params:
+			msg += "\nСкачиваю обложку"
+		else:
+			msg += "\nНе скачиваю обложку"
+		
+		for i in range(0,5):
+			await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text=msg, callback='enqueue_download', callback_kwargs={'params':params} )
 
 @router.callback_query(F.data.startswith('supertest:'))
 async def admin_test_qcb(callback_query: types.CallbackQuery) -> None:

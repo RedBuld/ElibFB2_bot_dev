@@ -121,6 +121,7 @@ class Downloader(object):
 		self.status = DOWNLOAD_STATUS.CANCELLED
 
 		await self.update_status()
+		return True
 
 	async def stop(self) -> None:
 
@@ -224,7 +225,7 @@ class Downloader(object):
 				reply_markup = InlineKeyboardMarkup(
 					inline_keyboard=[
 						[
-							InlineKeyboardButton( text='Нельзя отменить', callback_data=f'cancel:0' )
+							InlineKeyboardButton( text='Нельзя отменить', callback_data=f'dqc:0' )
 						]
 					]
 				)
@@ -232,7 +233,7 @@ class Downloader(object):
 				reply_markup = InlineKeyboardMarkup(
 					inline_keyboard=[
 						[
-							InlineKeyboardButton( text='Отмена', callback_data=f'cancel:{self.task.id}' )
+							InlineKeyboardButton( text='Отмена', callback_data=f'dqc:{self.task.id}' )
 						]
 					]
 				)
@@ -437,9 +438,15 @@ class Downloader(object):
 			command.append('--timeout')
 			command.append('120')
 		else:
-			# command += f' --timeout 30'
-			command.append('--timeout')
-			command.append('60')
+			if task.proxy:
+				command.append('--proxy')
+				command.append(f"{task.proxy}")
+				command.append('--timeout')
+				command.append('120')
+			else:
+				# command += f' --timeout 30'
+				command.append('--timeout')
+				command.append('60')
 
 		if task.cover == '1':
 			# command += ' --cover'

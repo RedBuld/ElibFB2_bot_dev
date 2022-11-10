@@ -34,35 +34,35 @@ async def sites_command(message: types.Message, state: FSMContext) -> None:
 async def stats_command(message: types.Message, state: FSMContext) -> None:
 
 	row_btns = [
-		[InlineKeyboardButton(text='Статистика', web_app=types.WebAppInfo(url=f'{bot.config.STATS_URL}?bot_id={bot.config.BOT_ID}'))]
+		[InlineKeyboardButton(text='Статистика', web_app=types.WebAppInfo(url=f'{bot.config.STATS_URL}?bot_id={bot.config.BOT_ID}'))],
+		[InlineKeyboardButton(text='Загрузка ботов', web_app=types.WebAppInfo(url=f'{bot.config.USAGE_URL}?bot_id={bot.config.BOT_ID}'))],
+		[InlineKeyboardButton(text='Лимит скачивания', callback_data='stats:free')],
+		[InlineKeyboardButton(text='Ваш ID', callback_data='stats:id')],
 	]
 	reply_markup = InlineKeyboardMarkup(row_width=1,inline_keyboard=row_btns)
 	await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text='Статистика доступна тут', reply_markup=reply_markup)
 
+@router.callback_query(F.data.startswith('stats:'))
+async def stats_command_handler(callback_query: types.CallbackQuery, state: FSMContext) -> None:
 
-@router.message(Command(commands='my_id'))
-async def my_id_command(message: types.Message, state: FSMContext) -> None:
+	await callback_query.answer()
 
-	user_id = message.from_user.id
+	data = callback_query.data.split(':')[1]
+	user_id = callback_query.from_user.id
 
-	return await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text=f'Ваш id {user_id}')
+	if data == 'id':
+		return await bot.messages_queue.add( callee='send_message', chat_id=callback_query.message.chat.id, text=f'Ваш ID: {user_id}')
 
-@router.message(Command(commands='free'))
-async def mfree_command(message: types.Message, state: FSMContext) -> None:
+	if data == 'free':
+		left = 'Неограничено'
+		used = await bot.db.get_user_usage(user_id)
+		premium = await bot.db.check_user_premium(user_id)
 
-	user_id = message.from_user.id
-
-	left = 'Неограничено'
-	used = await bot.db.get_user_usage(user_id)
-	premium = await bot.db.is_user_premium(user_id)
-
-	if not premium and bot.config.DOWNLOADS_FREE_LIMIT:
-		left = int(bot.config.DOWNLOADS_FREE_LIMIT) - int(used)
-		if left < 0:
-			left = 0
-
-	return await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text=f'Лимит загрузок: {left}')
-
+		if not premium and bot.config.DOWNLOADS_FREE_LIMIT:
+			left = int(bot.config.DOWNLOADS_FREE_LIMIT) - int(used)
+			if left < 0:
+				left = 0
+		return await bot.messages_queue.add( callee='send_message', chat_id=callback_query.message.chat.id, text=f'Лимит загрузок: {left}')
 
 @router.message(Command(commands='format'))
 async def format_command(message: types.Message, state: FSMContext) -> None:

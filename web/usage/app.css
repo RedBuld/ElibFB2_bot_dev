@@ -48,29 +48,46 @@ body {
 	-webkit-flex-direction: column;
 	flex-direction: column;
 }
-#download_stats {
+#bot_stats {
 	display: block;
 	padding: 1.5rem;
 }
-#download_stats table {
+#bot_stats table {
 	width: 100%;
 	border: 1px solid var(--tg-theme-hint-color);
 	border-collapse: collapse;
 	margin: 0px 0px 1.5rem 0px;
 }
-#download_stats table td,
-#download_stats table th {
+#bot_stats table td,
+#bot_stats table th {
 	border: 1px solid var(--tg-theme-hint-color);
 	padding: 0.5rem;
 }
-#download_stats table a {
+#bot_stats table a {
 	color: var(--tg-theme-link-color);
 }
-#download_stats table td {
+#bot_stats table td {
 	color: var(--tg-theme-text-color);
 }
-#download_stats table th {
+#bot_stats table th {
 	border-color: var(--tg-theme-button-color);
 	background-color: var(--tg-theme-button-color);
 	color: var(--tg-theme-button-text-color);
+}
+#bot_stats table td {
+	color: var(--tg-theme-text-color);
+}
+#bot_stats .progressbar {
+	margin:  0px;
+	display: block;
+	width: 100%;
+	height: 2.375rem;
+	border-radius: 0.75rem;
+	background-color: var(--tg-theme-hint-color);
+	overflow: hidden;
+}
+#bot_stats .progressbar .bar {
+	height: 2.375rem;
+	width: 0%;
+	background-color: var(--tg-theme-button-color);
 }
