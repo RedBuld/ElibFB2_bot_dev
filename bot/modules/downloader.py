@@ -674,10 +674,12 @@ class Downloader(object):
 							_cl = f'-parted-first{_end}'
 
 			path = self.result['files'][0]
-			file = os.path.basename(path)
 
-			_tmp_name, extension = os.path.splitext(file)
+
 			if _cl != '':
+				file = os.path.basename(path)
+				_tmp_name, extension = os.path.splitext(file)
+
 				_tmp_name = _tmp_name+_cl
 				_tmp_path = os.path.join(self._files_dir, _tmp_name+extension)
 
@@ -734,14 +736,14 @@ class Downloader(object):
 		if len(self.result['files']) == 1:
 
 			_return = []
-
 			path = self.result['files'][0]
-			file = os.path.basename(path)
 
 			fsize = os.path.getsize(path)
-
 			_split_limit = self.bot.config.get('DOWNLOADS_SPLIT_LIMIT')
+
 			if fsize > _split_limit:
+				file = os.path.basename(path)
+				_tmp_name, extension = os.path.splitext(file)
 
 				splitted_folder = os.path.join(self._files_dir, 'splitted')
 				os.makedirs(splitted_folder,exist_ok=True)
