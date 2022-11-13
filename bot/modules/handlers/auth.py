@@ -28,7 +28,7 @@ async def login_command(message: types.Message, state: FSMContext) -> None:
 
 	used_for_auth = []
 	for site in bot.config.get('SITES_LIST'):
-		if "auth" in bot.config.get('SITES_DATA')[site]:
+		if "auth" in bot.config.get('SITES_PARAMS')[site]:
 			used_for_auth.append(site)
 
 	if len(used_for_auth) > 0:
@@ -38,9 +38,9 @@ async def login_command(message: types.Message, state: FSMContext) -> None:
 
 		reply_markup = InlineKeyboardMarkup(row_width=1, inline_keyboard=row_btns)
 
-		await state.set_state(AuthForm.site)
-
 		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text="Выберите сайт", reply_markup=reply_markup )
+
+		await state.set_state(AuthForm.site)
 	else:
 		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text="Нет сайтов доступных для авторизации", reply_markup=ReplyKeyboardRemove() )
 
@@ -53,8 +53,8 @@ async def login_command_site_handler(callback_query: types.CallbackQuery, state:
 	site = callback_query.data.split(':')[1]
 
 	used_for_auth = []
-	for site in bot.config.get('SITES_LIST'):
-		if "auth" in bot.config.get('SITES_DATA')[site]:
+	for auth_site in bot.config.get('SITES_LIST'):
+		if "auth" in bot.config.get('SITES_PARAMS')[auth_site]:
 			used_for_auth.append(auth_site)
 
 	if site in used_for_auth:

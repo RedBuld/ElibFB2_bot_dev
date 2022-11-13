@@ -157,19 +157,21 @@ class Downloader(object):
 				await proc.wait()
 
 		if self.result['files']:
-			if len(self.result['files']) > 1:
-				async for files in self.__chunked_media_group():
-					media = []
-					for file in files:
-						m = {
-							'media': file,
-							'caption': self.result['caption'],
-							'parse_mode':'MarkdownV2'
-						}
-						media.append(m)
-					await self.bot.messages_queue.add( 'send_media_group', chat_id=self.task.chat_id, media=media )
-			else:
-				await self.bot.messages_queue.add( 'send_document', chat_id=self.task.chat_id, document=self.result['files'][0], caption=self.result['caption'], parse_mode='MarkdownV2' )
+			# if len(self.result['files']) > 1:
+			# 	async for files in self.__chunked_media_group():
+			# 		media = []
+			# 		for file in files:
+			# 			m = {
+			# 				'media': file,
+			# 				'caption': self.result['caption'],
+			# 				'parse_mode':'MarkdownV2'
+			# 			}
+			# 			media.append(m)
+			# 		await self.bot.messages_queue.add( 'send_media_group', chat_id=self.task.chat_id, media=media )
+			# else:
+			# 	await self.bot.messages_queue.add( 'send_document', chat_id=self.task.chat_id, document=self.result['files'][0], caption=self.result['caption'], parse_mode='MarkdownV2' )
+			for file in self.result['files']:
+				await self.bot.messages_queue.add( 'send_document', chat_id=self.task.chat_id, document=file, caption=self.result['caption'], parse_mode='MarkdownV2' )
 
 		if self.status != DOWNLOAD_STATUS.ERROR:
 			proc = await asyncio.create_subprocess_shell(f'rm -rf "{self._log_file}"')
