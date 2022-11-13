@@ -64,11 +64,11 @@ class Downloader(object):
 			'files': [],
 			'caption': None
 		}
-		self._running_lock = asyncio.Lock()
 		self.mq_id = self.task.mq_message_id
-		self._path = str(self.bot.config.BOT_ID)+'-'+str(self.task.chat_id)+'-'+str(self.task.id)
-		self._log_file = os.path.join( self.bot.config.DOWNLOADER_LOG_PATH, self._path+'.log' )
-		self._files_dir = os.path.join( self.bot.config.DOWNLOADER_TEMP_PATH, self._path )
+		self._running_lock = asyncio.Lock()
+		self._path = str(self.bot.config.get('BOT_ID'))+'-'+str(self.task.user_id)+'-'+str(self.task.id)
+		self._log_file = os.path.join( self.bot.config.get('DOWNLOADER_LOG_PATH'), self._path+'.log' )
+		self._files_dir = os.path.join( self.bot.config.get('DOWNLOADER_TEMP_PATH'), self._path )
 		self._running_lock = asyncio.Lock()
 		self._chapters_ln = 0
 
@@ -216,7 +216,7 @@ class Downloader(object):
 			or
 			self.last_status['cancellable'] != cancellable
 			or
-			self.last_status['timestamp'] <= ( timestamp - self.bot.config.DOWNLOADS_NOTICES_INTERVAL )
+			self.last_status['timestamp'] <= ( timestamp - self.bot.config.get('DOWNLOADS_NOTICES_INTERVAL') )
 		)
 
 		if need_send:
@@ -329,7 +329,7 @@ class Downloader(object):
 
 		try:
 			with open(self._log_file,'w') as log:
-				self._process = await asyncio.create_subprocess_exec(_exec, *args, stdout=log, cwd=self.bot.config.DOWNLOADER_PATH)
+				self._process = await asyncio.create_subprocess_exec(_exec, *args, stdout=log, cwd=self.bot.config.get('DOWNLOADER_PATH'))
 			await self._process.wait()
 
 			if self._process.returncode != 0:
@@ -402,7 +402,8 @@ class Downloader(object):
 		command.append('Elib2Ebook.dll')
 		command.append('--save')
 		command.append(f"{self._files_dir}")
-		# command = f'cd {self.bot.config.DOWNLOADER_PATH}; dotnet Elib2Ebook.dll --save "{self._files_dir}"'
+		# _dpath = self.bot.config.get('DOWNLOADER_PATH')
+		# command = f'cd {_dpath}; dotnet Elib2Ebook.dll --save "{self._files_dir}"'
 
 		task = self.task
 
@@ -417,7 +418,7 @@ class Downloader(object):
 			command.append(f"{task.format},json")
 		else:
 			command.append('--format')
-			_def = list(self.bot.config.FORMATS.keys())[0]
+			_def = self.bot.config.get('FORMATS_LIST')[0]
 			command.append(f"{_def},json")
 
 		if task.start:
@@ -430,8 +431,9 @@ class Downloader(object):
 			command.append('--end')
 			command.append(f"{task.end}")
 
-		if task.site in self.bot.config.PROXY_LIST:
-			_p = self.bot.config.PROXY_LIST[task.site]
+		_proxied = self.bot.config.get('PROXY_PARAMS')
+		if task.site in _proxied:
+			_p = _proxied[task.site]
 			# command += f' --proxy "{_p}" -timeout 120'
 			command.append('--proxy')
 			command.append(f"{_p}")
@@ -461,9 +463,10 @@ class Downloader(object):
 			password = None
 			if task.auth == 'anon':
 				try:
-					if task.site in self.bot.config.DEMO_USER:
-						login = self.bot.config.DEMO_USER[task.site]['login']
-						password = self.bot.config.DEMO_USER[task.site]['password']
+					_auths = self.bot.config.get('BUILTIN_AUTHS')
+					if task.site in _auths:
+						login = _auths[task.site]['login']
+						password = _auths[task.site]['password']
 				except Exception as e:
 					pass
 			elif task.auth != 'none':
@@ -508,6 +511,10 @@ class Downloader(object):
 				cover = os.path.join(self._files_dir, x)
 			else:
 				_trash.append(os.path.join(self._files_dir, x))
+
+		for _t in _trash:
+			proc = await asyncio.create_subprocess_shell(f'rm -rf "{_t}"')
+			await proc.wait()
 
 		return _json, file, cover
 
@@ -628,38 +635,42 @@ class Downloader(object):
 
 	async def __process_files(self) -> list:
 
-		if len(self.result['files']) == 1:
-			#maybe_rename
-			
-			_cl = ''
+		await self.__process_files__maybe_rename()
 
-			if self.bot.config.BOT_MODE == 0:
-				if self._chapters_ln > 0:
-					_start = self.task.start
-					_end = self.task.end
+		await self.__process_files__maybe_convert()
 
-					if _start and _end:
-						_start = int(_start)
-						_end = int(_end)
-						if _start > 0 and _end > 0:
-							_cl = f'-parted-{_start}-{_end}'
-						elif _start > 0 and _end < 0:
-							__end = _start+self._chapters_ln
-							_cl = f'-parted-{_start}-{__end}'
+		await self.__process_files__maybe_split()
 
-					elif _start and not _end:
-						_start = int(_start)
-						if _start > 0:
-							__end = _start+self._chapters_ln
-							_cl = f'-parted-{_start}-{__end}'
-						else:
+	async def __process_files__maybe_rename(self) -> None:
+
+		_cl = ''
+		if self.task.start or self.task.end:
+			if self._chapters_ln > 0:
+				_start = self.task.start
+				_end = self.task.end
+
+				if _start and _end:
+					_start = int(_start)
+					_end = int(_end)
+					if _start > 0 and _end > 0:
+						_cl = f'-parted-{_start}-{_end}'
+					elif _start > 0 and _end < 0:
+						__end = _start+self._chapters_ln
+						_cl = f'-parted-{_start}-{__end}'
+				elif _start and not _end:
+					_start = int(_start)
+					if _start > 0:
+						__end = _start+self._chapters_ln
+						_cl = f'-parted-{_start}-{__end}'
+					else:
+						if abs(_start) >= self._chapters_ln:
 							_cl = f'-parted-last{_start}'
-
-					elif _end and not _start:
-						_end = int(_end)
-						if _end > 0:
-							_cl = f'-parted-1-{self._chapters_ln}'
-						else:
+				elif _end and not _start:
+					_end = int(_end)
+					if _end > 0:
+						_cl = f'-parted-1-{self._chapters_ln}'
+					else:
+						if abs(_end) >= self._chapters_ln:
 							_cl = f'-parted-first{_end}'
 
 			path = self.result['files'][0]
@@ -675,6 +686,53 @@ class Downloader(object):
 
 				self.result['files'][0] = _tmp_path
 
+	async def __process_files__maybe_convert(self) -> int:
+
+		_converters_path = self.bot.config.get('CONVERTERS_PATH')
+
+		if self.task.target_format and _converters_path:
+			source_path = os.path.dirname( self.result['files'][0] )
+			target_path = os.path.join( source_path, 'converted' )
+
+			_exec = 'python3'
+			command = []
+			command.append('convert.py')
+			command.append(source_path)
+			command.append(target_path)
+			command.append(self.task.target_format)
+
+			os.makedirs(target_path,exist_ok=True)
+
+			self._process = await asyncio.create_subprocess_exec(_exec, *command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE, cwd=_converters_path)
+			await self._process.wait()
+			# stdout, stderr = await self._process.communicate()
+
+			file = None
+			_trash = []
+
+			t = os.listdir(target_path)
+			for x in t:
+				_tmp_name, extension = os.path.splitext(x)
+				extension = extension[1:]
+				if extension == self.task.target_format:
+					file = os.path.join(target_path, x)
+				else:
+					_trash.append(os.path.join(target_path, x))
+
+			for _t in _trash:
+				proc = await asyncio.create_subprocess_shell(f'rm -rf "{_t}"')
+				await proc.wait()
+
+			if file:
+				orig_file = self.result['files'][0]
+				proc = await asyncio.create_subprocess_shell(f'rm -rf "{orig_file}"')
+				await proc.wait()
+				self.result['files'][0] = file
+
+	async def __process_files__maybe_split(self) -> int:
+
+		if len(self.result['files']) == 1:
+
 			_return = []
 
 			path = self.result['files'][0]
@@ -682,14 +740,15 @@ class Downloader(object):
 
 			fsize = os.path.getsize(path)
 
-			if fsize > self.bot.config.DOWNLOADS_SPLIT_LIMIT:
+			_split_limit = self.bot.config.get('DOWNLOADS_SPLIT_LIMIT')
+			if fsize > _split_limit:
 
 				splitted_folder = os.path.join(self._files_dir, 'splitted')
 				os.makedirs(splitted_folder,exist_ok=True)
 
 				splitted_file = os.path.join(splitted_folder, f'{_tmp_name}.zip')
 
-				sfs = int(self.bot.config.DOWNLOADS_SPLIT_LIMIT / 1024 / 1024)
+				sfs = int(_split_limit / 1024 / 1024)
 				sfs = f'{sfs}m'
 				cmd = f'cd {self._files_dir}; zip -s {sfs} "{splitted_file}" "{file}"'
 

@@ -24,8 +24,9 @@ def get_router(_bot: Bot):
 @router.message(F.content_type.in_({'text'}), F.text.startswith('http'))
 async def prepare_download(message: types.Message, state: FSMContext) -> None:
 
-	if bot.config.LOCKED:
-		if message.from_user.id not in bot.config.ADMINS:
+	if bot.config.get('LOCKED'):
+		_admins = bot.config.get('ADMINS')
+		if message.from_user.id not in _admins:
 			await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text="Идет разработка" )
 			return
 
@@ -34,7 +35,7 @@ async def prepare_download(message: types.Message, state: FSMContext) -> None:
 		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text="Очередь заполнена. Пжалста пдждте" )
 		return
 
-	if not bot.config.ACCEPT_NEW:
+	if not bot.config.get('ACCEPT_NEW'):
 		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text="Бот временно не принимает новые закачки" )
 		return
 
@@ -48,9 +49,15 @@ async def prepare_download(message: types.Message, state: FSMContext) -> None:
 		await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text=f'Вы были заблокированы. Причина: {check_user_banned.reason}. Срок: {check_user_banned.until}' )
 		return
 
-	if bot.config.BOT_MODE == 0:
+	_bot_mode = bot.config.get('BOT_MODE')
+	_download_url = bot.config.get('DOWNLOAD_URL')
+
+	print('_bot_mode,_download_url')
+	print(_bot_mode,_download_url)
+
+	if _bot_mode == 0 and _download_url:
 		return await __mode_0_download_prepare(message, state)
-	if bot.config.BOT_MODE == 1:
+	else:
 		return await __mode_1_download_prepare(message, state)
 
 
@@ -70,7 +77,14 @@ async def mode_0_download_handler(message: types.Message, state: FSMContext) -> 
 			for k in data:
 				params[k] = data[k]
 		_format = params['format']
-		_format_name = bot.config.FORMATS[_format]
+
+		_formats_list = bot.config.get('FORMATS_LIST')
+		_formats_params = bot.config.get('FORMATS_PARAMS')
+		if _format not in _formats_list:
+			_format = _formats_list[0]
+			params['format'] = _format
+		_format_name = _formats_params[_format]
+
 		url = params['url']
 
 		msg = f"Добавляю в очередь {url}"
@@ -125,11 +139,13 @@ async def mode_1_download_handler(callback_query: types.CallbackQuery, state: FS
 
 	url = await bot.db.get_link(link_id)
 
-	for r in bot.config.REGEX_LIST:
+	_regex_list = bot.config.get('REGEX_LIST')
+	_sites_list = bot.config.get('SITES_LIST')
+	for r in _regex_list:
 		m = r.match(url)
 		if m:
 			site = m.group('site')
-			if site not in bot.config.SITES_LIST:
+			if site not in _sites_list:
 				site = None
 			break
 
@@ -150,7 +166,12 @@ async def mode_1_download_handler(callback_query: types.CallbackQuery, state: FS
 	if url:
 		msg = f"Добавляю в очередь {url}"
 
-		_format_name = bot.config.FORMATS[_format]
+		_formats_list = bot.config.get('FORMATS_LIST')
+		_formats_params = bot.config.get('FORMATS_PARAMS')
+		if _format not in _formats_list:
+			_format = _formats_list[0]
+			params['format'] = _format
+		_format_name = _formats_params[_format]
 
 		msg += f"\nФормат: {_format_name}"
 
@@ -200,12 +221,14 @@ async def __mode_0_download_prepare(message: types.Message, state: FSMContext) -
 	url = ''
 	site = ''
 
+	_regex_list = bot.config.get('REGEX_LIST')
+	_sites_list = bot.config.get('SITES_LIST')
 	for q in query:
-		for r in bot.config.REGEX_LIST:
+		for r in _regex_list:
 			m = r.match(q)
 			if m:
 				site = m.group('site')
-				if site not in bot.config.SITES_LIST:
+				if site not in _sites_list:
 					site = None
 				else:
 					url = q
@@ -220,9 +243,11 @@ async def __mode_0_download_prepare(message: types.Message, state: FSMContext) -
 		use_images = False
 		force_images = False
 
-		if "auth" in bot.config.SITES_DATA[site]:
+		_sites_params = bot.config.get('SITES_PARAMS')
+
+		if "auth" in _sites_params[site]:
 			uas = await bot.db.get_all_site_auths(message.from_user.id,site)
-			demo_login = True if site in bot.config.DEMO_USER else False
+			demo_login = True if site in bot.config.get('BUILTIN_AUTHS') else False
 			if uas:
 				for ua in uas:
 					use_auth[str(ua.id)] = ua.get_name()
@@ -230,15 +255,27 @@ async def __mode_0_download_prepare(message: types.Message, state: FSMContext) -
 				use_auth['anon'] = 'Анонимные доступы'
 			use_auth['none'] = 'Без авторизации'
 
-		if "paging" in bot.config.SITES_DATA[site]:
+		if "paging" in _sites_params[site]:
 			use_start_end = True
 
-		if "images" in bot.config.SITES_DATA[site]:
+		if "images" in _sites_params[site]:
 			use_images = True
 
-		if "force_images" in bot.config.SITES_DATA[site]:
+		if "force_images" in _sites_params[site]:
 			force_images = True
 			use_images = False
+
+		_format = await bot.db.get_user_setting(message.from_user.id,'format')
+		if _format and _format.value:
+			_format = _format.value
+		else:
+			_format = None
+
+		_formats_list = bot.config.get('FORMATS_LIST')
+		_formats_params = bot.config.get('FORMATS_PARAMS')
+		formats = {}
+		for _f in _formats_list:
+			formats[_f] = _formats_params[_f]
 
 		payload = {
 			'use_auth': use_auth,
@@ -246,13 +283,16 @@ async def __mode_0_download_prepare(message: types.Message, state: FSMContext) -
 			'use_end': use_start_end,
 			'use_images': use_images,
 			'use_cover': True,
-			'formats': bot.config.FORMATS,
+			'formats': formats,
+			'format': _format,
 			'images': True,
 			'cover': False,
 		}
+		_download_url = bot.config.get('DOWNLOAD_URL')
+
 		payload = orjson.dumps(payload).decode('utf8')
 		payload = urllib.parse.quote_plus( payload )
-		web_app = types.WebAppInfo(url=f"{bot.config.DOWNLOAD_URL}?payload={payload}")
+		web_app = types.WebAppInfo(url=f"{_download_url}?payload={payload}")
 		
 		reply_markup = ReplyKeyboardMarkup(
 			row_width=1,
@@ -285,12 +325,14 @@ async def __mode_1_download_prepare(message: types.Message, state: FSMContext) -
 	url = ''
 	site = ''
 
+	_regex_list = bot.config.get('REGEX_LIST')
+	_sites_list = bot.config.get('SITES_LIST')
 	for q in query:
-		for r in bot.config.REGEX_LIST:
+		for r in _regex_list:
 			m = r.match(q)
 			if m:
 				site = m.group('site')
-				if site not in bot.config.SITES_LIST:
+				if site not in _sites_list:
 					site = None
 				else:
 					url = q
@@ -310,10 +352,11 @@ async def __mode_1_download_prepare(message: types.Message, state: FSMContext) -
 		link = await bot.db.maybe_add_link(url)
 
 		# download_id = await bot.downloads_queue.add( params=params )
+		_sites_params = bot.config.get('SITES_PARAMS')
 
-		if "auth" in bot.config.SITES_DATA[site]:
+		if "auth" in _sites_params[site]:
 			uas = await bot.db.get_all_site_auths(message.from_user.id,site)
-			demo_login = True if site in bot.config.DEMO_USER else False
+			demo_login = True if site in bot.config.get('BUILTIN_AUTHS') else False
 			if uas:
 				for ua in uas:
 					use_auth[str(ua.id)] = ua.get_name()
@@ -344,15 +387,25 @@ async def __enqueue_download(message: types.Message, params: dict) -> None:
 				params['start'] = str(int(params['start']))
 			else:
 				del params['start']
+
 		if 'end' in params:
 			if params['end']:
 				params['end'] = str(int(params['end']))
 			else:
 				del params['end']
+
 		if 'images' in params:
 			params['images'] = '1' if params['images'] else '0'
+
 		if 'cover' in params:
 			params['cover'] = '1' if params['cover'] else '0'
+
+		_format = params['format']
+		_convertable = bot.config.get('CONVERT_PARAMS')
+
+		if _format in _convertable:
+			params['target_format'] = _format
+			params['format'] = _convertable[_format]
 
 		download_id = await bot.downloads_queue.add( params=params )
 		if download_id:

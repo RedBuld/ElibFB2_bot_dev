@@ -135,6 +135,7 @@ class Download(Base):
 	start = sa.Column(sa.Text, nullable=True, default=None)
 	end = sa.Column(sa.Text, nullable=True, default=None)
 	format = sa.Column(sa.Text)
+	target_format = sa.Column(sa.Text)
 	auth = sa.Column(sa.Text, default='none')
 	images = sa.Column(sa.String(1), default=0)
 	cover = sa.Column(sa.String(1), default=0)
@@ -158,6 +159,7 @@ class Download(Base):
 			'start': self.start,
 			'end': self.end,
 			'format': self.format,
+			'target_format': self.target_format,
 			'auth': self.auth,
 			'images': self.images,
 			'cover': self.cover,

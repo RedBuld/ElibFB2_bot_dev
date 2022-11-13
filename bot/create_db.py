@@ -8,14 +8,14 @@ from modules.config import Config
 from modules.db import DB
 
 
-parser = argparse.ArgumentParser(prog='bot.py', conflict_handler='resolve')
-parser.add_argument('config', type=Path, help='path to config file')
+parser = argparse.ArgumentParser(prog='create_db.py', conflict_handler='resolve')
+parser.add_argument('bot_id', type=str, help='bot_id to load config')
 execute_args = parser.parse_args()
 
-if not execute_args.config:
-	sys.exit('Not passed `config` path, use -h to get help')
+if not execute_args.bot_id:
+	sys.exit('Not passed `bot_id`, use -h to get help')
 
-config = Config(config_file=execute_args.config)
+config = Config(bot_id=execute_args.bot_id)
 
 logging.basicConfig(
 	format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -23,7 +23,7 @@ logging.basicConfig(
 )
 logger=logging.getLogger(__name__)
 
-bot = Bot( token=config.API_TOKEN )
+bot = Bot( token=config.get('BOT_TOKEN') )
 bot.config = config
 db = DB(bot)
 

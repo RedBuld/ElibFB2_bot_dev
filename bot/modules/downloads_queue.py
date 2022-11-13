@@ -1,4 +1,4 @@
-import asyncio, logging, copy
+import asyncio, logging, copy, time
 from typing import Optional
 from aiogram import Bot
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
@@ -11,6 +11,7 @@ class DownloadsQueue():
 	_thread = None
 	_running_lock = None
 	_delayed_restart = False
+	_last_notices = None
 
 	_temp = []
 	_queue = {}
@@ -78,7 +79,7 @@ class DownloadsQueue():
 		return
 
 	async def can_add(self) -> bool:
-		return len(self.__queue_ids__) < self.bot.config.DOWNLOADS_Q_LIMIT
+		return len(self.__queue_ids__) < self.bot.config.get('DOWNLOADS_Q_LENGTH_LIMIT')
 
 	async def add(self, params: dict) -> Optional[int]:
 
@@ -204,8 +205,8 @@ class DownloadsQueue():
 
 		queue_moved = len_before != len_after
 
-		if self.bot.config.DOWNLOADS_Q_RUN:
-			free_slots = self.bot.config.DOWNLOADS_SIMULTANEOUSLY - len(self.__active_ids__)
+		if self.bot.config.get('DOWNLOADS_Q_RUNNING'):
+			free_slots = self.bot.config.get('DOWNLOADS_Q_SIMULTANEOUSLY') - len(self.__active_ids__)
 			if free_slots > 0:
 				_queue_ids = self.__queue_ids__[0:free_slots]
 				for download_id in _queue_ids:
@@ -213,14 +214,14 @@ class DownloadsQueue():
 					del self._queue[download_id]
 				queue_moved = True
 
-		await self.bot.db.update_bot_stat( len(self.__queue_ids__), len(self.__active_ids__), self.bot.config.DOWNLOADS_Q_LIMIT, self.bot.config.DOWNLOADS_SIMULTANEOUSLY )
+		await self.bot.db.update_bot_stat( len(self.__queue_ids__), len(self.__active_ids__), self.bot.config.get('DOWNLOADS_Q_LENGTH_LIMIT'), self.bot.config.get('DOWNLOADS_Q_SIMULTANEOUSLY') )
 		
 		if queue_moved:
 			_waiting_ids = self.__queue_ids__
 			for download_id in _waiting_ids:
 				await self.__queue_moved(download_id)
 
-		await asyncio.sleep(self.bot.config.DOWNLOADS_Q_INTERVAL)
+		await asyncio.sleep( self.bot.config.get('DOWNLOADS_CHECK_INTERVAL') )
 	
 	async def __queue_add(self, task: Download, _upd: Optional[bool]=True) -> None:
 		self._queue[task.id] = {'position':None,'last_message':task.last_message,'chat_id':task.chat_id,'message_id':task.message_id,'mq_id':task.mq_message_id}

@@ -4,6 +4,9 @@ if(!isset($_GET['payload']))
 	die("There's nothing interesting");
 }
 $payload = json_decode($_GET['payload'],true);
+
+$_format = isset( $payload['format'] ) ? $payload['format'] : null;
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -34,7 +37,7 @@ $payload = json_decode($_GET['payload'],true);
 		<div class="form-row select">
 			<select class="input" id="format" name="format">
 				<?php foreach ($payload['formats'] as $key => $value) { ?>
-				<option value="<?=$key?>"><?=$value?></option>
+				<option value="<?=$key?>" <?=($_format==$key?'selected':'')?> ><?=$value?></option>
 				<?php } ?>
 			</select>
 			<label for="format" class="label">Формат</label>

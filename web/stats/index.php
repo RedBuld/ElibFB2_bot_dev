@@ -47,11 +47,14 @@ function total_fsize($n)
 
 $sql_day = "SELECT sites_stats.site, sites_stats.count, sites_stats.fsize FROM sites_stats WHERE sites_stats.day = '_DAY_' AND sites_stats.bot_id = '_BOT_' ORDER BY sites_stats.site ASC";
 $sql_month = "SELECT sites_stats.site, sum(sites_stats.count) AS count, sum(sites_stats.fsize) AS fsize FROM sites_stats WHERE sites_stats.day BETWEEN '_START_' AND '_END_' AND sites_stats.bot_id = '_BOT_' GROUP BY sites_stats.site ORDER BY sites_stats.site ASC";
+$sql_total = "SELECT sites_stats.site, sum(sites_stats.count) AS count, sum(sites_stats.fsize) AS fsize FROM sites_stats WHERE sites_stats.bot_id = '_BOT_' GROUP BY sites_stats.site ORDER BY sites_stats.site ASC";
+$sql_total_all = "SELECT sites_stats.site, sum(sites_stats.count) AS count, sum(sites_stats.fsize) AS fsize FROM sites_stats GROUP BY sites_stats.site ORDER BY sites_stats.site ASC";
 
 $w = ["скачивание","скачивания","скачиваний"];
 $mysqli = new mysqli("localhost", "grampus-tg-bot-v2", "grampus-tg-bot-v2", "grampus-tg-bot-v2");
 $sql_day = str_replace('_BOT_', $mysqli->real_escape_string($bot_id), $sql_day);
 $sql_month = str_replace('_BOT_', $mysqli->real_escape_string($bot_id), $sql_month);
+$sql_total = str_replace('_BOT_', $mysqli->real_escape_string($bot_id), $sql_total);
 
 $hs = false;
 ?>
@@ -248,6 +251,98 @@ $hs = false;
 		</table>
 		<?php
 		}
+
+		/*
+
+		$result = $mysqli->query($sql_total);
+		$total = 0;
+		$fsize = 0;
+
+		if( $result->num_rows > 0 )
+		{
+			$hs = true;
+		?>
+		<table>
+			<thead>
+				<tr>
+					<th colspan="3">Статистика всего</th>
+				</tr>
+				<tr>
+					<th>Сайт</th>
+					<th>Скачиваний</th>
+					<th>Объем</th>
+				</tr>
+			</thead>
+			<tbody>
+				<?php
+				foreach( $result as $row )
+				{
+				?>
+				<tr>
+					<td><a target="_blank" href="http://<?=$row['site']?>"><?=$row['site']?></a></td>
+					<td><?=plural_form($row['count'],$w)?></td>
+					<td><?=total_fsize($row['fsize'])?></td>
+				</tr>
+				<?php
+				$total+=intval($row['count']);
+				$fsize+=intval($row['fsize']);
+				}
+				?>
+				<tr>
+					<td>Всего</td>
+					<td><?=plural_form($total,$w)?></td>
+					<td><?=total_fsize($fsize)?></td>
+				</tr>
+			</tbody>
+		</table>
+		<?php
+		}
+
+		$result = $mysqli->query($sql_total_all);
+		$total = 0;
+		$fsize = 0;
+
+		if( $result->num_rows > 0 )
+		{
+			$hs = true;
+		?>
+		<table>
+			<thead>
+				<tr>
+					<th colspan="3">Статистика всего (все боты)</th>
+				</tr>
+				<tr>
+					<th>Сайт</th>
+					<th>Скачиваний</th>
+					<th>Объем</th>
+				</tr>
+			</thead>
+			<tbody>
+				<?php
+				foreach( $result as $row )
+				{
+				?>
+				<tr>
+					<td><a target="_blank" href="http://<?=$row['site']?>"><?=$row['site']?></a></td>
+					<td><?=plural_form($row['count'],$w)?></td>
+					<td><?=total_fsize($row['fsize'])?></td>
+				</tr>
+				<?php
+				$total+=intval($row['count']);
+				$fsize+=intval($row['fsize']);
+				}
+				?>
+				<tr>
+					<td>Всего</td>
+					<td><?=plural_form($total,$w)?></td>
+					<td><?=total_fsize($fsize)?></td>
+				</tr>
+			</tbody>
+		</table>
+		<?php
+		}
+
+		*/
 
 		if(!$hs)
 		{

@@ -27,8 +27,8 @@ async def login_command(message: types.Message, state: FSMContext) -> None:
 		return
 
 	used_for_auth = []
-	for site in bot.config.SITES_DATA:
-		if "auth" in bot.config.SITES_DATA[site]:
+	for site in bot.config.get('SITES_LIST'):
+		if "auth" in bot.config.get('SITES_DATA')[site]:
 			used_for_auth.append(site)
 
 	if len(used_for_auth) > 0:
@@ -53,17 +53,20 @@ async def login_command_site_handler(callback_query: types.CallbackQuery, state:
 	site = callback_query.data.split(':')[1]
 
 	used_for_auth = []
-	for auth_site in bot.config.SITES_DATA:
-		if "auth" in bot.config.SITES_DATA[auth_site]:
+	for site in bot.config.get('SITES_LIST'):
+		if "auth" in bot.config.get('SITES_DATA')[site]:
 			used_for_auth.append(auth_site)
 
 	if site in used_for_auth:
 
 		await state.update_data(site=site)
 
-		if bot.config.BOT_MODE == 0:
+		_bot_mode = bot.config.get('BOT_MODE')
+		_auth_url = bot.config.get('AUTH_URL')
+
+		if _bot_mode == 0 and _auth_url:
 			await state.set_state(AuthForm.web)
-			web_app = types.WebAppInfo(url=f"{bot.config.AUTH_URL}")
+			web_app = types.WebAppInfo(url=f"{_auth_url}")
 			reply_markup = ReplyKeyboardMarkup(
 				row_width=1,
 				keyboard=[
@@ -73,8 +76,7 @@ async def login_command_site_handler(callback_query: types.CallbackQuery, state:
 			)
 			await bot.messages_queue.add( callee='edit_message_text', chat_id=callback_query.message.chat.id, message_id=callback_query.message.message_id, text=f'Выбран сайт {site}', reply_markup=None)
 			await bot.messages_queue.add( callee='send_message', chat_id=callback_query.message.chat.id, text=f'Используйте окно авторизации', reply_markup=reply_markup)
-
-		if bot.config.BOT_MODE == 1:
+		else:
 			await state.set_state(AuthForm.login)
 			await bot.messages_queue.add( callee='edit_message_text', chat_id=callback_query.message.chat.id, message_id=callback_query.message.message_id, text=f'Выбран сайт {site}\n\n!!!ВХОД ЧЕРЕЗ СОЦ. СЕТИ НЕВОЗМОЖЕН!!!\n\nНажмите /cancel для отмены', reply_markup=None)
 			await bot.messages_queue.add( callee='send_message', chat_id=callback_query.message.chat.id, text=f'Отправьте сообщением логин')

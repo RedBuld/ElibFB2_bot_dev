@@ -68,7 +68,7 @@ class DB(object):
 
 	async def init(self, _sync=False) -> None:
 		try:
-			self.engine = create_async_engine(self.bot.config.DB_URL, pool_size=1, max_overflow=50)
+			self.engine = create_async_engine(self.bot.config.get('DB_URL'), pool_size=1, max_overflow=50)
 		except Exception as e:
 			raise e
 
@@ -77,10 +77,6 @@ class DB(object):
 			# self.engine.terminate()
 			# await self.engine.wait_closed()
 			await self.engine.dispose()
-
-	async def reinit(self) -> None:
-		await self.stop()
-		await self.init()
 
 	async def create_db(self) -> None:
 		try:
@@ -172,9 +168,9 @@ class DB(object):
 		return res
 
 	async def check_user_limit(self, user_id: int) -> bool:
-		if self.bot.config.DOWNLOADS_FREE_LIMIT:
+		if self.bot.config.get('DOWNLOADS_FREE_LIMIT'):
 			used = await self.get_user_usage(user_id)
-			if used >= self.bot.config.DOWNLOADS_FREE_LIMIT:
+			if used >= self.bot.config.get('DOWNLOADS_FREE_LIMIT'):
 				premium = await self.check_user_premium(user_id)
 				if not premium:
 					return False
@@ -317,7 +313,7 @@ class DB(object):
 		bs.queue_limit = queue_limit
 		bs.queue_sim = queue_sim
 		bs.queue_act = queue_act
-		bs.bot_id = self.bot.config.BOT_ID
+		bs.bot_id = self.bot.config.get('BOT_ID')
 		params = await self.__to_object__(bs)
 
 		async with self.engine.begin() as conn:
@@ -330,7 +326,7 @@ class DB(object):
 
 		ss = SiteStat()
 		ss.site = site
-		ss.bot_id = self.bot.config.BOT_ID
+		ss.bot_id = self.bot.config.get('BOT_ID')
 		params = await self.__to_object__(ss)
 
 		async with self.engine.begin() as conn:
@@ -419,7 +415,7 @@ class DB(object):
 		async with self.engine.begin() as conn:
 			query = await conn.execute(
 				select(Message.id)\
-					.filter(Message.bot_id==self.bot.config.BOT_ID)\
+					.filter(Message.bot_id==self.bot.config.get('BOT_ID'))\
 					.order_by(sa.asc(Message.id))
 			)
 			res = query.scalars()
@@ -444,7 +440,7 @@ class DB(object):
 		res = None
 		params = await self.__map_one__(params.values(),params.keys(),Message)
 		params = await self.__to_object__(params)
-		params['bot_id'] = self.bot.config.BOT_ID
+		params['bot_id'] = self.bot.config.get('BOT_ID')
 
 		async with self.engine.begin() as conn:
 			res = await conn.execute(Message.__table__.insert().values(**params))
@@ -478,7 +474,7 @@ class DB(object):
 		async with self.engine.begin() as conn:
 			query = await conn.execute(
 				select(Download)\
-					.filter(Download.bot_id==self.bot.config.BOT_ID)\
+					.filter(Download.bot_id==self.bot.config.get('BOT_ID'))\
 					.order_by(sa.desc(Download.status),sa.asc(Download.id))
 			)
 			res = query.fetchall()
@@ -505,7 +501,7 @@ class DB(object):
 		res = None
 		params = await self.__map_one__(params.values(),params.keys(),Download)
 		params = await self.__to_object__(params)
-		params['bot_id'] = self.bot.config.BOT_ID
+		params['bot_id'] = self.bot.config.get('BOT_ID')
 
 		async with self.engine.begin() as conn:
 			res = await conn.execute(Download.__table__.insert().values(**params))
@@ -517,7 +513,7 @@ class DB(object):
 		# d = await self.get_download()
 		# d = await self.__to_object__(d)
 		# d = await self.__map_one__(params.values(),params.keys(),Download)
-		params['bot_id'] = self.bot.config.BOT_ID
+		params['bot_id'] = self.bot.config.get('BOT_ID')
 		params['updated_on'] = datetime.now()
 		params = await self.__filter__(params, Download)
 

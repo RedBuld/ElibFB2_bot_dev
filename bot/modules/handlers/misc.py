@@ -20,25 +20,32 @@ def get_router(_bot: Bot):
 @router.message(Command(commands='start'))
 async def start_command(message: types.Message, state: FSMContext) -> None:
 	await state.clear()
-	if bot.config.START_MESSAGE:
-		return await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text=bot.config.START_MESSAGE, reply_markup=ReplyKeyboardRemove())
+	msg = bot.config.get('START_MESSAGE')
+	if msg:
+		return await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text=msg, reply_markup=ReplyKeyboardRemove())
 
 
 @router.message(Command(commands='sites'))
 async def sites_command(message: types.Message, state: FSMContext) -> None:
-
-	await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text=f'Список поддерживаемых сайтов:\n'+('\n'.join( [idna.decode(x) for x in bot.config.SITES_LIST] )) )
+	_sites_list = bot.config.get('SITES_LIST')
+	await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text=f'Список поддерживаемых сайтов:\n'+('\n'.join( [idna.decode(x) for x in _sites_list] )) )
 
 
 @router.message(Command(commands='stats'))
 async def stats_command(message: types.Message, state: FSMContext) -> None:
 
-	row_btns = [
-		[InlineKeyboardButton(text='Статистика', web_app=types.WebAppInfo(url=f'{bot.config.STATS_URL}?bot_id={bot.config.BOT_ID}'))],
-		[InlineKeyboardButton(text='Загрузка ботов', web_app=types.WebAppInfo(url=f'{bot.config.USAGE_URL}?bot_id={bot.config.BOT_ID}'))],
-		[InlineKeyboardButton(text='Лимит скачивания', callback_data='stats:free')],
-		[InlineKeyboardButton(text='Ваш ID', callback_data='stats:id')],
-	]
+	_stats_url = bot.config.get('STATS_URL')
+	_usage_url = bot.config.get('USAGE_URL')
+	_bot_id = bot.config.get('BOT_ID')
+
+	row_btns = []
+	if _stats_url:
+		row_btns.append( [InlineKeyboardButton(text='Статистика', web_app=types.WebAppInfo(url=f'{_stats_url}?bot_id={_bot_id}'))] )
+	if _usage_url:
+		row_btns.append( [InlineKeyboardButton(text='Загрузка ботов', web_app=types.WebAppInfo(url=f'{_usage_url}?bot_id={_bot_id}'))] )
+	row_btns.append( [InlineKeyboardButton(text='Лимит скачивания', callback_data='stats:free')] )
+	row_btns.append( [InlineKeyboardButton(text='Ваш ID', callback_data='stats:id')] )
+
 	reply_markup = InlineKeyboardMarkup(row_width=1,inline_keyboard=row_btns)
 	await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text='Статистика доступна тут', reply_markup=reply_markup)
 
@@ -58,8 +65,9 @@ async def stats_command_handler(callback_query: types.CallbackQuery, state: FSMC
 		used = await bot.db.get_user_usage(user_id)
 		premium = await bot.db.check_user_premium(user_id)
 
-		if not premium and bot.config.DOWNLOADS_FREE_LIMIT:
-			left = int(bot.config.DOWNLOADS_FREE_LIMIT) - int(used)
+		_free_limit = bot.config.get('DOWNLOADS_FREE_LIMIT')
+		if not premium and _free_limit:
+			left = int(_free_limit) - int(used)
 			if left < 0:
 				left = 0
 		return await bot.messages_queue.add( callee='send_message', chat_id=callback_query.message.chat.id, text=f'Лимит загрузок: {left}')
@@ -67,14 +75,20 @@ async def stats_command_handler(callback_query: types.CallbackQuery, state: FSMC
 @router.message(Command(commands='format'))
 async def format_command(message: types.Message, state: FSMContext) -> None:
 
-	if bot.config.BOT_MODE != 1:
-		return
+	_bot_mode = bot.config.get('BOT_MODE')
+	_download_url = bot.config.get('DOWNLOAD_URL')
 
 	user_id = message.from_user.id
 
+	_formats_list = bot.config.get('FORMATS_LIST')
+	_formats_params = bot.config.get('FORMATS_PARAMS')
+	formats = {}
+	for _f in _formats_list:
+		formats[_f] = _formats_params[_f]
+
 	row_btns = []
-	for fmt in bot.config.FORMATS:
-		row_btns.append([InlineKeyboardButton(text=bot.config.FORMATS[fmt], callback_data=f'format:{fmt}')])
+	for fmt in formats:
+		row_btns.append([InlineKeyboardButton(text=formats[fmt], callback_data=f'format:{fmt}')])
 	reply_markup = InlineKeyboardMarkup(row_width=1,inline_keyboard=row_btns)
 
 	await bot.messages_queue.add( callee='send_message', chat_id=message.chat.id, text='Выберите формат', reply_markup=reply_markup)
@@ -88,7 +102,7 @@ async def format_command_format(callback_query: types.CallbackQuery, state: FSMC
 	data = callback_query.data.split(':')
 	_format = str(data[1])
 	user_id = callback_query.from_user.id
-	_format_name = bot.config.FORMATS[_format]
+	_format_name = bot.config.get('FORMATS_PARAMS')[_format]
 
 	await bot.db.add_user_setting(user_id, 'format', _format)
 	await bot.messages_queue.add( callee='edit_message_text', chat_id=callback_query.message.chat.id, message_id=callback_query.message.message_id, text=f'Установлен формат: {_format_name}', reply_markup=None)

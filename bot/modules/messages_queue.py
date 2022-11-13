@@ -180,17 +180,18 @@ class MessagesQueue():
 				logger.error('mq:__process_message error'+repr(e))
 
 
-		await asyncio.sleep(self.bot.config.MESSAGES_Q_INTERVAL)
+		await asyncio.sleep( self.bot.config.get('MESSAGES_Q_INTERVAL') )
 
 	async def __process_message(self, message_id: int, try_count: int) -> None:
+
+		try:
+			del self._queue[message_id]
+		except Exception as e:
+			pass
 
 		task = await self.bot.db.get_message(message_id)
 
 		if not task:
-			try:
-				del self._queue[message_id]
-			except Exception as e:
-				pass
 			return
 
 		_try = True
@@ -295,14 +296,17 @@ class MessagesQueue():
 		except Exception as e:
 			logger.exception(f"Base exception [Exception],\n---------\n{repr(e)}\n---------")
 		finally:
+
 			if not _sended:
+
 				if _ignore:
 					await self.bot.db.remove_message(message_id)
 					return
+
 				if _try:
 					try_count += 1
 				
-				if try_count >= self._max_try:
+				if try_count > self._max_try:
 
 					params = {
 						'callee':'send_message_once',
@@ -313,21 +317,30 @@ class MessagesQueue():
 						}
 					}
 
-					await self.bot.db.update_message(message_id,params)
-					
+					message = await self.bot.db.update_message(message_id, params)
+
+					try:
+						self._queue[message_id] = 0
+					except Exception as e:
+						pass
+
 					for delete_file in delete_files:
 						proc = await asyncio.create_subprocess_shell(f'rm -rf "{delete_file}"')
 						await proc.wait()
+					
 				else:
+
 					try:
 						self._queue[message_id] = try_count
 					except Exception as e:
-						raise e
+						pass
 			else:
+
 				try:
 					del self._queue[message_id]
 				except Exception as e:
 					pass
+
 				await self.bot.db.remove_message(message_id)
 
 				for delete_file in delete_files:
