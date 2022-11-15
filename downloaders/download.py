@@ -35,7 +35,7 @@ async def __Elib2Ebook__prepare_command(args) -> str:
 
 	if 'url' in args and args['url']:
 		command.append('--url')
-		command.append(f"{args['url']}asd")
+		command.append(f"{args['url']}")
 
 	if 'format' in args:
 		command.append('--format')
