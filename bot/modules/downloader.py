@@ -6,6 +6,7 @@ from time import time
 from aiogram import Bot
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from .db import DOWNLOAD_STATUS, Download
+from .models import BookNotDownloaded, BookDirectoryNotExist
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +30,11 @@ class Downloader(object):
 	_log_file = None
 	_files_dir = None
 	_running_lock = None
+
+	_args = None
+	_json = None
+	_exec = None
+	_command = None
 	_chapters_ln = 0
 
 	bot = None
@@ -61,15 +67,22 @@ class Downloader(object):
 		}
 		self.result = {
 			'cover': None,
+			'file': None,
 			'files': [],
-			'caption': None
+			'caption': None,
+			'error': None
 		}
 		self.mq_id = self.task.mq_message_id
 		self._running_lock = asyncio.Lock()
 		self._path = str(self.bot.config.get('BOT_ID'))+'-'+str(self.task.user_id)+'-'+str(self.task.id)
-		self._log_file = os.path.join( self.bot.config.get('DOWNLOADER_LOG_PATH'), self._path+'.log' )
-		self._files_dir = os.path.join( self.bot.config.get('DOWNLOADER_TEMP_PATH'), self._path )
+		self._log_file = os.path.join( self.bot.config.get('DOWNLOADERS_LOG_PATH'), self._path+'.log' )
+		self._files_dir = os.path.join( self.bot.config.get('DOWNLOADERS_TEMP_PATH'), self._path )
 		self._running_lock = asyncio.Lock()
+
+		self._args = None
+		self._json = None
+		self._exec = None
+		self._command = None
 		self._chapters_ln = 0
 
 
@@ -85,31 +98,31 @@ class Downloader(object):
 		return 1
 
 	async def start(self) -> None:
+		logger.info('start')
+		logger.info(self.status)
 
 		# await self.bot.db.add_user_usage_extended(self.task.user_id,self.task.site)
 
 		if not self._thread:
 
-			proc = await asyncio.create_subprocess_shell(f'rm -rf "{self._log_file}"')
-			await proc.wait()
-
-			proc = await asyncio.create_subprocess_shell(f'rm -rf "{self._files_dir}"')
-			await proc.wait()
-
 			if self.status == DOWNLOAD_STATUS.INIT:
+
 				self.status = DOWNLOAD_STATUS.RUNNING
 				await self.update_status()
-				try:
-					self._thread = asyncio.create_task( self.__start() )
-				except asyncio.CancelledError:
-					pass
-			if self.status == DOWNLOAD_STATUS.PROCESSING:
-				try:
-					self._thread = asyncio.create_task( self.__process() )
-				except asyncio.CancelledError:
-					pass
+
+				proc = await asyncio.create_subprocess_shell(f'rm -rf "{self._log_file}"')
+				await proc.wait()
+
+				proc = await asyncio.create_subprocess_shell(f'rm -rf "{self._files_dir}"')
+				await proc.wait()
+
+			try:
+				self._thread = asyncio.create_task( self.__start() )
+			except asyncio.CancelledError:
+				pass
 
 	async def cancel(self) -> None:
+		logger.info('cancel')
 		self.status = DOWNLOAD_STATUS.CANCELLED
 
 		if self._process:
@@ -124,6 +137,7 @@ class Downloader(object):
 		return True
 
 	async def stop(self) -> None:
+		logger.info('stop')
 
 		# await self.bot.db.reduce_user_usage_extended(self.task.user_id,self.task.site)
 
@@ -140,6 +154,8 @@ class Downloader(object):
 		await self.update_status()
 
 	async def clear_results(self) -> None:
+		logger.info('clear_results')
+
 		proc = await asyncio.create_subprocess_shell(f'rm -rf "{self._log_file}"')
 		await proc.wait()
 
@@ -147,14 +163,24 @@ class Downloader(object):
 		await proc.wait()
 
 	async def send_results(self) -> None:
+		logger.info('send_results')
+
+		sf = False
 
 		if self.result['cover']:
 			if self.status != DOWNLOAD_STATUS.ERROR:
-				await self.bot.messages_queue.add( 'send_photo', chat_id=self.task.chat_id, photo=self.result['cover'] )
+				if os.path.exists(self.result['cover']):
+					sf = True
+					await self.bot.messages_queue.add( 'send_photo', chat_id=self.task.chat_id, photo=self.result['cover'] )
 			else:
 				cover = self.result['cover']
 				proc = await asyncio.create_subprocess_shell(f'rm -rf "{cover}"')
 				await proc.wait()
+
+		if self.result['file']:
+			if os.path.exists(self.result['file']):
+				sf = True
+				await self.bot.messages_queue.add( 'send_document', chat_id=self.task.chat_id, document=self.result['file'], caption=self.result['caption'], parse_mode='MarkdownV2' )
 
 		if self.result['files']:
 			# if len(self.result['files']) > 1:
@@ -171,10 +197,19 @@ class Downloader(object):
 			# else:
 			# 	await self.bot.messages_queue.add( 'send_document', chat_id=self.task.chat_id, document=self.result['files'][0], caption=self.result['caption'], parse_mode='MarkdownV2' )
 			for file in self.result['files']:
-				await self.bot.messages_queue.add( 'send_document', chat_id=self.task.chat_id, document=file, caption=self.result['caption'], parse_mode='MarkdownV2' )
+				if os.path.exists(file):
+					sf = True
+					await self.bot.messages_queue.add( 'send_document', chat_id=self.task.chat_id, document=file, caption=self.result['caption'], parse_mode='MarkdownV2' )
+
+		if self.result['error']:
+			await self.bot.messages_queue.add( 'send_message', chat_id=self.task.chat_id, text=self.result['error'] )
+		elif not sf:
+			await self.bot.messages_queue.add( 'send_message', chat_id=self.task.chat_id, text='Ошибка отправки файлов' )
 
 		if self.status != DOWNLOAD_STATUS.ERROR:
 			proc = await asyncio.create_subprocess_shell(f'rm -rf "{self._log_file}"')
+			await proc.wait()
+			proc = await asyncio.create_subprocess_shell(f'rm -rf "{self._json}"')
 			await proc.wait()
 
 	async def update_status(self) -> None:
@@ -211,14 +246,17 @@ class Downloader(object):
 		cancellable = self.__cancellable__()
 		timestamp = time()
 
+		_mdiff = self.last_status['message'] != message
+		_tdiff = self.last_status['timestamp'] <= ( timestamp - self.bot.config.get('DOWNLOADS_NOTICES_INTERVAL') )
+		_sdiff = self.last_status['status'] != self.status
+		_cdiff = self.last_status['cancellable'] != cancellable
+
 		need_send = (
-			self.last_status['message'] != message
+			( _mdiff and _tdiff )
 			or
-			self.last_status['status'] != self.status
+			_sdiff
 			or
-			self.last_status['cancellable'] != cancellable
-			or
-			self.last_status['timestamp'] <= ( timestamp - self.bot.config.get('DOWNLOADS_NOTICES_INTERVAL') )
+			_cdiff
 		)
 
 		if need_send:
@@ -244,10 +282,10 @@ class Downloader(object):
 
 			mq_id = self.mq_id
 
-			if self.last_status['message'] != message:
+			if _mdiff:
 				mq_id = await self.bot.messages_queue.update_or_add( callee='edit_message_text', mq_id=self.task.mq_message_id, chat_id=self.task.chat_id, message_id=self.task.message_id, text=message, reply_markup=reply_markup)
 			else:
-				if self.last_status['cancellable'] != cancellable:
+				if _cdiff:
 					mq_id = await self.bot.messages_queue.update_or_add( callee='edit_message_reply_markup', mq_id=self.task.mq_message_id, chat_id=self.task.chat_id, message_id=self.task.message_id, reply_markup=reply_markup)
 				# else:
 				# 	timestamp = self.last_status['timestamp']
@@ -257,7 +295,7 @@ class Downloader(object):
 			'message': message,
 			'status': self.status,
 			'cancellable': cancellable,
-			'timestamp': timestamp,
+			'timestamp': timestamp
 		}
 
 		task = await self.bot.db.update_download( self.task.id, {'status':self.status,'last_message':message,'mq_message_id':self.mq_id,'result':self.result} )
@@ -266,16 +304,27 @@ class Downloader(object):
 	# PRIVATE
 
 	async def __start(self) -> None:
+		#logger.info('__start')
 		try:
-			async with self._running_lock:
-				logger.info(f'Started download: {self.task}')
-				await self.__download()
-				await self.__process()
-				logger.info(f'Ended download: {self.task}')
+
+			if self.status == DOWNLOAD_STATUS.RUNNING:
+				async with self._running_lock:
+					logger.info(f'Started download: {self.task}')
+					await self.__download()
+					await self.__process()
+					logger.info(f'Ended download: {self.task}')
+
+			elif self.status == DOWNLOAD_STATUS.PROCESSING:
+				async with self._running_lock:
+					logger.info(f'Started processing: {self.task}')
+					await self.__process()
+					logger.info(f'Ended processing: {self.task}')
+
 		except asyncio.CancelledError:
 			pass
+
 		except Exception as e:
-			logger.error('Download error: '+repr(e))
+			await self.__process_error(e)
 
 	async def __get_last_line(self) -> str:
 		line = ''
@@ -326,139 +375,81 @@ class Downloader(object):
 
 
 	async def __download(self) -> None:
+		#logger.info('__download')
 
-		_exec, args = await self.__prepare_command()
+		if self.status == DOWNLOAD_STATUS.RUNNING:
 
-		try:
-			with open(self._log_file,'w') as log:
-				self._process = await asyncio.create_subprocess_exec(_exec, *args, stdout=log, cwd=self.bot.config.get('DOWNLOADER_PATH'))
-			await self._process.wait()
+			await self.__download__prepare_args()
 
-			if self._process.returncode != 0:
-				raise Exception('Произошла ошибка')
-
-			_json, file, cover = await self.__process_results()
-
-			if not _json:
-				raise Exception('Файл конфигурации не найден')
-
-			file_caption = await self.__process_caption(_json)
-
-			self.result['caption'] = file_caption
-
-			if cover:
-				if os.path.exists(cover):
-					self.result['cover'] = cover
-
-			if file:
-				if os.path.exists(file):
-					self.result['files'].append( file )
-			else:
-				raise Exception('Произошла ошибка чтения файлов')
+			await self.__download__get_files()
 
 			self.status = DOWNLOAD_STATUS.PROCESSING
 			await self.update_status()
 
-		except asyncio.CancelledError:
-			pass
-
-		except Exception as e:
-			self.status = DOWNLOAD_STATUS.ERROR
-			error_text = await self.__process_error('Произошла ошибка:',e=e)
-			self.result['files'].append( self._log_file )
-			self.result['caption'] = error_text
-			await self.update_status()
-			return
-
 	async def __process(self) -> None:
+		#logger.info('__process')
+
 		if self.status == DOWNLOAD_STATUS.PROCESSING:
-			try:
-				try:
-					await self.__process_files()
-				except Exception as e:
-					raise e
 
-				size = await self.__process_files_size()
+			await self.__process_data()
 
-				await self.bot.db.add_site_stat( self.task.site, size )
+			await self.__process_files()
 
-				self.status = DOWNLOAD_STATUS.DONE
-				await self.update_status()
+			self.status = DOWNLOAD_STATUS.DONE
+			await self.update_status()
 
-			except asyncio.CancelledError:
-				pass
+	async def __download__prepare_args(self) -> None:
+		#logger.info('__download__prepare_args')
 
-			except Exception as e:
-				self.status = DOWNLOAD_STATUS.ERROR
-				error_text = await self.__process_error('Произошла ошибка:',e=e)
-				self.result['files'].append( self._log_file )
-				self.result['caption'] = error_text
-				await self.update_status()
-				return
+		args = []
 
-	async def __prepare_command(self) -> str:
-
-		_exec = 'dotnet'
-		command = []
-
-		command.append('Elib2Ebook.dll')
-		command.append('--save')
-		command.append(f"{self._files_dir}")
-		# _dpath = self.bot.config.get('DOWNLOADER_PATH')
-		# command = f'cd {_dpath}; dotnet Elib2Ebook.dll --save "{self._files_dir}"'
+		args.append('--save')
+		args.append(f"{self._files_dir}")
 
 		task = self.task
 
 		if task.url:
-			# command += f' --url "{task.url}"'
-			command.append('--url')
-			command.append(f"{task.url}")
+			args.append('--url')
+			args.append(f"{task.url}")
 
 		if task.format:
-			# command += f' --format "{task.format},json"'
-			command.append('--format')
-			command.append(f"{task.format},json")
+			args.append('--format')
+			args.append(f"{task.format}")
 		else:
-			command.append('--format')
+			args.append('--format')
 			_def = self.bot.config.get('FORMATS_LIST')[0]
-			command.append(f"{_def},json")
+			args.append(f"{_def}")
 
 		if task.start:
-			# command += f' --start "{task.start}"'
-			command.append('--start')
-			command.append(f"{task.start}")
+			args.append('--start')
+			args.append(f"{task.start}")
 
 		if task.end:
-			# command += f' --end "{task.end}"'
-			command.append('--end')
-			command.append(f"{task.end}")
+			args.append('--end')
+			args.append(f"{task.end}")
 
 		_proxied = self.bot.config.get('PROXY_PARAMS')
 		if task.site in _proxied:
 			_p = _proxied[task.site]
-			# command += f' --proxy "{_p}" -timeout 120'
-			command.append('--proxy')
-			command.append(f"{_p}")
-			command.append('--timeout')
-			command.append('120')
+			args.append('--proxy')
+			args.append(f"{_p}")
+			args.append('--timeout')
+			args.append('120')
 		else:
 			if task.proxy:
-				command.append('--proxy')
-				command.append(f"{task.proxy}")
-				command.append('--timeout')
-				command.append('120')
+				args.append('--proxy')
+				args.append(f"{task.proxy}")
+				args.append('--timeout')
+				args.append('120')
 			else:
-				# command += f' --timeout 30'
-				command.append('--timeout')
-				command.append('60')
+				args.append('--timeout')
+				args.append('60')
 
 		if task.cover == '1':
-			# command += ' --cover'
-			command.append('--cover')
+			args.append('--cover')
 
 		if task.images == '0':
-			# command += ' --no-image'
-			command.append('--no-image')
+			args.append('--no-image')
 
 		if task.auth:
 			login = None
@@ -482,23 +473,43 @@ class Downloader(object):
 
 			if login and password:
 				if not login.startswith('/') and not login.startswith('http:') and not login.startswith('https:') and not password.startswith('/') and not password.startswith('http:') and not password.startswith('https:'):
-					# command += f' --login="{login}" --password="{password}"'
-					command.append('--login')
-					command.append(f"{login}")
-					command.append('--password')
-					command.append(f"{password}")
+					args.append('--login')
+					args.append(f"{login}")
+					args.append('--password')
+					args.append(f"{password}")
 
-		# command += f' > {self._log_file}'
-		logger.info('__prepare_command')
-		logger.info(command)
+		logger.info(args)
 
-		return _exec, command
+		self._args = args
 
-	async def __process_results(self) -> tuple:
-		# logger.info('__process_results')
-		_json = None
-		cover = None
-		file = None
+	async def __download__get_files(self) -> None:
+		#logger.info('__download__get_files')
+
+		_downloaders_path = self.bot.config.get('DOWNLOADERS_PATH')
+
+		if _downloaders_path and self._args:
+			_exec = 'python3'
+			command = []
+			command.append('download.py')
+			command = command + self._args
+
+			with open(self._log_file,'w') as log:
+				self._process = await asyncio.create_subprocess_exec(_exec, *command, stdout=log, stderr=asyncio.subprocess.STDOUT, cwd=_downloaders_path)
+			await self._process.wait()
+
+		if not os.path.exists(self._files_dir):
+			raise BookDirectoryNotExist()
+
+	async def __process_data(self) -> None:
+		#logger.info('__process_data')
+
+		await self.__process_data__files()
+
+		await self.__process_data__caption()
+
+	async def __process_data__files(self) -> None:
+		#logger.info('__process_data__files')
+
 		_trash = []
 		
 		t = os.listdir(self._files_dir)
@@ -506,22 +517,24 @@ class Downloader(object):
 			_tmp_name, extension = os.path.splitext(x)
 			extension = extension[1:]
 			if extension == 'json':
-				_json = os.path.join(self._files_dir, x)
+				self._json = os.path.join(self._files_dir, x)
 			elif extension == self.task.format:
-				file = os.path.join(self._files_dir, x)
+				self.result['file'] = os.path.join(self._files_dir, x)
 			elif extension in ['jpg','jpeg','png','gif']:
-				cover = os.path.join(self._files_dir, x)
+				self.result['cover'] = os.path.join(self._files_dir, x)
 			else:
-				_trash.append(os.path.join(self._files_dir, x))
+				_trash.append( os.path.join(self._files_dir, x) )
 
 		for _t in _trash:
 			proc = await asyncio.create_subprocess_shell(f'rm -rf "{_t}"')
 			await proc.wait()
 
-		return _json, file, cover
+		if not self.result['file']:
+			raise BookNotDownloaded()
 
-	async def __process_caption(self, _json_file: Union[str, Path]) -> str:
-		# logger.info('__process_caption')
+	async def __process_data__caption(self) -> None:
+		#logger.info('__process_data__caption')
+	
 		book_caption = []
 		_title = ''
 		_author = ''
@@ -537,9 +550,10 @@ class Downloader(object):
 		_seria_url = ''
 		_book_chapters = []
 		_book_chapter = None
+
 		try:
-			if _json_file is not None:
-				with open(_json_file, "rb") as f:
+			if self._json is not None:
+				with open(self._json, "rb") as f:
 					parser = ijson.parse(f)
 					for prefix, event, value in parser:
 						if prefix == 'Title':
@@ -608,14 +622,15 @@ class Downloader(object):
 						if _fc and _lc:
 							_fc = TAG_RE.sub('', _fc)
 							_lc = TAG_RE.sub('', _lc)
-							_chapters = fmt.text( 'Глав ', fmt.escape_md(_vc), 'из', fmt.escape_md(_tc), ', с ', fmt.escape_md(f'"{_fc}"'), ' по ', fmt.escape_md(f'"{_lc}"') )
+							if self.task.start or self.task.end:
+								_chapters = fmt.text( 'Глав ', fmt.escape_md(_vc), 'из', fmt.escape_md(_tc), ', с ', fmt.escape_md(f'"{_fc}"'), ' по ', fmt.escape_md(f'"{_lc}"') )
+							else:
+								_chapters = fmt.text( 'Глав ', fmt.escape_md(_vc), 'из', fmt.escape_md(_tc), ', по ', fmt.escape_md(f'"{_lc}"') )
 						else:
 							_chapters = fmt.text( 'Глав ', fmt.escape_md(_vc), 'из', fmt.escape_md(_tc) )
 		except Exception as e:
-			await self.__process_error('Произошла ошибка чтения json',e=e)
-
-		proc = await asyncio.create_subprocess_shell(f'rm -rf "{_json_file}"')
-		await proc.wait()
+			# await self.__process_error(e)
+			pass
 
 		if _title:
 			book_caption.append(_title)
@@ -626,16 +641,19 @@ class Downloader(object):
 		if _chapters:
 			book_caption.append('\n'+_chapters)
 
-		book_caption.append('\n')
+		if book_caption:
+			book_caption.append('\n')
+
 		book_caption.append( fmt.text( fmt.link('Спасибо автору качалки','https://boosty.to/elib2ebook'), fmt.escape_md(' (Boosty)') ) )
 
 		book_caption = '\n'.join(book_caption)
 
-		return book_caption
+		self.result['caption'] = book_caption
 
 	# SERVICE
 
-	async def __process_files(self) -> list:
+	async def __process_files(self) -> None:
+		#logger.info('__process_files')
 
 		await self.__process_files__maybe_rename()
 
@@ -643,7 +661,11 @@ class Downloader(object):
 
 		await self.__process_files__maybe_split()
 
+		await self.__process_files__size()
+
+
 	async def __process_files__maybe_rename(self) -> None:
+		#logger.info('__process_files__maybe_rename')
 
 		_cl = ''
 		if self.task.start or self.task.end:
@@ -675,8 +697,7 @@ class Downloader(object):
 						if abs(_end) >= self._chapters_ln:
 							_cl = f'-parted-first{_end}'
 
-			path = self.result['files'][0]
-
+			path = self.result['file']
 
 			if _cl != '':
 				file = os.path.basename(path)
@@ -688,14 +709,15 @@ class Downloader(object):
 				proc = await asyncio.create_subprocess_shell(f'mv "{path}" "{_tmp_path}"')
 				await proc.wait()
 
-				self.result['files'][0] = _tmp_path
+				self.result['file'] = _tmp_path
 
-	async def __process_files__maybe_convert(self) -> int:
+	async def __process_files__maybe_convert(self) -> None:
+		#logger.info('__process_files__maybe_convert')
 
 		_converters_path = self.bot.config.get('CONVERTERS_PATH')
 
 		if self.task.target_format and _converters_path:
-			source_path = os.path.dirname( self.result['files'][0] )
+			source_path = os.path.dirname( self.result['file'] )
 			target_path = os.path.join( source_path, 'converted' )
 
 			_exec = 'python3'
@@ -731,14 +753,15 @@ class Downloader(object):
 				orig_file = self.result['files'][0]
 				proc = await asyncio.create_subprocess_shell(f'rm -rf "{orig_file}"')
 				await proc.wait()
-				self.result['files'][0] = file
+				self.result['file'] = file
 
-	async def __process_files__maybe_split(self) -> int:
+	async def __process_files__maybe_split(self) -> None:
+		#logger.info('__process_files__maybe_split')
 
-		if len(self.result['files']) == 1:
+		if self.result['file']:
 
-			_return = []
-			path = self.result['files'][0]
+			files = []
+			path = self.result['file']
 
 			fsize = os.path.getsize(path)
 			_split_limit = self.bot.config.get('DOWNLOADS_SPLIT_LIMIT')
@@ -764,26 +787,54 @@ class Downloader(object):
 
 				t = os.listdir(splitted_folder)
 				for x in t:
-					_return.append( os.path.join(splitted_folder, x) )
-			else:
-				_return.append(self.result['files'][0])
-			self.result['files'] = _return
+					files.append( os.path.join(splitted_folder, x) )
 
-	async def __process_files_size(self) -> int:
+				self.result['files'] = files
+				self.result['file'] = None
+
+	async def __process_files__size(self) -> None:
+		#logger.info('__process_files__size')
+
 		size = 0
-		for file in self.result['files']:
-			fsize = os.path.getsize(file)
+		if self.result['file']:
+			fsize = os.path.getsize(self.result['file'])
 			size += fsize
-		return int(size/1024)
 
-	async def __process_error(self, message: str, command: Optional[str]=None, e: Optional[Exception]=None) -> str:
-		if e:
-			message += '\n'+fmt.escape_md(repr(e))
-		if message:
-			logger.error(message)
-		if command:
-			logger.error('command')
-			logger.error(command)
-		logger.error('Downloader')
-		logger.error(self)
-		return message
+		if self.result['files']:
+			for file in self.result['files']:
+				fsize = os.path.getsize(file)
+				size += fsize
+
+		size = int(size/1024)
+		await self.bot.db.add_site_stat( self.task.site, size )
+
+	async def __process_error(self, error: Exception) -> None:
+		self.status = DOWNLOAD_STATUS.ERROR
+		await self.update_status()
+
+		if os.path.exists( self._log_file ) and os.path.getsize( self._log_file ) > 4:
+			self.result['file'] = self._log_file
+			self.result['caption'] = await self.__process_error__human_readable(error)
+		else:
+			self.result['error'] = 'Ошибка скачивания книги\n\n'+fmt.escape_md(repr(error))
+
+	async def __process_error__human_readable(self, error: Exception) -> str:
+		message = 'Ошибка скачивания книги'
+		lines = []
+		with open(self._log_file, 'r') as f:
+			lines = f.readlines()
+		lines = list(reversed(lines))[:30]
+		for line in lines:
+			if '404 (Not Found)' in line:
+				message = fmt.escape_md('Книга не найдена. Проверьте ссылку')
+				break
+			if '403 (Forbidden)' in line:
+				message = fmt.escape_md('Доступ к книге запрещен. Проверьте ссылку')
+				break
+			if 'Не удалось авторизоваться' in line:
+				message = fmt.escape_md('Не удалось авторизоваться. Проверьте доступы командой /logins')
+				break
+			# if 'Object reference not set to an instance of an object' in line:
+			# 	break
+
+		return  message

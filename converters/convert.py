@@ -9,7 +9,7 @@ execute_args = parser.parse_args()
 _fb2c_formats = ['mobi','azw3']
 
 async def _fb2c_covert(target_format,source_folder,target_folder):
-	_exec = 'fb2c/fb2c'
+	_exec = '_fb2c/fb2c'
 	command = []
 	command.append('convert')
 	command.append('--nodirs')

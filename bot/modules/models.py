@@ -24,6 +24,12 @@ class DOWNLOAD_STATUS(object):
 	PROCESSING = 4
 	DONE = 5
 
+class BookDirectoryNotExist(Exception):
+	pass
+
+class BookNotDownloaded(Exception):
+	pass
+
 class Links(Base):
 	__tablename__ = 'plain_links'
 	__table_args__  = ( sa.Index('plain_links', 'link', mysql_length=191, unique=True), )

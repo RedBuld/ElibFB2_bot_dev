@@ -162,7 +162,9 @@ class DownloadsQueue():
 		except asyncio.CancelledError:
 			pass
 		except Exception as e:
-			logger.error('Downloads queue error: '+repr(e))
+			exc_type, exc_obj, exc_tb = sys.exc_info()
+			line = exc_tb.tb_lineno
+			logger.error('Downloads queue error: ['+line+']:'+repr(e))
 			raise e
 
 	async def __queue_step(self) -> None:
@@ -278,8 +280,9 @@ class DownloadsQueue():
 				await self.bot.db.update_download( download_id, {'last_message':message,'mq_message_id':mq_id} )
 
 	async def __init_downloader(self, download_id: int) -> None:
-		from modules.downloader import Downloader
+		logger.info(f'__init_downloader {download_id}')
 		task = await self.bot.db.get_download(download_id)
 		if task:
+			from modules.downloader import Downloader
 			downloader = Downloader(bot=self.bot,task=task)
 			self._active[download_id] = downloader

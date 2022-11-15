@@ -1,5 +1,5 @@
 {
-	"admins": [ 470328529 ],
+	"admins": [  ],
 	"start_message": "Привет, я бот для скачивания книг\nКоманды в меню",
 	"sites_params": {
 		"acomics.ru": ["paging","force_images"],
@@ -56,13 +56,13 @@
 		"xn--80ac9aeh6f.xn--p1ai": ["paging","images"]
 	},
 	"proxy_params": {
-		"litmarket.ru": "193.201.115.46:3128",
-		"litres.ru": "193.201.115.46:3128",
-		"renovels.org": "193.201.115.46:3128",
-		"booknet.ua": "193.201.115.46:3128",
-		"booknet.com": "193.201.115.46:3128",
-		"renovels.org": "193.201.115.46:3128",
-		"wuxiaworld.ru": "193.201.115.46:3128"
+		"litmarket.ru": "PROXY_IP:PROXY_PORT",
+		"litres.ru": "PROXY_IP:PROXY_PORT",
+		"renovels.org": "PROXY_IP:PROXY_PORT",
+		"booknet.ua": "PROXY_IP:PROXY_PORT",
+		"booknet.com": "PROXY_IP:PROXY_PORT",
+		"renovels.org": "PROXY_IP:PROXY_PORT",
+		"wuxiaworld.ru": "PROXY_IP:PROXY_PORT"
 	},
 	"formats_params": {
 		"fb2": "Fb2 - для книг",
@@ -76,41 +76,41 @@
 		"azw3": "fb2"
 	},
 	"builtin_auth": {
-		"booknet.com": {
-			"login":"elib.fb2.bot@gmail.com",
-			"password":"elib.fb2.bot123"
+		"DOMAIN": {
+			"login":"EMAIL",
+			"password":"PASSWORD"
 		},
 		"booknet.ua": {
-			"login":"elib.fb2.bot@gmail.com",
-			"password":"elib.fb2.bot123"
+			"login":"EMAIL",
+			"password":"PASSWORD"
 		},
 		"author.today": {
-			"login":"elib.fb2.bot@gmail.com",
-			"password":"elib.fb2.bot123"
+			"login":"EMAIL",
+			"password":"PASSWORD"
 		},
 		"litres.ru": {
-			"login":"elib.fb2.bot@gmail.com",
-			"password":"elib.fb2.bot123"
+			"login":"EMAIL",
+			"password":"PASSWORD"
 		},
 		"litnet.com": {
-			"login":"elib.fb2.bot@gmail.com",
-			"password":"elib.fb2.bot123"
+			"login":"EMAIL",
+			"password":"PASSWORD"
 		},
 		"litgorod.ru": {
-			"login":"elib.fb2.bot@gmail.com",
-			"password":"elib.fb2.bot123"
+			"login":"EMAIL",
+			"password":"PASSWORD"
 		},
 		"ranobelib.me": {
-			"login":"elib.fb2.bot@gmail.com",
-			"password":"elib.fb2.bot123"
+			"login":"EMAIL",
+			"password":"PASSWORD"
 		},
 		"mangalib.me": {
-			"login":"elib.fb2.bot@gmail.com",
-			"password":"elib.fb2.bot123"
+			"login":"EMAIL",
+			"password":"PASSWORD"
 		},
 		"hentailib.me": {
-			"login":"elib.fb2.bot@gmail.com",
-			"password":"elib.fb2.bot123"
+			"login":"EMAIL",
+			"password":"PASSWORD"
 		}
 	}
 }

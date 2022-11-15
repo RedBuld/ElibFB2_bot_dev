@@ -21,10 +21,10 @@ class __Config__(object):
 		'BOT_HOOK'                    : None,
 		# STORAGES
 		'LOGS_PATH'                   : None,
-		'DOWNLOADER_PATH'             : None,
+		'DOWNLOADERS_PATH'            : None,
+		'DOWNLOADERS_TEMP_PATH'       : None,
+		'DOWNLOADERS_LOG_PATH'        : None,
 		'CONVERTERS_PATH'             : None,
-		'DOWNLOADER_TEMP_PATH'        : None,
-		'DOWNLOADER_LOG_PATH'         : None,
 		# MESSAGES
 		'MESSAGES_Q_INTERVAL'         : 1,
 		# DOWNLOADS
@@ -127,10 +127,10 @@ class __Config__(object):
 			'BOT_MODE',
 			'BOT_TOKEN',
 			'LOGS_PATH',
-			'DOWNLOADER_PATH',
+			'DOWNLOADERS_PATH',
+			'DOWNLOADERS_TEMP_PATH',
+			'DOWNLOADERS_LOG_PATH',
 			'CONVERTERS_PATH',
-			'DOWNLOADER_TEMP_PATH',
-			'DOWNLOADER_LOG_PATH',
 			'MESSAGES_Q_INTERVAL',
 			'DOWNLOADS_CHECK_INTERVAL',
 			'DOWNLOADS_Q_LENGTH_LIMIT',
@@ -187,7 +187,7 @@ class __Config__(object):
 			self.__GLOBAL_STORE['LOGS_PATH'] = os.getenv('LOGS_PATH',None)
 			self.__GLOBAL_STORE['CONFIGS_PATH'] = os.getenv('CONFIGS_PATH',None)
 
-		self.__GLOBAL_STORE['DOWNLOADER_PATH'] = os.getenv('DOWNLOADER_PATH',None)
+		self.__GLOBAL_STORE['DOWNLOADERS_PATH'] = os.getenv('DOWNLOADERS_PATH',None)
 		self.__GLOBAL_STORE['CONVERTERS_PATH'] = os.getenv('CONVERTERS_PATH',None)
 
 		# WEB INTERFACES
@@ -293,8 +293,8 @@ class __Config__(object):
 				if 'configs_path' in _config and _config['configs_path']:
 					store['CONFIGS_PATH'] = _config['configs_path']
 
-			if 'downloader_path' in _config and _config['downloader_path']:
-				store['DOWNLOADER_PATH'] = _config['downloader_path']
+			if 'downloaders_path' in _config and _config['downloaders_path']:
+				store['DOWNLOADERS_PATH'] = _config['downloaders_path']
 
 			if 'converters_path' in _config and _config['converters_path']:
 				store['CONVERTERS_PATH'] = _config['converters_path']
@@ -371,8 +371,8 @@ class __Config__(object):
 		if not self.get('CONFIGS_PATH'):
 			raise Exception('CONFIGS_PATH/configs_path not set')
 
-		if not self.get('DOWNLOADER_PATH'):
-			raise Exception('DOWNLOADER_PATH/downloader_path not set')
+		if not self.get('DOWNLOADERS_PATH'):
+			raise Exception('DOWNLOADERS_PATH/downloaders_path not set')
 
 	def __validate__(self):
 
@@ -388,14 +388,14 @@ class __Config__(object):
 			self.set('BOT_HOOK', f"/wh_{bot_id}")
 
 		# STORAGES
-		self.set( 'DOWNLOADER_TEMP_PATH', os.path.join( self.get('DOWNLOADER_PATH'), 'temp' ) )
-		self.set( 'DOWNLOADER_LOG_PATH', os.path.join( self.get('DOWNLOADER_PATH'), 'logs' ) )
+		self.set( 'DOWNLOADERS_TEMP_PATH', os.path.join( self.get('DOWNLOADERS_PATH'), 'temp' ) )
+		self.set( 'DOWNLOADERS_LOG_PATH', os.path.join( self.get('DOWNLOADERS_PATH'), 'logs' ) )
 
-		if not os.path.exists( self.get('DOWNLOADER_TEMP_PATH') ):
-			os.makedirs( self.get('DOWNLOADER_TEMP_PATH'), 777, exist_ok=True)
+		if not os.path.exists( self.get('DOWNLOADERS_TEMP_PATH') ):
+			os.makedirs( self.get('DOWNLOADERS_TEMP_PATH'), 777, exist_ok=True)
 
-		if not os.path.exists( self.get('DOWNLOADER_LOG_PATH') ):
-			os.makedirs( self.get('DOWNLOADER_LOG_PATH'), 777, exist_ok=True)
+		if not os.path.exists( self.get('DOWNLOADERS_LOG_PATH') ):
+			os.makedirs( self.get('DOWNLOADERS_LOG_PATH'), 777, exist_ok=True)
 
 		# CONFIG
 		if not self.get('SITES_PARAMS'):
