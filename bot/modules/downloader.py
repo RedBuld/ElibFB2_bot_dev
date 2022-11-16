@@ -29,13 +29,14 @@ class Downloader(object):
 	_process = None
 	_log_file = None
 	_files_dir = None
-	_running_lock = None
+	# _running_lock = None
 
 	_args = None
 	_json = None
 	_exec = None
 	_command = None
 	_chapters_ln = 0
+	_res_size = 0
 
 	bot = None
 	task = None
@@ -73,11 +74,10 @@ class Downloader(object):
 			'error': None
 		}
 		self.mq_id = self.task.mq_message_id
-		self._running_lock = asyncio.Lock()
+		# self._running_lock = asyncio.Lock()
 		self._path = str(self.bot.config.get('BOT_ID'))+'-'+str(self.task.user_id)+'-'+str(self.task.id)
 		self._log_file = os.path.join( self.bot.config.get('DOWNLOADERS_LOG_PATH'), self._path+'.log' )
 		self._files_dir = os.path.join( self.bot.config.get('DOWNLOADERS_TEMP_PATH'), self._path )
-		self._running_lock = asyncio.Lock()
 
 		self._args = None
 		self._json = None
@@ -99,7 +99,6 @@ class Downloader(object):
 
 	async def start(self) -> None:
 		logger.info('start')
-		logger.info(self.status)
 
 		# await self.bot.db.add_user_usage_extended(self.task.user_id,self.task.site)
 
@@ -177,7 +176,11 @@ class Downloader(object):
 				proc = await asyncio.create_subprocess_shell(f'rm -rf "{cover}"')
 				await proc.wait()
 
+
 		if self.result['file']:
+			if self._res_size > 50000:
+				_sm = await self.__get_human_size()
+				await self.bot.messages_queue.add( 'send_message', chat_id=self.task.chat_id, text=f'Размер файлов {_sm}. Отправка может занять некоторое время' )
 			if os.path.exists(self.result['file']):
 				sf = True
 				await self.bot.messages_queue.add( 'send_document', chat_id=self.task.chat_id, document=self.result['file'], caption=self.result['caption'], parse_mode='MarkdownV2' )
@@ -196,6 +199,9 @@ class Downloader(object):
 			# 		await self.bot.messages_queue.add( 'send_media_group', chat_id=self.task.chat_id, media=media )
 			# else:
 			# 	await self.bot.messages_queue.add( 'send_document', chat_id=self.task.chat_id, document=self.result['files'][0], caption=self.result['caption'], parse_mode='MarkdownV2' )
+			if self._res_size > 50000:
+				_sm = await self.__get_human_size()
+				await self.bot.messages_queue.add( 'send_message', chat_id=self.task.chat_id, text=f'Размер файлов {_sm}. Отправка может занять некоторое время' )
 			for file in self.result['files']:
 				if os.path.exists(file):
 					sf = True
@@ -287,9 +293,9 @@ class Downloader(object):
 			else:
 				if _cdiff:
 					mq_id = await self.bot.messages_queue.update_or_add( callee='edit_message_reply_markup', mq_id=self.task.mq_message_id, chat_id=self.task.chat_id, message_id=self.task.message_id, reply_markup=reply_markup)
-				# else:
-				# 	timestamp = self.last_status['timestamp']
 			self.mq_id = mq_id
+		else:
+			timestamp = self.last_status['timestamp']
 
 		self.last_status = {
 			'message': message,
@@ -308,17 +314,17 @@ class Downloader(object):
 		try:
 
 			if self.status == DOWNLOAD_STATUS.RUNNING:
-				async with self._running_lock:
-					logger.info(f'Started download: {self.task}')
-					await self.__download()
-					await self.__process()
-					logger.info(f'Ended download: {self.task}')
+				# async with self._running_lock:
+				logger.info(f'Started download: {self.task}')
+				await self.__download()
+				await self.__process()
+				logger.info(f'Ended download: {self.task}')
 
 			elif self.status == DOWNLOAD_STATUS.PROCESSING:
-				async with self._running_lock:
-					logger.info(f'Started processing: {self.task}')
-					await self.__process()
-					logger.info(f'Ended processing: {self.task}')
+				# async with self._running_lock:
+				logger.info(f'Started processing: {self.task}')
+				await self.__process()
+				logger.info(f'Ended processing: {self.task}')
 
 		except asyncio.CancelledError:
 			pass
@@ -369,6 +375,25 @@ class Downloader(object):
 			return list_of_lines[0]
 		return ''
 
+	async def __get_human_size(self):
+		_n = self._res_size
+		_t = "Кб"
+
+		if _n > 1024:
+			_n = _n/1024
+			_t = "Мб"
+
+		if _n > 1024:
+			_n = _n/1024
+			_t = "Гб"
+
+		if _n > 1024:
+			_n = _n/1024
+			_t = "Тб"
+
+		_n = int(_n)
+		return f"{_n} {_t}"
+
 	async def __chunked_media_group(self) -> Iterator[Union[str, Path]]:
 		for i in range(0, len(self.result['files']), 10):
 			yield self.result['files'][i:i + 10]
@@ -399,7 +424,7 @@ class Downloader(object):
 			await self.update_status()
 
 	async def __download__prepare_args(self) -> None:
-		#logger.info('__download__prepare_args')
+		logger.info('__download__prepare_args')
 
 		args = []
 
@@ -806,6 +831,7 @@ class Downloader(object):
 				size += fsize
 
 		size = int(size/1024)
+		self._res_size = size
 		await self.bot.db.add_site_stat( self.task.site, size )
 
 	async def __process_error(self, error: Exception) -> None:

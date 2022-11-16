@@ -197,6 +197,7 @@ class MessagesQueue():
 		_try = True
 		_ignore = False
 		_sended = False
+		_has_files = False
 
 		callback = None
 		callback_kwargs = {}
@@ -220,6 +221,7 @@ class MessagesQueue():
 
 		try:
 			if callee == 'send_media_group':
+				_has_files = True
 				_m = []
 				for m in kwargs['media']:
 					delete_files.append(m['media'])
@@ -229,10 +231,12 @@ class MessagesQueue():
 				kwargs['media'] = _m
 
 			if callee == 'send_document':
+				_has_files = True
 				delete_files.append(kwargs['document'])
 				kwargs['document'] = FSInputFile(kwargs['document'])
 
 			if callee == 'send_photo':
+				_has_files = True
 				delete_files.append(kwargs['photo'])
 				kwargs['photo'] = FSInputFile(kwargs['photo'])
 
@@ -278,6 +282,8 @@ class MessagesQueue():
 			logger.error(f"---------\n[RestartingTelegram]:\n{repr(e)}\n---------")
 			pass
 		except TelegramAPIError as e:
+			if 'Request timeout error' in str(e) and _has_files:
+				_ignore = True
 			logger.error(f"---------\n[TelegramAPIError]:\n{repr(e)}\n{repr(args)}\n{repr(kwargs)}\n---------")
 			pass
 		except TelegramEntityTooLarge:

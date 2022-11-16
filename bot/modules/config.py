@@ -33,7 +33,7 @@ class __Config__(object):
 		'DOWNLOADS_Q_RUNNING'         : True,
 		'DOWNLOADS_CHECK_INTERVAL'    : 3,
 		'DOWNLOADS_NOTICES_INTERVAL'  : 10,
-		'DOWNLOADS_SPLIT_LIMIT'       : 400*1024*1024,
+		'DOWNLOADS_SPLIT_LIMIT'       : 1900*1024*1024,
 		'DOWNLOADS_FREE_LIMIT'        : 100,
 		# WEB INTERFACES
 		'DOWNLOAD_URL'                : None,

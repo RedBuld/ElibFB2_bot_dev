@@ -3,6 +3,7 @@ from typing import Optional
 from aiogram import Bot
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from .db import DOWNLOAD_STATUS, Download
+# from .downloader import Downloader
 
 logger = logging.getLogger(__name__)
 

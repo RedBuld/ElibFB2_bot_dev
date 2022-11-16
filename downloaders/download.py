@@ -14,6 +14,8 @@ parser.add_argument('--login', dest="login", type=str, help='Логин от с�
 parser.add_argument('--password', dest="password", type=str, help='Пароль от сайта')
 execute_args = parser.parse_args()
 
+_process = None
+
 _Elib2Ebook_sites = ['acomics.ru','author.today','bigliba.com','bookinbook.ru','bookinist.pw','booknet.com','booknet.ua','bookstab.ru','bookriver.ru','dark-novels.ru','dreame.com','eznovels.com','fb2.top','ficbook.net','fictionbook.ru','hentailib.me','hogwartsnet.ru','hotnovelpub.com','hub-book.com','ifreedom.su','jaomix.ru','ladylib.top','lanovels.com','libbox.ru','libst.ru','lightnoveldaily.com','litexit.ru','litgorod.ru','litmarket.ru','litmir.me','litnet.com','litres.ru','manga.ovh','mangalib.me','mybook.ru','online-knigi.com.ua','noveltranslate.com','novelxo.com','prodaman.ru','ranobe-novels.ru','ranobehub.org','ranobelib.me','ranobe.ovh','ranobes.com','readli.net','readmanga.live','remanga.org','renovels.org','ru.novelxo.com','samlib.ru','topliba.com','tl.rulate.ru','twilightrussia.ru','wattpad.com','wuxiaworld.ru','xn--80ac9aeh6f.xn--p1ai']
 
 async def __Elib2Ebook__prepare_command(args) -> str:
@@ -75,6 +77,8 @@ async def __Elib2Ebook__prepare_command(args) -> str:
 
 async def download(args: dict) -> None:
 
+	global _process
+
 	_exec = None
 	command = None
 	_cwd = None
@@ -100,4 +104,14 @@ async def download(args: dict) -> None:
 
 if __name__ == '__main__':
 	if execute_args.url and execute_args.format:
-		asyncio.run( download( vars(execute_args) ) )
+		try:
+			asyncio.run( download( vars(execute_args) ) )
+		except (KeyboardInterrupt, SystemExit):
+			if _process:
+				try:
+					_process.kill()
+				except Exception as e:
+					pass
+		except Exception as e:
+			raise e
+		# asyncio.run( download( vars(execute_args) ) )
